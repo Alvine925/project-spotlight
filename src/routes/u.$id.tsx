@@ -51,6 +51,7 @@ type ProfileData = {
   display_name: string | null;
   avatar_url: string | null;
   bio: string | null;
+  about: string | null;
   website: string | null;
   github: string | null;
   twitter: string | null;
@@ -59,14 +60,12 @@ type ProfileData = {
   created_at: string;
 };
 
-/* deterministic fake star/fork counts derived from slug */
 function pseudoCount(seed: string, offset: number): number {
   let h = offset;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
   return (h % 180) + 8;
 }
 
-/* ── Single project card (list style) ── */
 function ProjectCard({ project, index }: { project: PublicProject; index: number }) {
   let host = project.url;
   try { host = new URL(project.url).hostname.replace("www.", ""); } catch {}
@@ -80,12 +79,8 @@ function ProjectCard({ project, index }: { project: PublicProject; index: number
 
   return (
     <div className="py-4">
-
-      {/* ── Top: preview area ── */}
       {hasCover ? (
-        /* With cover image: full-width number/status header, then left=text right=image */
         <div>
-          {/* Full-width number + status row */}
           <div className="flex items-center justify-between px-5 pt-5 pb-3">
             <span className="font-mono text-xs font-semibold text-gray-400">{num}</span>
             <div className="flex items-center gap-1.5">
@@ -95,10 +90,7 @@ function ProjectCard({ project, index }: { project: PublicProject; index: number
               </span>
             </div>
           </div>
-
-          {/* Content row: left text, right cover image */}
           <div className="flex items-stretch">
-            {/* Left: name, tagline, URL, tags */}
             <div className="flex-1 px-5 pb-3">
               <h3 className="font-display text-xl font-bold leading-tight text-gray-900">{project.name}</h3>
               {project.tagline && (
@@ -127,8 +119,6 @@ function ProjectCard({ project, index }: { project: PublicProject; index: number
                 ))}
               </div>
             </div>
-
-            {/* Right: cover image + arrow button */}
             <div className="relative w-[38%] shrink-0 overflow-hidden rounded-xl mr-4 mb-3 border border-gray-100">
               <img
                 src={project.cover_image_url!}
@@ -147,9 +137,7 @@ function ProjectCard({ project, index }: { project: PublicProject; index: number
           </div>
         </div>
       ) : (
-        /* Without cover: number+status on top, watermark area, then arrow */
         <div className="relative">
-          {/* Number + status row */}
           <div className="flex items-center justify-between px-5 pt-5">
             <span className="font-mono text-xs font-semibold text-gray-400">{num}</span>
             <div className="flex items-center gap-1.5">
@@ -159,8 +147,6 @@ function ProjectCard({ project, index }: { project: PublicProject; index: number
               </span>
             </div>
           </div>
-
-          {/* Watermark area + arrow button */}
           <div className="relative flex h-24 items-center justify-center overflow-hidden">
             <span className="pointer-events-none select-none font-display text-[110px] font-black leading-none text-gray-100">
               {letter}
@@ -176,7 +162,6 @@ function ProjectCard({ project, index }: { project: PublicProject; index: number
         </div>
       )}
 
-      {/* ── Bottom: content (no-cover cards only) + star/fork counts ── */}
       {!hasCover && (
         <div className="px-5 pb-2 pt-1">
           <h3 className="font-display text-xl font-bold leading-tight text-gray-900">{project.name}</h3>
@@ -208,7 +193,6 @@ function ProjectCard({ project, index }: { project: PublicProject; index: number
         </div>
       )}
 
-      {/* Star / fork counts + View details link */}
       <div className="flex items-center justify-between px-5 pb-5 pt-3">
         <div className="flex items-center gap-4">
           <span className="inline-flex items-center gap-1.5 text-xs text-gray-400">
@@ -235,12 +219,10 @@ function ProjectCard({ project, index }: { project: PublicProject; index: number
           <ArrowUpRight className="h-3.5 w-3.5" />
         </Link>
       </div>
-
     </div>
   );
 }
 
-/* ── Main Profile ── */
 function Profile() {
   const { id } = Route.useParams();
   const [copied, setCopied] = useState(false);
@@ -253,7 +235,7 @@ function Profile() {
       const [{ data: profile }, { data: projects }] = await Promise.all([
         supabase
           .from("profiles")
-          .select("id, display_name, avatar_url, bio, website, github, twitter, linkedin, location, created_at")
+          .select("id, display_name, avatar_url, bio, about, website, github, twitter, linkedin, location, created_at")
           .eq("id", id)
           .maybeSingle(),
         supabase.from("projects")
@@ -271,6 +253,8 @@ function Profile() {
   const profileUrl = typeof window !== "undefined" ? window.location.href : "";
   const profileUrlClean = profileUrl.replace(/^https?:\/\//, "");
   const categories = Array.from(new Set(allProjects.map((p) => p.category).filter(Boolean)));
+  const profile = data?.profile;
+  const hasSocials = profile?.website || profile?.github || profile?.twitter || profile?.linkedin;
 
   const copy = () => {
     navigator.clipboard.writeText(profileUrl).then(() => {
@@ -279,7 +263,22 @@ function Profile() {
     });
   };
 
-  const openQr = () => setShowQr(true);
+  const shareItems = [
+    {
+      icon: Twitter, label: "Twitter",
+      href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(profileUrl)}&text=Check+out+my+projects+on+ProjectAtlas`,
+    },
+    {
+      icon: Linkedin, label: "LinkedIn",
+      href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(profileUrl)}`,
+    },
+    {
+      icon: MessageCircle, label: "WhatsApp",
+      href: `https://wa.me/?text=${encodeURIComponent(`Check out my projects on ProjectAtlas: ${profileUrl}`)}`,
+    },
+    { icon: Link2, label: "Link", onClick: copy },
+    { icon: QrCode, label: "QR Code", onClick: () => setShowQr(true) },
+  ];
 
   if (isLoading) {
     return (
@@ -288,9 +287,6 @@ function Profile() {
       </div>
     );
   }
-
-  const profile = data?.profile;
-  const hasSocials = profile?.website || profile?.github || profile?.twitter || profile?.linkedin;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -316,8 +312,8 @@ function Profile() {
         </header>
 
         {/* ── Hero ── */}
-        <section className="relative overflow-hidden px-5 pb-5 pt-6">
-          {/* Decorative floating 3-D-style blocks (top-right) */}
+        <section className="relative overflow-hidden bg-white px-5 pb-5 pt-6">
+          {/* Decorative blocks */}
           <div className="pointer-events-none absolute right-4 top-3 select-none">
             <div className="relative h-28 w-28">
               <div
@@ -332,11 +328,7 @@ function Profile() {
               </div>
               <div
                 className="absolute bottom-1 left-0 flex h-10 w-10 items-center justify-center rounded-xl font-display text-xs font-black text-white shadow-md"
-                style={{
-                  background: "linear-gradient(145deg, #1a1a2e, #16213e)",
-                  transform: "rotate(-9deg)",
-                  boxShadow: "3px 4px 12px rgba(0,0,0,0.25)",
-                }}
+                style={{ background: "linear-gradient(145deg, #1a1a2e, #16213e)", transform: "rotate(-9deg)" }}
               >
                 AI
               </div>
@@ -352,11 +344,7 @@ function Profile() {
           {/* Avatar + info */}
           <div className="flex items-start gap-4 pr-32">
             {profile?.avatar_url ? (
-              <img
-                src={profile.avatar_url}
-                alt={name}
-                className="h-14 w-14 shrink-0 rounded-2xl object-cover shadow-md"
-              />
+              <img src={profile.avatar_url} alt={name} className="h-14 w-14 shrink-0 rounded-2xl object-cover shadow-md" />
             ) : (
               <div
                 className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl font-display text-xl font-black text-white shadow-md"
@@ -374,56 +362,10 @@ function Profile() {
                 </p>
               )}
               <p className="mt-1.5 text-sm leading-relaxed line-clamp-2 text-gray-500">
-                {profile?.bio || "Building cool things with code. Passionate about developer tools, AI and creating products."}
+                {profile?.bio || "Building cool things with code."}
               </p>
             </div>
           </div>
-
-          {/* Social links row */}
-          {hasSocials && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {profile?.website && (
-                <a
-                  href={profile.website}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600 transition-all hover:border-[#ff6600]/40 hover:text-[#ff6600]"
-                >
-                  <Globe className="h-3.5 w-3.5" /> Website
-                </a>
-              )}
-              {profile?.github && (
-                <a
-                  href={`https://github.com/${profile.github}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600 transition-all hover:border-[#ff6600]/40 hover:text-[#ff6600]"
-                >
-                  <Github className="h-3.5 w-3.5" /> {profile.github}
-                </a>
-              )}
-              {profile?.twitter && (
-                <a
-                  href={`https://x.com/${profile.twitter}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600 transition-all hover:border-[#ff6600]/40 hover:text-[#ff6600]"
-                >
-                  <Twitter className="h-3.5 w-3.5" /> @{profile.twitter}
-                </a>
-              )}
-              {profile?.linkedin && (
-                <a
-                  href={profile.linkedin.startsWith("http") ? profile.linkedin : `https://${profile.linkedin}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600 transition-all hover:border-[#ff6600]/40 hover:text-[#ff6600]"
-                >
-                  <Linkedin className="h-3.5 w-3.5" /> LinkedIn
-                </a>
-              )}
-            </div>
-          )}
 
           {/* Stats pills */}
           <div className="mt-4 flex flex-wrap gap-2">
@@ -441,7 +383,7 @@ function Profile() {
         </section>
 
         {/* ── Tab bar ── */}
-        <div className="flex border-b border-gray-200 px-5">
+        <div className="flex border-b border-gray-200 bg-white px-5">
           {(["projects", "about"] as const).map((t) => (
             <button
               key={t}
@@ -472,17 +414,23 @@ function Profile() {
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
-              {/* Background */}
+
+              {/* About the user */}
               <div className="py-5">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="h-1 w-5 rounded-full bg-[#ff6600]" />
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-[#ff6600]">Background</span>
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-[#ff6600]">About</span>
                 </div>
-                <p className="leading-relaxed text-gray-700">
-                  {profile?.bio
-                    ? profile.bio
+                <p className="leading-relaxed text-sm text-gray-700">
+                  {profile?.about || profile?.bio
+                    ? (profile.about ?? profile.bio)
                     : `Hey, I'm ${name} — a developer who loves turning ideas into real, working products. I've been writing code for several years, building everything from weekend side-projects to production-grade tools used by real people.`}
                 </p>
+                {!profile?.about && !profile?.bio && (
+                  <p className="mt-3 text-[11px] text-gray-300 italic">
+                    This is placeholder text. Update your profile to personalise it.
+                  </p>
+                )}
               </div>
 
               {/* Connect / Social links */}
@@ -545,18 +493,6 @@ function Profile() {
                 </div>
               </div>
 
-              {/* Closing note */}
-              <div className="py-5">
-                <p className="text-sm leading-relaxed text-gray-600">
-                  Interested in collaborating or just want to talk shop?{" "}
-                  <span className="font-semibold text-[#ff6600]">Check out my projects above</span> — each one links directly to the live product.
-                </p>
-                {!profile?.bio && (
-                  <p className="mt-3 text-[11px] text-gray-300 italic">
-                    This is a placeholder about page. Update your profile to personalise it.
-                  </p>
-                )}
-              </div>
             </div>
           )}
         </div>
@@ -567,9 +503,7 @@ function Profile() {
           <p className="mt-1 text-xs text-gray-400">Share your projects with the world.</p>
 
           <div className="mt-4 flex items-center gap-2 rounded-xl border border-gray-200 bg-white p-1 pl-3">
-            <span className="flex-1 truncate font-mono text-xs text-gray-500">
-              {profileUrlClean}
-            </span>
+            <span className="flex-1 truncate font-mono text-xs text-gray-500">{profileUrlClean}</span>
             <button
               onClick={copy}
               className="shrink-0 rounded-lg bg-[#ff6600] px-4 py-2 text-xs font-bold text-white transition-all hover:bg-[#e55a00]"
@@ -578,54 +512,18 @@ function Profile() {
             </button>
           </div>
 
-          {/* Social share icons */}
+          {/* Share icons — for sharing the profile URL */}
           <div className="mt-5 flex items-center justify-around">
-            {[
-              {
-                icon: Twitter,
-                label: "Twitter",
-                href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(profileUrl)}&text=Check+out+my+projects+on+ProjectAtlas`,
-              },
-              {
-                icon: Linkedin,
-                label: "LinkedIn",
-                href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(profileUrl)}`,
-              },
-              {
-                icon: MessageCircle,
-                label: "WhatsApp",
-                href: `https://wa.me/?text=${encodeURIComponent(`Check out my projects on ProjectAtlas: ${profileUrl}`)}`,
-              },
-              {
-                icon: Link2,
-                label: "Link",
-                onClick: copy,
-              },
-              {
-                icon: QrCode,
-                label: "QR Code",
-                onClick: openQr,
-              },
-            ].map(({ icon: Icon, label, href, onClick }) =>
+            {shareItems.map(({ icon: Icon, label, href, onClick }) =>
               href ? (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex flex-col items-center gap-1.5"
-                >
+                <a key={label} href={href} target="_blank" rel="noreferrer" className="flex flex-col items-center gap-1.5">
                   <div className="grid h-11 w-11 place-items-center rounded-full border border-gray-200 bg-white text-gray-600 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
                     <Icon className="h-5 w-5" />
                   </div>
                   <span className="text-[10px] text-gray-400">{label}</span>
                 </a>
               ) : (
-                <button
-                  key={label}
-                  onClick={onClick}
-                  className="flex flex-col items-center gap-1.5"
-                >
+                <button key={label} onClick={onClick} className="flex flex-col items-center gap-1.5">
                   <div className="grid h-11 w-11 place-items-center rounded-full border border-gray-200 bg-white text-gray-600 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
                     <Icon className="h-5 w-5" />
                   </div>
@@ -653,11 +551,7 @@ function Profile() {
       </div>
 
       {showQr && (
-        <QrModal
-          url={profileUrl}
-          title={name}
-          onClose={() => setShowQr(false)}
-        />
+        <QrModal url={profileUrl} title={name} onClose={() => setShowQr(false)} />
       )}
     </div>
   );

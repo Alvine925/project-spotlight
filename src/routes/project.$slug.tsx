@@ -1,12 +1,12 @@
 import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState, useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { pickPalette } from "@/lib/auth";
 import {
   ArrowLeft, Copy, Check, ExternalLink, Globe, Loader2,
   MoreHorizontal, Twitter, Linkedin, Link2, QrCode, MessageCircle,
-  Calendar,
+  Calendar, Heart, Share2, BookOpen, Image,
 } from "lucide-react";
 import { QrModal } from "@/components/QrModal";
 
@@ -20,7 +20,6 @@ export const Route = createFileRoute("/project/$slug")({
   component: ProjectDetail,
 });
 
-/* deterministic fake counts from slug */
 function pseudoCount(seed: string, offset: number): number {
   let h = offset;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
@@ -31,7 +30,17 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-/* tech stack icon colour map */
+function getVisitorId(): string {
+  if (typeof window === "undefined") return "";
+  const key = "pa_visitor_id";
+  let id = localStorage.getItem(key);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(key, id);
+  }
+  return id;
+}
+
 const TECH_COLORS: Record<string, string> = {
   typescript: "#3178c6", javascript: "#f7df1e", react: "#61dafb",
   "node.js": "#339933", nodejs: "#339933", python: "#3776ab",
@@ -56,8 +65,10 @@ function TechBadge({ name }: { name: string }) {
 function ProjectDetail() {
   const { slug } = Route.useParams();
   const router = useRouter();
+  const qc = useQueryClient();
   const [copied, setCopied] = useState(false);
   const [showQr, setShowQr] = useState(false);
+  const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 
   const { data: project, isLoading, error } = useQuery({
     queryKey: ["project", slug],
@@ -73,7 +84,54 @@ function ProjectDetail() {
     },
   });
 
-  /* Track view */
+  /* ── Likes ── */
+  const visitorId = typeof window !== "undefined" ? getVisitorId() : "";
+
+  const { data: likesData, refetch: refetchLikes } = useQuery({
+    queryKey: ["likes", project?.id],
+    enabled: !!project?.id,
+    queryFn: async () => {
+      const [{ count }, { data: myLike }] = await Promise.all([
+        supabase
+          .from("project_likes")
+          .select("*", { count: "exact", head: true })
+          .eq("project_id", project!.id),
+        supabase
+          .from("project_likes")
+          .select("id")
+          .eq("project_id", project!.id)
+          .eq("visitor_id", visitorId)
+          .maybeSingle(),
+      ]);
+      return { count: count ?? 0, liked: !!myLike };
+    },
+  });
+
+  const { mutate: toggleLike, isPending: liking } = useMutation({
+    mutationFn: async () => {
+      if (!project) return;
+      if (likesData?.liked) {
+        await supabase
+          .from("project_likes")
+          .delete()
+          .eq("project_id", project.id)
+          .eq("visitor_id", visitorId);
+      } else {
+        await supabase
+          .from("project_likes")
+          .insert({ project_id: project.id, visitor_id: visitorId });
+      }
+    },
+    onSuccess: () => refetchLikes(),
+  });
+
+  /* ── Shares ── */
+  const recordShare = useCallback(async (platform: string) => {
+    if (!project?.id) return;
+    await supabase.from("project_shares").insert({ project_id: project.id, platform });
+  }, [project?.id]);
+
+  /* ── Views ── */
   useEffect(() => {
     if (project?.id) {
       supabase.from("project_views").insert({
@@ -106,10 +164,16 @@ function ProjectDetail() {
   let host = project.url;
   try { host = new URL(project.url).hostname.replace("www.", ""); } catch {}
 
-  const coverUrl = (project as unknown as { cover_image_url?: string | null }).cover_image_url;
+  const coverUrl = project.cover_image_url;
+  const galleryImages: string[] = project.gallery_images ?? [];
+  const hasGallery = galleryImages.length > 0;
+  const docUrl = project.documentation_url;
   const isLive = project.status?.toLowerCase() === "live";
   const stars = pseudoCount(project.slug, 7);
   const forks = pseudoCount(project.slug, 13);
+  const likeCount = likesData?.count ?? (project.likes_count ?? 0);
+  const liked = likesData?.liked ?? false;
+  const shareCount = project.shares_count ?? 0;
   const projectUrl = typeof window !== "undefined" ? window.location.href : "";
   const projectUrlClean = projectUrl.replace(/^https?:\/\//, "");
 
@@ -120,7 +184,27 @@ function ProjectDetail() {
     });
   };
 
-  const openQr = () => setShowQr(true);
+  const handleShare = (platform: string, href?: string) => {
+    recordShare(platform);
+    if (href) window.open(href, "_blank", "noopener,noreferrer");
+  };
+
+  const shareItems = [
+    {
+      icon: Twitter, label: "Twitter",
+      href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(projectUrl)}&text=Check+out+${encodeURIComponent(project.name)}+on+ProjectAtlas`,
+    },
+    {
+      icon: Linkedin, label: "LinkedIn",
+      href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(projectUrl)}`,
+    },
+    {
+      icon: MessageCircle, label: "WhatsApp",
+      href: `https://wa.me/?text=${encodeURIComponent(`Check out ${project.name}: ${projectUrl}`)}`,
+    },
+    { icon: Link2, label: "Link", onClick: () => { copy(); recordShare("link"); } },
+    { icon: QrCode, label: "QR Code", onClick: () => setShowQr(true) },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -155,7 +239,6 @@ function ProjectDetail() {
 
         {/* ── Project header ── */}
         <section className="bg-white px-5 pb-5 pt-5">
-          {/* Number + status */}
           <div className="mb-3 flex items-center justify-between">
             <span className="font-mono text-xs font-semibold text-gray-400">01</span>
             <div className="flex items-center gap-1.5">
@@ -166,13 +249,11 @@ function ProjectDetail() {
             </div>
           </div>
 
-          {/* Title + tagline */}
           <h1 className="font-display text-3xl font-black leading-tight text-gray-900">{project.name}</h1>
           {project.tagline && (
             <p className="mt-1.5 text-sm text-gray-500">{project.tagline}</p>
           )}
 
-          {/* Domain */}
           <a
             href={project.url}
             target="_blank"
@@ -184,7 +265,6 @@ function ProjectDetail() {
             <ExternalLink className="h-3 w-3 opacity-60" />
           </a>
 
-          {/* Category + tags */}
           <div className="mt-3 flex flex-wrap gap-1.5">
             {project.category && (
               <span className="inline-flex items-center gap-1 rounded-full bg-[#ff6600]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#ff6600]">
@@ -208,13 +288,9 @@ function ProjectDetail() {
               style={{ aspectRatio: "16/9" }}
             />
           ) : (
-            /* Placeholder gradient cover when no image */
             <div
               className="flex items-center justify-center"
-              style={{
-                aspectRatio: "16/9",
-                background: `linear-gradient(135deg, ${from}, ${to})`,
-              }}
+              style={{ aspectRatio: "16/9", background: `linear-gradient(135deg, ${from}, ${to})` }}
             >
               <span className="font-display text-[80px] font-black text-white/20 select-none">
                 {project.name[0]?.toUpperCase()}
@@ -223,8 +299,8 @@ function ProjectDetail() {
           )}
         </div>
 
-        {/* ── Stats row ── */}
-        <div className="mx-4 mt-3 flex items-center gap-5">
+        {/* ── Stats row: views / stars / forks / date / likes ── */}
+        <div className="mx-4 mt-3 flex items-center gap-4 flex-wrap">
           <span className="inline-flex items-center gap-1.5 text-xs text-gray-400">
             <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
@@ -243,9 +319,28 @@ function ProjectDetail() {
             <Calendar className="h-3.5 w-3.5" />
             {formatDate(project.created_at)}
           </span>
+          {shareCount > 0 && (
+            <span className="inline-flex items-center gap-1.5 text-xs text-gray-400">
+              <Share2 className="h-3.5 w-3.5" />
+              {shareCount}
+            </span>
+          )}
+          {/* Like button */}
+          <button
+            onClick={() => toggleLike()}
+            disabled={liking}
+            className={`ml-auto inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
+              liked
+                ? "border-red-200 bg-red-50 text-red-500"
+                : "border-gray-200 bg-white text-gray-500 hover:border-red-200 hover:text-red-400"
+            }`}
+          >
+            <Heart className={`h-3.5 w-3.5 ${liked ? "fill-red-500 text-red-500" : ""}`} />
+            {likeCount > 0 ? likeCount : "Like"}
+          </button>
         </div>
 
-        {/* ── Sections — flat on background, divided by hairlines ── */}
+        {/* ── Sections ── */}
         <div className="mt-5 divide-y divide-gray-200">
 
           {/* About */}
@@ -267,41 +362,6 @@ function ProjectDetail() {
               </div>
             </div>
           )}
-
-          {/* Links */}
-          <div className="px-5 py-5">
-            <h2 className="font-display text-base font-bold text-gray-900">Links</h2>
-            <div className="mt-3 space-y-0 divide-y divide-gray-100">
-              <a
-                href={project.url}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center justify-between py-3 transition-colors hover:text-[#ff6600]"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-md bg-green-100">
-                    <Globe className="h-3.5 w-3.5 text-green-600" />
-                  </span>
-                  <span className="text-sm font-medium text-gray-700">Live Site</span>
-                </div>
-                <ExternalLink className="h-3.5 w-3.5 text-gray-400" />
-              </a>
-              {project.features?.length > 0 && (
-                <div className="flex items-center justify-between py-3">
-                  <div className="flex items-center gap-2.5">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-100">
-                      <svg className="h-3.5 w-3.5 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                        <polyline points="14 2 14 8 20 8" />
-                      </svg>
-                    </span>
-                    <span className="text-sm font-medium text-gray-700">Documentation</span>
-                  </div>
-                  <ExternalLink className="h-3.5 w-3.5 text-gray-400" />
-                </div>
-              )}
-            </div>
-          </div>
 
           {/* Features */}
           {project.features?.length > 0 && (
@@ -335,49 +395,104 @@ function ProjectDetail() {
 
           {/* Gallery */}
           <div className="px-5 py-5">
-            <h2 className="font-display text-base font-bold text-gray-900">Gallery</h2>
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              {[0, 1, 2].map((i) => (
-                <div key={i} className="aspect-video overflow-hidden rounded-xl">
-                  {coverUrl ? (
+            <h2 className="font-display text-base font-bold text-gray-900 flex items-center gap-2">
+              <Image className="h-4 w-4 text-gray-400" /> Gallery
+            </h2>
+            {hasGallery ? (
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                {galleryImages.map((src, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setLightboxImg(src)}
+                    className="aspect-video overflow-hidden rounded-xl border border-gray-100 focus:outline-none focus:ring-2 focus:ring-[#ff6600]/40"
+                  >
                     <img
-                      src={coverUrl}
+                      src={src}
                       alt={`${project.name} screenshot ${i + 1}`}
-                      className="h-full w-full object-cover"
-                      style={{ objectPosition: i === 0 ? "top" : i === 1 ? "center" : "bottom" }}
+                      className="h-full w-full object-cover transition-transform hover:scale-105"
+                      loading="lazy"
                     />
-                  ) : (
-                    <div
-                      className="h-full w-full flex items-center justify-center"
-                      style={{
-                        background: i === 0
-                          ? `linear-gradient(135deg, ${from}, ${to})`
-                          : i === 1
-                          ? "linear-gradient(135deg, #1a1a2e, #16213e)"
-                          : "linear-gradient(135deg, #2d2d2d, #1a1a1a)",
-                      }}
-                    >
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="aspect-video overflow-hidden rounded-xl flex items-center justify-center"
+                    style={{
+                      background: i === 0
+                        ? `linear-gradient(135deg, ${from}, ${to})`
+                        : i === 1
+                        ? "linear-gradient(135deg, #1a1a2e, #16213e)"
+                        : "linear-gradient(135deg, #2d2d2d, #1a1a1a)",
+                    }}
+                  >
+                    {coverUrl ? (
+                      <img
+                        src={coverUrl}
+                        alt=""
+                        className="h-full w-full object-cover"
+                        style={{ objectPosition: i === 0 ? "top" : i === 1 ? "center" : "bottom" }}
+                      />
+                    ) : (
                       <span className="font-display text-2xl font-black text-white/20 select-none">
                         {project.name[0]?.toUpperCase()}
                       </span>
-                    </div>
-                  )}
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Links */}
+          <div className="px-5 py-5">
+            <h2 className="font-display text-base font-bold text-gray-900">Links</h2>
+            <div className="mt-3 divide-y divide-gray-100">
+              <a
+                href={project.url}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-between py-3 transition-colors hover:text-[#ff6600]"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-md bg-green-100">
+                    <Globe className="h-3.5 w-3.5 text-green-600" />
+                  </span>
+                  <span className="text-sm font-medium text-gray-700">Live Site</span>
                 </div>
-              ))}
+                <ExternalLink className="h-3.5 w-3.5 text-gray-400" />
+              </a>
+              {docUrl && (
+                <a
+                  href={docUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-between py-3 transition-colors hover:text-[#ff6600]"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-100">
+                      <BookOpen className="h-3.5 w-3.5 text-blue-600" />
+                    </span>
+                    <span className="text-sm font-medium text-gray-700">Documentation</span>
+                  </div>
+                  <ExternalLink className="h-3.5 w-3.5 text-gray-400" />
+                </a>
+              )}
             </div>
           </div>
 
           {/* Share */}
           <div className="px-5 py-5">
             <h3 className="font-display text-base font-bold text-gray-900">Share this project</h3>
-            <p className="mt-1 text-xs text-gray-400">Anyone with this link can view the live site.</p>
+            <p className="mt-1 text-xs text-gray-400">Share with your network and help others discover it.</p>
 
             <div className="mt-4 flex items-center gap-2 rounded-xl border border-gray-200 bg-white p-1 pl-3">
-              <span className="flex-1 truncate font-mono text-xs text-gray-500">
-                {projectUrlClean}
-              </span>
+              <span className="flex-1 truncate font-mono text-xs text-gray-500">{projectUrlClean}</span>
               <button
-                onClick={copy}
+                onClick={() => { copy(); recordShare("link"); }}
                 className="shrink-0 rounded-lg bg-[#ff6600] px-4 py-2 text-xs font-bold text-white transition-all hover:bg-[#e55a00]"
               >
                 {copied ? "Copied!" : "Copy"}
@@ -385,20 +500,18 @@ function ProjectDetail() {
             </div>
 
             <div className="mt-5 flex items-center justify-around">
-              {[
-                { icon: Twitter, label: "Twitter", href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(projectUrl)}&text=Check+out+${encodeURIComponent(project.name)}+on+ProjectAtlas` },
-                { icon: Linkedin, label: "LinkedIn", href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(projectUrl)}` },
-                { icon: MessageCircle, label: "WhatsApp", href: `https://wa.me/?text=${encodeURIComponent(`Check out ${project.name}: ${projectUrl}`)}` },
-                { icon: Link2, label: "Link", onClick: copy },
-                { icon: QrCode, label: "QR Code", onClick: openQr },
-              ].map(({ icon: Icon, label, href, onClick }) =>
+              {shareItems.map(({ icon: Icon, label, href, onClick }) =>
                 href ? (
-                  <a key={label} href={href} target="_blank" rel="noreferrer" className="flex flex-col items-center gap-1.5">
+                  <button
+                    key={label}
+                    onClick={() => handleShare(label.toLowerCase(), href)}
+                    className="flex flex-col items-center gap-1.5"
+                  >
                     <div className="grid h-11 w-11 place-items-center rounded-full border border-gray-200 bg-white text-gray-600 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
                       <Icon className="h-5 w-5" />
                     </div>
                     <span className="text-[10px] text-gray-400">{label}</span>
-                  </a>
+                  </button>
                 ) : (
                   <button key={label} onClick={onClick} className="flex flex-col items-center gap-1.5">
                     <div className="grid h-11 w-11 place-items-center rounded-full border border-gray-200 bg-white text-gray-600 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
@@ -428,6 +541,27 @@ function ProjectDetail() {
         </footer>
 
       </div>
+
+      {/* ── Lightbox ── */}
+      {lightboxImg && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setLightboxImg(null)}
+        >
+          <img
+            src={lightboxImg}
+            alt="Gallery"
+            className="max-h-[90vh] max-w-full rounded-xl object-contain shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button
+            onClick={() => setLightboxImg(null)}
+            className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white backdrop-blur-sm hover:bg-white/20"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {showQr && (
         <QrModal

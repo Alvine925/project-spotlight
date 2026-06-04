@@ -48,6 +48,8 @@ type MyProject = {
   category: string | null;
   created_at: string;
   description: string | null;
+  documentation_url: string | null;
+  gallery_images: string[];
   tags: string[];
   tech_stack: string[];
   features: string[];
@@ -59,6 +61,7 @@ type Profile = {
   display_name: string | null;
   avatar_url: string | null;
   bio: string | null;
+  about: string | null;
   website: string | null;
   github: string | null;
   twitter: string | null;
@@ -77,6 +80,7 @@ function EditProfileCard({ profile, userId }: { profile: Profile | null; userId:
   const [name, setName] = useState(profile?.display_name ?? "");
   const [bio, setBio] = useState(profile?.bio ?? "");
   const [website, setWebsite] = useState(profile?.website ?? "");
+  const [about, setAbout] = useState(profile?.about ?? "");
   const [github, setGithub] = useState(profile?.github ?? "");
   const [twitter, setTwitter] = useState(profile?.twitter ?? "");
   const [linkedin, setLinkedin] = useState(profile?.linkedin ?? "");
@@ -94,6 +98,7 @@ function EditProfileCard({ profile, userId }: { profile: Profile | null; userId:
   const startEdit = () => {
     setName(profile?.display_name ?? "");
     setBio(profile?.bio ?? "");
+    setAbout(profile?.about ?? "");
     setWebsite(profile?.website ?? "");
     setGithub(profile?.github ?? "");
     setTwitter(profile?.twitter ?? "");
@@ -109,6 +114,7 @@ function EditProfileCard({ profile, userId }: { profile: Profile | null; userId:
         .update({
           display_name: name.trim() || null,
           bio: bio.trim() || null,
+          about: about.trim() || null,
           website: website.trim() || null,
           github: github.trim() || null,
           twitter: twitter.trim() || null,
@@ -128,6 +134,7 @@ function EditProfileCard({ profile, userId }: { profile: Profile | null; userId:
   const cancel = () => {
     setName(profile?.display_name ?? "");
     setBio(profile?.bio ?? "");
+    setAbout(profile?.about ?? "");
     setWebsite(profile?.website ?? "");
     setGithub(profile?.github ?? "");
     setTwitter(profile?.twitter ?? "");
@@ -191,13 +198,28 @@ function EditProfileCard({ profile, userId }: { profile: Profile | null; userId:
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-muted-foreground mb-1">Bio</label>
+                <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+                  Bio <span className="text-muted-foreground/50">(short tagline, shown in hero)</span>
+                </label>
                 <textarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   placeholder="Short bio — what you build, where you work…"
                   maxLength={160}
                   rows={2}
+                  className={`${inputCls} resize-none`}
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+                  About <span className="text-muted-foreground/50">(long-form, shown in the About tab)</span>
+                </label>
+                <textarea
+                  value={about}
+                  onChange={(e) => setAbout(e.target.value)}
+                  placeholder="Tell the world about yourself — your background, what you love to build, your journey…"
+                  rows={4}
                   className={`${inputCls} resize-none`}
                 />
               </div>
@@ -332,6 +354,8 @@ function EditProjectRow({ project, onDone }: { project: MyProject; onDone: () =>
   const [tagline, setTagline] = useState(project.tagline ?? "");
   const [description, setDescription] = useState(project.description ?? "");
   const [url, setUrl] = useState(project.url);
+  const [docUrl, setDocUrl] = useState(project.documentation_url ?? "");
+  const [gallery, setGallery] = useState((project.gallery_images ?? []).join("\n"));
   const [category, setCategory] = useState(project.category ?? "");
   const [status, setStatus] = useState(project.status);
   const [tags, setTags] = useState(project.tags.join(", "));
@@ -348,6 +372,8 @@ function EditProjectRow({ project, onDone }: { project: MyProject; onDone: () =>
           tagline: tagline.trim() || null,
           description: description.trim() || null,
           url: url.trim(),
+          documentation_url: docUrl.trim() || null,
+          gallery_images: gallery.split("\n").map((t) => t.trim()).filter(Boolean),
           category: category || null,
           status,
           tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
@@ -400,9 +426,13 @@ function EditProjectRow({ project, onDone }: { project: MyProject; onDone: () =>
               <label className="block text-[11px] font-medium text-muted-foreground mb-1">Tagline</label>
               <input value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="One-line description" className={rowInput} />
             </div>
-            <div className="sm:col-span-2 lg:col-span-3">
-              <label className="block text-[11px] font-medium text-muted-foreground mb-1">URL</label>
-              <input value={url} onChange={(e) => setUrl(e.target.value)} type="url" className={rowInput} />
+            <div className="sm:col-span-2">
+              <label className="block text-[11px] font-medium text-muted-foreground mb-1">Live URL</label>
+              <input value={url} onChange={(e) => setUrl(e.target.value)} type="url" placeholder="https://yourproject.com" className={rowInput} />
+            </div>
+            <div className="sm:col-span-1">
+              <label className="block text-[11px] font-medium text-muted-foreground mb-1">Documentation URL <span className="text-muted-foreground/50">(optional)</span></label>
+              <input value={docUrl} onChange={(e) => setDocUrl(e.target.value)} type="url" placeholder="https://docs.yourproject.com" className={rowInput} />
             </div>
             <div className="sm:col-span-2 lg:col-span-3">
               <label className="block text-[11px] font-medium text-muted-foreground mb-1">Description</label>
@@ -430,6 +460,18 @@ function EditProjectRow({ project, onDone }: { project: MyProject; onDone: () =>
             <div className="sm:col-span-1">
               <label className="block text-[11px] font-medium text-muted-foreground mb-1">Use Cases <span className="text-muted-foreground/60">(one per line)</span></label>
               <textarea rows={4} value={useCases} onChange={(e) => setUseCases(e.target.value)} placeholder={"Manage team projects\nTrack client work\nPersonal task list"} className={`${rowInput} resize-none`} />
+            </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+                Gallery images <span className="text-muted-foreground/60">(paste one image URL per line — these appear in the Gallery section of your project page)</span>
+              </label>
+              <textarea
+                rows={3}
+                value={gallery}
+                onChange={(e) => setGallery(e.target.value)}
+                placeholder={"https://example.com/screenshot1.png\nhttps://example.com/screenshot2.png\nhttps://example.com/screenshot3.png"}
+                className={`${rowInput} resize-none font-mono text-xs`}
+              />
             </div>
           </div>
 
@@ -511,7 +553,7 @@ function Dashboard() {
     queryFn: async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("id, display_name, avatar_url, bio, website, github, twitter, linkedin, location")
+        .select("id, display_name, avatar_url, bio, about, website, github, twitter, linkedin, location")
         .eq("id", user!.id)
         .maybeSingle();
       return data as Profile | null;
@@ -524,7 +566,7 @@ function Dashboard() {
     queryFn: async () => {
       const { data: projects, error } = await supabase
         .from("projects")
-        .select("id, slug, name, tagline, url, status, published, category, created_at, description, tags, tech_stack, features, use_cases")
+        .select("id, slug, name, tagline, url, status, published, category, created_at, description, documentation_url, gallery_images, tags, tech_stack, features, use_cases")
         .eq("owner_id", user!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;

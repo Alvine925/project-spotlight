@@ -14,6 +14,7 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          about: string | null
           avatar_url: string | null
           bio: string | null
           created_at: string
@@ -27,6 +28,7 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          about?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -40,6 +42,7 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          about?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -53,6 +56,64 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      project_likes: {
+        Row: {
+          created_at: string
+          id: string
+          project_id: string
+          visitor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_id: string
+          visitor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_id?: string
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_likes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_shares: {
+        Row: {
+          created_at: string
+          id: string
+          platform: string | null
+          project_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          platform?: string | null
+          project_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          platform?: string | null
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_shares_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       project_views: {
         Row: {
@@ -91,11 +152,15 @@ export type Database = {
           cover_image_url: string | null
           created_at: string
           description: string | null
+          documentation_url: string | null
           features: string[]
+          gallery_images: string[]
           id: string
+          likes_count: number
           name: string
           owner_id: string
           published: boolean
+          shares_count: number
           slug: string
           status: string
           tagline: string | null
@@ -112,11 +177,15 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
+          documentation_url?: string | null
           features?: string[]
+          gallery_images?: string[]
           id?: string
+          likes_count?: number
           name: string
           owner_id: string
           published?: boolean
+          shares_count?: number
           slug: string
           status?: string
           tagline?: string | null
@@ -133,11 +202,15 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
+          documentation_url?: string | null
           features?: string[]
+          gallery_images?: string[]
           id?: string
+          likes_count?: number
           name?: string
           owner_id?: string
           published?: boolean
+          shares_count?: number
           slug?: string
           status?: string
           tagline?: string | null
