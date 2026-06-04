@@ -31,7 +31,7 @@ function Home() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select("id, slug, url, name, tagline, category, tags, status, created_at, cover_image_url")
+        .select("*")
         .eq("published", true)
         .order("created_at", { ascending: false })
         .limit(60);
