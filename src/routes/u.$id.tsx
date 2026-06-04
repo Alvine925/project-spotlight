@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { SiteNav } from "@/components/SiteNav";
 import { supabase } from "@/integrations/supabase/client";
-import { gradientFor } from "@/lib/auth";
+import { pickPalette } from "@/lib/auth";
 import { ExternalLink, Loader2, Globe } from "lucide-react";
 
 export const Route = createFileRoute("/u/$id")({
@@ -55,7 +55,7 @@ function Profile() {
   const name = data?.profile?.display_name || `dev-${id.slice(0, 6)}`;
   const projects = data?.projects ?? [];
   const initials = name.slice(0, 2).toUpperCase();
-  const [from, to] = gradientFor(id);
+  const [from, to] = pickPalette(id);
 
   return (
     <div className="min-h-screen">
@@ -79,7 +79,7 @@ function Profile() {
             </div>
           ) : (
             projects.map((p) => {
-              const [pFrom, pTo] = gradientFor(p.id);
+              const [pFrom, pTo] = pickPalette(p.id);
               return (
                 <Link
                   key={p.id}
