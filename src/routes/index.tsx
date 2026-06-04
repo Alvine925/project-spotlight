@@ -100,13 +100,13 @@ function Home() {
         <div className="mx-auto max-w-7xl px-6 py-20">
           <div className="mx-auto mb-12 max-w-2xl text-center">
             <h2 className="font-display text-3xl font-semibold md:text-4xl">How it works</h2>
-            <p className="mt-3 text-muted-foreground">From idea to a publishable project page in minutes.</p>
+            <p className="mt-3 text-muted-foreground">Build your developer profile in minutes — no portfolio site required.</p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {[
-              { icon: Globe, title: "1. Submit a URL", body: "Paste your project link and a few key details." },
-              { icon: Brain, title: "2. Publish your page", body: "A polished project page goes live in the catalogue." },
-              { icon: Layers, title: "3. Track views", body: "Your dashboard shows real-time views per project." },
+              { icon: Globe, title: "1. Add your projects", body: "Paste a URL for each project — landing pages, repos, demos, anything." },
+              { icon: Brain, title: "2. Get your profile link", body: "Every developer gets a public profile page listing all their projects." },
+              { icon: Layers, title: "3. Share one link", body: "Drop it in your bio, resume, or pitch — track clicks and views per project." },
             ].map((s) => (
               <div key={s.title} className="rounded-2xl border border-border/60 bg-gradient-card p-6 shadow-elegant transition-smooth hover:border-primary/40">
                 <div className="mb-4 grid h-10 w-10 place-items-center rounded-lg bg-gradient-primary shadow-glow">
