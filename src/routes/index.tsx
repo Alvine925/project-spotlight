@@ -36,7 +36,7 @@ function Home() {
         .order("created_at", { ascending: false })
         .limit(60);
       if (error) throw error;
-      return (data ?? []) as ProjectRow[];
+      return ((data ?? []) as unknown) as ProjectRow[];
     },
   });
 
