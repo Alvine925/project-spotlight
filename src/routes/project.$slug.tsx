@@ -69,12 +69,18 @@ function ProjectDetail() {
     <div className="min-h-screen">
       <SiteNav />
 
-      <section className={`relative overflow-hidden border-b border-border/40 bg-gradient-to-br from-${from} to-${to}`}>
-        <div className="absolute inset-0 bg-background/60 backdrop-blur-sm" />
+      <section
+        className="relative overflow-hidden border-b border-border/40"
+        style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
+      >
+        <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" />
         <div className="relative mx-auto max-w-5xl px-6 py-16">
           <div className="flex flex-col items-start gap-6 md:flex-row md:items-end md:justify-between">
             <div className="flex items-start gap-5">
-              <div className={`grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-${from} to-${to} font-display text-2xl font-bold text-primary-foreground shadow-glow`}>
+              <div
+                className="grid h-16 w-16 place-items-center rounded-2xl font-display text-2xl font-bold text-primary-foreground shadow-glow"
+                style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
+              >
                 {project.name[0]?.toUpperCase()}
               </div>
               <div>

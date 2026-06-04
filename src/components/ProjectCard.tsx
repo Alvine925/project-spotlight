@@ -37,7 +37,11 @@ export function ProjectCard({ project }: { project: ProjectRow }) {
       params={{ slug: project.slug }}
       className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-gradient-card p-6 shadow-elegant transition-smooth hover:-translate-y-1 hover:border-primary/50 hover:shadow-glow"
     >
-      <div className={`relative mb-5 h-32 overflow-hidden rounded-xl bg-gradient-to-br from-${from} to-${to}`}>
+      <div
+        className="relative mb-5 h-32 overflow-hidden rounded-xl"
+        style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
+      >
+
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.35),transparent_60%)]" />
         <div className="absolute bottom-3 left-3 grid h-10 w-10 place-items-center rounded-lg bg-background/80 font-display font-bold backdrop-blur-md">
           {project.name[0]?.toUpperCase()}
