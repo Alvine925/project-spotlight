@@ -73,14 +73,14 @@ function Home() {
           <div className="mx-auto max-w-3xl text-center">
             <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs text-primary-glow backdrop-blur-md">
               <Sparkles className="h-3.5 w-3.5" />
-              AI-powered project catalogue
+              Linktree — but for projects
             </div>
             <h1 className="font-display text-5xl font-bold leading-[1.05] tracking-tight md:text-7xl">
-              Drop a URL.<br />
-              <span className="text-gradient">Get a beautiful project page.</span>
+              One link.<br />
+              <span className="text-gradient">All your projects.</span>
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-base text-muted-foreground md:text-lg">
-              ProjectAtlas helps developers showcase their work without the maintenance overhead of a portfolio.
+              ProjectAtlas gives every developer a shareable profile that showcases every side-project, SaaS, and weekend build — in one place.
             </p>
 
             <div className="mt-10 flex justify-center">
@@ -88,9 +88,9 @@ function Home() {
             </div>
 
             <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5"><Globe className="h-3.5 w-3.5 text-primary-glow" /> Public project pages</span>
-              <span className="inline-flex items-center gap-1.5"><Brain className="h-3.5 w-3.5 text-primary-glow" /> Rich metadata & tags</span>
-              <span className="inline-flex items-center gap-1.5"><Radar className="h-3.5 w-3.5 text-primary-glow" /> Built-in view analytics</span>
+              <span className="inline-flex items-center gap-1.5"><Globe className="h-3.5 w-3.5 text-primary-glow" /> Your own profile page</span>
+              <span className="inline-flex items-center gap-1.5"><Brain className="h-3.5 w-3.5 text-primary-glow" /> Unlimited project links</span>
+              <span className="inline-flex items-center gap-1.5"><Radar className="h-3.5 w-3.5 text-primary-glow" /> Built-in click analytics</span>
             </div>
           </div>
         </div>
