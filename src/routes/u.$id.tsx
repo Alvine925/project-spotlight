@@ -64,7 +64,7 @@ function ProjectCard({ project, index }: { project: PublicProject; index: number
   const forks = pseudoCount(project.slug, 13);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 transition-all duration-200 hover:border-gray-300">
+    <div className="py-4">
 
       {/* ── Top: preview area ── */}
       {hasCover ? (
@@ -392,9 +392,9 @@ function Profile() {
         {/* ── Content ── */}
         <div className="px-4 py-4">
           {tab === "projects" ? (
-            <div className="space-y-4">
+            <div className="divide-y divide-gray-200">
               {allProjects.length === 0 ? (
-                <div className="border border-dashed border-gray-200 py-16 rounded-2xl text-center text-gray-400">
+                <div className="py-16 text-center text-gray-400">
                   <p className="text-sm">No public projects yet.</p>
                 </div>
               ) : (
