@@ -18,11 +18,13 @@ type Extracted = {
 export const analyzeProjectUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => analyzeInput.parse(input))
-  .handler(async ({ data }): Promise<Extracted & { cover_image_url: string | null; url: string }> => {
+  .handler(async ({ data, context }): Promise<Extracted & { cover_image_url: string | null; url: string }> => {
     const firecrawlKey = process.env.FIRECRAWL_API_KEY;
     const lovableKey = process.env.LOVABLE_API_KEY;
     if (!firecrawlKey) throw new Error("Firecrawl is not configured");
     if (!lovableKey) throw new Error("AI gateway is not configured");
+
+    const userId = (context as { userId: string }).userId;
 
     // 1) Scrape the URL via Firecrawl
     const scrapeRes = await fetch("https://api.firecrawl.dev/v2/scrape", {
@@ -47,7 +49,6 @@ export const analyzeProjectUrl = createServerFn({ method: "POST" })
     const markdown = scrapeJson.data?.markdown ?? "";
     const metaTitle = scrapeJson.data?.metadata?.title ?? "";
     const metaDesc = scrapeJson.data?.metadata?.description ?? "";
-
     const trimmed = markdown.slice(0, 8000);
 
     // 2) Ask the AI to structure project metadata
@@ -80,17 +81,17 @@ export const analyzeProjectUrl = createServerFn({ method: "POST" })
                 type: "object",
                 additionalProperties: false,
                 properties: {
-                  name: { type: "string", description: "Short product name" },
-                  tagline: { type: "string", description: "One-line tagline (max 90 chars)" },
-                  description: { type: "string", description: "2-3 sentence description" },
+                  name: { type: "string" },
+                  tagline: { type: "string" },
+                  description: { type: "string" },
                   category: {
                     type: "string",
                     enum: ["Productivity", "AI", "Developer Tools", "Finance", "Marketing", "Other"],
                   },
-                  tags: { type: "array", items: { type: "string" }, description: "3-6 short keywords" },
-                  tech_stack: { type: "array", items: { type: "string" }, description: "Detected tech if any (else empty)" },
-                  features: { type: "array", items: { type: "string" }, description: "Up to 5 short feature bullets" },
-                  use_cases: { type: "array", items: { type: "string" }, description: "Up to 4 short use cases" },
+                  tags: { type: "array", items: { type: "string" } },
+                  tech_stack: { type: "array", items: { type: "string" } },
+                  features: { type: "array", items: { type: "string" } },
+                  use_cases: { type: "array", items: { type: "string" } },
                 },
                 required: ["name", "tagline", "description", "category", "tags", "tech_stack", "features", "use_cases"],
               },
@@ -111,7 +112,7 @@ export const analyzeProjectUrl = createServerFn({ method: "POST" })
     if (!argsStr) throw new Error("AI did not return structured metadata");
     const parsed = JSON.parse(argsStr) as Extracted;
 
-    // 3) Generate a cover image
+    // 3) Generate a cover image and upload to storage
     let cover_image_url: string | null = null;
     try {
       const imgRes = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
@@ -122,7 +123,7 @@ export const analyzeProjectUrl = createServerFn({ method: "POST" })
         },
         body: JSON.stringify({
           model: "google/gemini-2.5-flash-image",
-          prompt: `Modern abstract cover image for a product named "${parsed.name}". Theme: ${parsed.tagline}. Style: minimal, vibrant gradient, soft geometric shapes, no text. 16:9 wide.`,
+          prompt: `Modern abstract cover image for a product named "${parsed.name}". Theme: ${parsed.tagline}. Style: minimal, vibrant gradient, soft geometric shapes, no text, 16:9 wide.`,
         }),
       });
       if (imgRes.ok) {
@@ -131,21 +132,23 @@ export const analyzeProjectUrl = createServerFn({ method: "POST" })
         if (b64) {
           const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          const path = `${context_userId(arguments)}/${Date.now()}.png`;
-          const filePath = `${userIdFrom()}`;
-          // We need userId from middleware context
+          const filePath = `${userId}/${Date.now()}.png`;
+          const { error: upErr } = await supabaseAdmin.storage
+            .from("covers")
+            .upload(filePath, bytes, { contentType: "image/png", upsert: true });
+          if (!upErr) {
+            const { data: pub } = supabaseAdmin.storage.from("covers").getPublicUrl(filePath);
+            cover_image_url = pub.publicUrl;
+          } else {
+            console.error("cover upload failed", upErr);
+          }
         }
+      } else {
+        console.error("image gen failed", imgRes.status, await imgRes.text().catch(() => ""));
       }
     } catch (e) {
       console.error("cover image generation failed", e);
     }
 
-    return {
-      ...parsed,
-      cover_image_url,
-      url: data.url,
-    };
+    return { ...parsed, cover_image_url, url: data.url };
   });
-
-function context_userId(_: IArguments) { return ""; }
-function userIdFrom() { return ""; }
