@@ -12,6 +12,7 @@ export type ProjectRow = {
   tags: string[];
   status: string;
   created_at: string;
+  cover_image_url?: string | null;
 };
 
 function timeAgo(iso: string) {
