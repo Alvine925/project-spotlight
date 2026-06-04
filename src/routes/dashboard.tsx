@@ -92,10 +92,16 @@ function Dashboard() {
               Welcome back, <span className="text-gradient">{user.email?.split("@")[0]}</span>
             </h1>
           </div>
-          <Link to="/submit"
-            className="inline-flex items-center gap-2 rounded-full bg-gradient-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow transition-smooth hover:scale-105">
-            <Plus className="h-4 w-4" /> New project
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link to="/u/$id" params={{ id: user.id }}
+              className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-4 py-2 text-sm font-medium backdrop-blur-md transition-smooth hover:border-primary/40">
+              <ExternalLink className="h-4 w-4" /> View my profile
+            </Link>
+            <Link to="/submit"
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow transition-smooth hover:scale-105">
+              <Plus className="h-4 w-4" /> New project
+            </Link>
+          </div>
         </div>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-3">

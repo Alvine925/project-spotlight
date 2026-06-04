@@ -13,8 +13,8 @@ import { Route as SubmitRouteImport } from './routes/submit'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UIdRouteImport } from './routes/u.$id'
 import { Route as ProjectSlugRouteImport } from './routes/project.$slug'
-import { Route as UserIdRouteImport } from './routes/u.$id'
 
 const SubmitRoute = SubmitRouteImport.update({
   id: '/submit',
@@ -36,14 +36,14 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UIdRoute = UIdRouteImport.update({
+  id: '/u/$id',
+  path: '/u/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProjectSlugRoute = ProjectSlugRouteImport.update({
   id: '/project/$slug',
   path: '/project/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const UserIdRoute = UserIdRouteImport.update({
-  id: '/u/$id',
-  path: '/u/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -53,7 +53,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/submit': typeof SubmitRoute
   '/project/$slug': typeof ProjectSlugRoute
-  '/u/$id': typeof UserIdRoute
+  '/u/$id': typeof UIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -61,7 +61,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/submit': typeof SubmitRoute
   '/project/$slug': typeof ProjectSlugRoute
-  '/u/$id': typeof UserIdRoute
+  '/u/$id': typeof UIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -70,14 +70,27 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/submit': typeof SubmitRoute
   '/project/$slug': typeof ProjectSlugRoute
-  '/u/$id': typeof UserIdRoute
+  '/u/$id': typeof UIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/dashboard' | '/submit' | '/project/$slug' | '/u/$id'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/submit'
+    | '/project/$slug'
+    | '/u/$id'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/auth' | '/dashboard' | '/submit' | '/project/$slug' | '/u/$id'
-  id: '__root__' | '/' | '/auth' | '/dashboard' | '/submit' | '/project/$slug' | '/u/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/submit'
+    | '/project/$slug'
+    | '/u/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -86,7 +99,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   SubmitRoute: typeof SubmitRoute
   ProjectSlugRoute: typeof ProjectSlugRoute
-  UserIdRoute: typeof UserIdRoute
+  UIdRoute: typeof UIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -119,18 +132,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/u/$id': {
+      id: '/u/$id'
+      path: '/u/$id'
+      fullPath: '/u/$id'
+      preLoaderRoute: typeof UIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/project/$slug': {
       id: '/project/$slug'
       path: '/project/$slug'
       fullPath: '/project/$slug'
       preLoaderRoute: typeof ProjectSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/u/$id': {
-      id: '/u/$id'
-      path: '/u/$id'
-      fullPath: '/u/$id'
-      preLoaderRoute: typeof UserIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -142,7 +155,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   SubmitRoute: SubmitRoute,
   ProjectSlugRoute: ProjectSlugRoute,
-  UserIdRoute: UserIdRoute,
+  UIdRoute: UIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
