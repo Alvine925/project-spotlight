@@ -14,7 +14,122 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      project_views: {
+        Row: {
+          id: string
+          project_id: string
+          referrer: string | null
+          viewed_at: string
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          referrer?: string | null
+          viewed_at?: string
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          referrer?: string | null
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_views_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          category: string | null
+          color_from: string
+          color_to: string
+          created_at: string
+          description: string | null
+          features: string[]
+          id: string
+          name: string
+          owner_id: string
+          published: boolean
+          slug: string
+          status: string
+          tagline: string | null
+          tags: string[]
+          tech_stack: string[]
+          updated_at: string
+          url: string
+          use_cases: string[]
+        }
+        Insert: {
+          category?: string | null
+          color_from?: string
+          color_to?: string
+          created_at?: string
+          description?: string | null
+          features?: string[]
+          id?: string
+          name: string
+          owner_id: string
+          published?: boolean
+          slug: string
+          status?: string
+          tagline?: string | null
+          tags?: string[]
+          tech_stack?: string[]
+          updated_at?: string
+          url: string
+          use_cases?: string[]
+        }
+        Update: {
+          category?: string | null
+          color_from?: string
+          color_to?: string
+          created_at?: string
+          description?: string | null
+          features?: string[]
+          id?: string
+          name?: string
+          owner_id?: string
+          published?: boolean
+          slug?: string
+          status?: string
+          tagline?: string | null
+          tags?: string[]
+          tech_stack?: string[]
+          updated_at?: string
+          url?: string
+          use_cases?: string[]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
