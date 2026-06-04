@@ -14,6 +14,8 @@ import {
   Linkedin,
   Link2,
   MoreHorizontal,
+  QrCode,
+  MessageCircle,
 } from "lucide-react";
 
 export const Route = createFileRoute("/u/$id")({
@@ -38,6 +40,7 @@ type PublicProject = {
   color_from: string;
   color_to: string;
   tech_stack: string[];
+  cover_image_url?: string | null;
 };
 
 /* ── Single project card (list style) ── */
@@ -48,13 +51,16 @@ function ProjectCard({ project, index }: { project: PublicProject; index: number
   const num = String(index + 1).padStart(2, "0");
   const isLive = project.status?.toLowerCase() === "live";
   const letter = project.name[0]?.toUpperCase() ?? "P";
+  const hasCover = !!project.cover_image_url;
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-200 hover:shadow-md">
-      {/* Background watermark letter */}
-      <div className="pointer-events-none absolute right-6 top-1/2 -translate-y-1/2 select-none font-display text-[100px] font-black leading-none text-gray-100">
-        {letter}
-      </div>
+      {/* Background watermark letter — only shown when no cover image */}
+      {!hasCover && (
+        <div className="pointer-events-none absolute right-6 top-1/2 -translate-y-1/2 select-none font-display text-[100px] font-black leading-none text-gray-100">
+          {letter}
+        </div>
+      )}
 
       <div className="relative p-5">
         {/* Top row: number + status */}
@@ -63,12 +69,12 @@ function ProjectCard({ project, index }: { project: PublicProject; index: number
           <div className="flex items-center gap-1.5">
             <span className={`h-2 w-2 rounded-full ${isLive ? "bg-green-500" : "bg-gray-300"}`} />
             <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
-              {project.status || "Live"}
+              {isLive ? "Live" : (project.status || "Live")}
             </span>
           </div>
         </div>
 
-        {/* Content + arrow */}
+        {/* Content + optional cover preview + arrow */}
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <h3 className="font-display text-xl font-bold leading-tight text-gray-900">
@@ -107,14 +113,26 @@ function ProjectCard({ project, index }: { project: PublicProject; index: number
             </div>
           </div>
 
-          {/* Arrow button */}
-          <Link
-            to="/project/$slug"
-            params={{ slug: project.slug }}
-            className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#ff6600] text-white shadow-md transition-all hover:scale-105 hover:shadow-lg"
-          >
-            <ArrowUpRight className="h-5 w-5" />
-          </Link>
+          {/* Right side: cover image preview (if available) OR arrow only */}
+          <div className="flex shrink-0 flex-col items-end gap-3">
+            {hasCover && (
+              <div className="h-20 w-28 overflow-hidden rounded-xl border border-gray-100 shadow-sm">
+                <img
+                  src={project.cover_image_url!}
+                  alt={`${project.name} preview`}
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            )}
+            <Link
+              to="/project/$slug"
+              params={{ slug: project.slug }}
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ff6600] text-white shadow-md transition-all hover:scale-105 hover:shadow-lg"
+            >
+              <ArrowUpRight className="h-5 w-5" />
+            </Link>
+          </div>
         </div>
       </div>
     </div>
@@ -133,7 +151,7 @@ function Profile() {
       const [{ data: profile }, { data: projects }] = await Promise.all([
         supabase.from("profiles").select("id, display_name, avatar_url, bio, created_at").eq("id", id).maybeSingle(),
         supabase.from("projects")
-          .select("id, slug, name, tagline, url, category, tags, status, color_from, color_to, tech_stack")
+          .select("id, slug, name, tagline, url, category, tags, status, color_from, color_to, tech_stack, cover_image_url")
           .eq("owner_id", id).eq("published", true).order("created_at", { ascending: false }),
       ]);
       return { profile, projects: (projects ?? []) as PublicProject[] };
@@ -145,6 +163,7 @@ function Profile() {
   const initials = name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
   const [from, to] = pickPalette(id);
   const profileUrl = typeof window !== "undefined" ? window.location.href : "";
+  const profileUrlClean = profileUrl.replace(/^https?:\/\//, "");
   const categories = Array.from(new Set(allProjects.map((p) => p.category).filter(Boolean)));
 
   const copy = () => {
@@ -152,6 +171,10 @@ function Profile() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     });
+  };
+
+  const openQr = () => {
+    window.open(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(profileUrl)}`, "_blank");
   };
 
   if (isLoading) {
@@ -187,34 +210,62 @@ function Profile() {
 
         {/* ── Hero ── */}
         <section className="relative overflow-hidden bg-white px-5 pb-5 pt-6">
-          {/* Decorative floating shapes (top right) */}
-          <div className="pointer-events-none absolute right-4 top-4 select-none">
-            <div className="relative h-24 w-24">
+          {/* Decorative floating 3-D-style blocks (top-right) */}
+          <div className="pointer-events-none absolute right-4 top-3 select-none">
+            <div className="relative h-28 w-28">
+              {/* Big letter block */}
               <div
-                className="absolute right-0 top-0 flex h-14 w-14 items-center justify-center rounded-2xl font-display text-2xl font-black text-white shadow-lg"
-                style={{ background: `linear-gradient(135deg, ${from}, ${to})`, transform: "rotate(10deg)" }}
+                className="absolute right-0 top-1 flex h-16 w-16 items-center justify-center rounded-2xl font-display text-3xl font-black text-white shadow-xl"
+                style={{
+                  background: `linear-gradient(145deg, ${from}, ${to})`,
+                  transform: "rotate(8deg)",
+                  boxShadow: `4px 6px 20px ${from}55`,
+                }}
               >
                 {initials[0]}
               </div>
-              <div className="absolute bottom-0 left-0 flex h-10 w-10 items-center justify-center rounded-xl bg-gray-800 font-display text-xs font-black text-white shadow-md" style={{ transform: "rotate(-8deg)" }}>
+              {/* Small AI block */}
+              <div
+                className="absolute bottom-1 left-0 flex h-10 w-10 items-center justify-center rounded-xl font-display text-xs font-black text-white shadow-md"
+                style={{
+                  background: "linear-gradient(145deg, #1a1a2e, #16213e)",
+                  transform: "rotate(-9deg)",
+                  boxShadow: "3px 4px 12px rgba(0,0,0,0.25)",
+                }}
+              >
                 AI
+              </div>
+              {/* Tiny code block */}
+              <div
+                className="absolute left-7 top-0 flex h-7 w-7 items-center justify-center rounded-lg bg-gray-800 font-display text-[10px] font-black text-white shadow-md"
+                style={{ transform: "rotate(15deg)" }}
+              >
+                {"</>"}
               </div>
             </div>
           </div>
 
           {/* Avatar + info */}
-          <div className="flex items-start gap-4 pr-28">
-            <div
-              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl font-display text-xl font-black text-white shadow-md"
-              style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
-            >
-              {initials}
-            </div>
+          <div className="flex items-start gap-4 pr-32">
+            {data?.profile?.avatar_url ? (
+              <img
+                src={data.profile.avatar_url}
+                alt={name}
+                className="h-14 w-14 shrink-0 rounded-2xl object-cover shadow-md"
+              />
+            ) : (
+              <div
+                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl font-display text-xl font-black text-white shadow-md"
+                style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
+              >
+                {initials}
+              </div>
+            )}
             <div className="min-w-0">
               <h1 className="font-display text-xl font-bold leading-tight text-gray-900">{name}</h1>
               <p className="font-mono text-xs text-gray-400">@{id.slice(0, 8)}</p>
               {data?.profile?.bio && (
-                <p className="mt-2 text-sm leading-relaxed text-gray-500">{data.profile.bio}</p>
+                <p className="mt-2 text-sm leading-relaxed text-gray-500 line-clamp-3">{data.profile.bio}</p>
               )}
             </div>
           </div>
@@ -240,7 +291,7 @@ function Profile() {
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`relative pb-3 pt-3 text-sm font-semibold capitalize transition-colors mr-6 ${
+              className={`relative mr-6 pb-3 pt-3 text-sm font-semibold capitalize transition-colors ${
                 tab === t ? "text-[#ff6600]" : "text-gray-400 hover:text-gray-700"
               }`}
             >
@@ -285,7 +336,7 @@ function Profile() {
 
           <div className="mt-4 flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 p-1 pl-3">
             <span className="flex-1 truncate font-mono text-xs text-gray-500">
-              {profileUrl.replace(/^https?:\/\//, "")}
+              {profileUrlClean}
             </span>
             <button
               onClick={copy}
@@ -298,10 +349,32 @@ function Profile() {
           {/* Social share icons */}
           <div className="mt-5 flex items-center justify-around">
             {[
-              { icon: Twitter, label: "Twitter", href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(profileUrl)}` },
-              { icon: Linkedin, label: "LinkedIn", href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(profileUrl)}` },
-              { icon: Link2, label: "Link", onClick: copy },
-            ].map(({ icon: Icon, label, href, onClick }) => (
+              {
+                icon: Twitter,
+                label: "Twitter",
+                href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(profileUrl)}&text=Check+out+my+projects+on+ProjectAtlas`,
+              },
+              {
+                icon: Linkedin,
+                label: "LinkedIn",
+                href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(profileUrl)}`,
+              },
+              {
+                icon: MessageCircle,
+                label: "WhatsApp",
+                href: `https://wa.me/?text=${encodeURIComponent(`Check out my projects on ProjectAtlas: ${profileUrl}`)}`,
+              },
+              {
+                icon: Link2,
+                label: "Link",
+                onClick: copy,
+              },
+              {
+                icon: QrCode,
+                label: "QR Code",
+                onClick: openQr,
+              },
+            ].map(({ icon: Icon, label, href, onClick }) =>
               href ? (
                 <a
                   key={label}
@@ -327,7 +400,7 @@ function Profile() {
                   <span className="text-[10px] text-gray-400">{label}</span>
                 </button>
               )
-            ))}
+            )}
           </div>
         </div>
 
