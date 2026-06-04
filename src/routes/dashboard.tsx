@@ -1,10 +1,22 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { SiteNav } from "@/components/SiteNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { Eye, Plus, ExternalLink, Loader2, BarChart3, Trash2 } from "lucide-react";
+import { pickPalette } from "@/lib/auth";
+import {
+  Eye,
+  Plus,
+  ExternalLink,
+  Loader2,
+  BarChart3,
+  Trash2,
+  Pencil,
+  Check,
+  X,
+  User,
+} from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -28,6 +40,124 @@ type MyProject = {
   created_at: string;
 };
 
+type Profile = {
+  id: string;
+  display_name: string | null;
+  avatar_url: string | null;
+};
+
+function EditProfileCard({ profile, userId }: { profile: Profile | null; userId: string }) {
+  const qc = useQueryClient();
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState(profile?.display_name ?? "");
+
+  const [from, to] = pickPalette(userId);
+  const displayName = profile?.display_name || `dev-${userId.slice(0, 6)}`;
+  const initials = displayName
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  const { mutate: save, isPending } = useMutation({
+    mutationFn: async (newName: string) => {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ display_name: newName.trim() || null })
+        .eq("id", userId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-profile", userId] });
+      qc.invalidateQueries({ queryKey: ["profile", userId] });
+      setEditing(false);
+    },
+  });
+
+  const cancel = () => {
+    setName(profile?.display_name ?? "");
+    setEditing(false);
+  };
+
+  return (
+    <div className="rounded-2xl border border-border/60 bg-gradient-card p-5 shadow-elegant">
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+          <User className="h-3.5 w-3.5" /> Profile
+        </span>
+        {!editing && (
+          <button
+            onClick={() => { setName(profile?.display_name ?? ""); setEditing(true); }}
+            className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-all"
+          >
+            <Pencil className="h-3 w-3" /> Edit
+          </button>
+        )}
+      </div>
+
+      <div className="flex items-center gap-4">
+        <div
+          className="grid h-14 w-14 shrink-0 place-items-center rounded-full font-display text-lg font-bold text-primary-foreground shadow-glow"
+          style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
+        >
+          {initials}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          {editing ? (
+            <div className="flex items-center gap-2">
+              <input
+                autoFocus
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") save(name);
+                  if (e.key === "Escape") cancel();
+                }}
+                placeholder="Your display name"
+                maxLength={40}
+                className="flex-1 rounded-lg border border-border/60 bg-background/60 px-3 py-1.5 text-sm font-medium outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30"
+              />
+              <button
+                onClick={() => save(name)}
+                disabled={isPending}
+                className="grid h-8 w-8 place-items-center rounded-lg bg-primary/20 text-primary-glow hover:bg-primary/30 transition-all disabled:opacity-50"
+                aria-label="Save"
+              >
+                {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+              </button>
+              <button
+                onClick={cancel}
+                className="grid h-8 w-8 place-items-center rounded-lg bg-muted hover:bg-muted/80 text-muted-foreground transition-all"
+                aria-label="Cancel"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ) : (
+            <div>
+              <p className="font-display font-semibold truncate">{displayName}</p>
+              <p className="text-xs text-muted-foreground">@{userId.slice(0, 8)}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-4 pt-4 border-t border-border/40">
+        <Link
+          to="/u/$id"
+          params={{ id: userId }}
+          className="inline-flex items-center gap-1.5 text-xs text-primary-glow hover:underline"
+        >
+          <ExternalLink className="h-3 w-3" />
+          View public profile
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 function Dashboard() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -35,6 +165,19 @@ function Dashboard() {
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth", replace: true });
   }, [user, loading, navigate]);
+
+  const { data: profileData } = useQuery({
+    queryKey: ["my-profile", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, display_name, avatar_url")
+        .eq("id", user!.id)
+        .maybeSingle();
+      return data as Profile | null;
+    },
+  });
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["my-projects", user?.id],
@@ -71,8 +214,11 @@ function Dashboard() {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen"><SiteNav />
-        <div className="flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary-glow" /></div>
+      <div className="min-h-screen">
+        <SiteNav />
+        <div className="flex justify-center py-20">
+          <Loader2 className="h-6 w-6 animate-spin text-primary-glow" />
+        </div>
       </div>
     );
   }
@@ -89,22 +235,24 @@ function Dashboard() {
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Dashboard</p>
             <h1 className="mt-1 font-display text-3xl font-semibold md:text-4xl">
-              Welcome back, <span className="text-gradient">{user.email?.split("@")[0]}</span>
+              Welcome back,{" "}
+              <span className="text-gradient">
+                {profileData?.display_name || user.email?.split("@")[0]}
+              </span>
             </h1>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Link to="/u/$id" params={{ id: user.id }}
-              className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-4 py-2 text-sm font-medium backdrop-blur-md transition-smooth hover:border-primary/40">
-              <ExternalLink className="h-4 w-4" /> View my profile
-            </Link>
-            <Link to="/submit"
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow transition-smooth hover:scale-105">
+            <Link
+              to="/submit"
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow transition-smooth hover:scale-105"
+            >
               <Plus className="h-4 w-4" /> New project
             </Link>
           </div>
         </div>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <EditProfileCard profile={profileData ?? null} userId={user.id} />
           <Stat label="Projects" value={projects.length} icon={Eye} />
           <Stat label="Total views" value={totalViews} icon={BarChart3} />
           <Stat label="Published" value={projects.filter((p) => p.published).length} icon={ExternalLink} />
@@ -113,11 +261,16 @@ function Dashboard() {
         <div className="mt-10">
           <h2 className="font-display text-xl font-semibold">Your projects</h2>
           {isLoading ? (
-            <div className="flex justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-primary-glow" /></div>
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-5 w-5 animate-spin text-primary-glow" />
+            </div>
           ) : projects.length === 0 ? (
             <div className="mt-6 rounded-2xl border border-dashed border-border/60 bg-card/30 p-12 text-center">
               <p className="text-muted-foreground">You haven't added any projects yet.</p>
-              <Link to="/submit" className="mt-4 inline-flex items-center gap-2 rounded-full bg-gradient-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow">
+              <Link
+                to="/submit"
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-gradient-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow"
+              >
                 <Plus className="h-4 w-4" /> Add your first project
               </Link>
             </div>
@@ -145,20 +298,32 @@ function Dashboard() {
                       <td className="px-4 py-3 text-muted-foreground">{p.category || "—"}</td>
                       <td className="px-4 py-3 text-right font-mono">{viewMap[p.id] || 0}</td>
                       <td className="px-4 py-3">
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${
-                          p.published ? "bg-primary/15 text-primary-glow" : "bg-muted text-muted-foreground"
-                        }`}>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${
+                            p.published
+                              ? "bg-primary/15 text-primary-glow"
+                              : "bg-muted text-muted-foreground"
+                          }`}
+                        >
                           {p.published ? p.status : "Draft"}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <a href={p.url} target="_blank" rel="noreferrer"
-                            className="rounded p-1.5 text-muted-foreground hover:text-foreground" aria-label="Open">
+                          <a
+                            href={p.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="rounded p-1.5 text-muted-foreground hover:text-foreground"
+                            aria-label="Open"
+                          >
                             <ExternalLink className="h-4 w-4" />
                           </a>
-                          <button onClick={() => onDelete(p.id)}
-                            className="rounded p-1.5 text-muted-foreground hover:text-destructive" aria-label="Delete">
+                          <button
+                            onClick={() => onDelete(p.id)}
+                            className="rounded p-1.5 text-muted-foreground hover:text-destructive"
+                            aria-label="Delete"
+                          >
                             <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
@@ -175,7 +340,15 @@ function Dashboard() {
   );
 }
 
-function Stat({ label, value, icon: Icon }: { label: string; value: number; icon: React.ComponentType<{ className?: string }> }) {
+function Stat({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value: number;
+  icon: React.ComponentType<{ className?: string }>;
+}) {
   return (
     <div className="rounded-2xl border border-border/60 bg-gradient-card p-5 shadow-elegant">
       <div className="flex items-center justify-between">
