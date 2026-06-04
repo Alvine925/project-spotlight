@@ -182,24 +182,24 @@ function Profile() {
       <section className="relative px-6 pb-16 pt-10 md:px-12 md:pt-14">
         {/* Soft glow behind avatar */}
         <div
-          className="pointer-events-none absolute left-1/2 top-0 h-[320px] w-[320px] -translate-x-1/2 rounded-full opacity-20 blur-[80px]"
+          className="pointer-events-none absolute left-1/2 top-0 h-[200px] w-[200px] -translate-x-1/2 rounded-full opacity-10 blur-[60px]"
           style={{ background: `radial-gradient(circle, ${from}, transparent 70%)` }}
         />
 
         <div className="relative mx-auto max-w-2xl text-center">
           {/* Avatar */}
           <div
-            className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-2xl font-display text-3xl font-black text-black"
+            className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-xl font-display text-lg font-black text-black"
             style={{
               background: `linear-gradient(135deg, ${from}, ${to})`,
-              boxShadow: `0 0 0 4px #000, 0 0 0 5px rgba(255,102,0,0.3), 0 20px 60px -10px ${from}88`,
+              boxShadow: `0 0 0 3px #000, 0 0 0 4px rgba(255,102,0,0.25), 0 12px 40px -8px ${from}66`,
             }}
           >
             {initials}
           </div>
 
           {/* Name */}
-          <h1 className="font-display text-5xl font-black leading-none tracking-tight text-white md:text-6xl lg:text-7xl">
+          <h1 className="font-display text-3xl font-bold leading-tight tracking-tight text-white md:text-4xl">
             {name}
           </h1>
 
