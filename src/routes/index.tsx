@@ -13,10 +13,10 @@ const CATEGORIES = ["All", "Productivity", "AI", "Developer Tools", "Finance", "
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ProjectAtlas — AI-powered catalogue of developer projects" },
-      { name: "description", content: "Drop a URL. ProjectAtlas turns your project into a beautiful, searchable showcase — automatically." },
-      { property: "og:title", content: "ProjectAtlas" },
-      { property: "og:description", content: "An AI-powered catalogue for the projects developers actually build." },
+      { title: "ProjectAtlas — One link for all your projects" },
+      { name: "description", content: "Linktree for developers. Share every project you've built from a single, beautiful profile link." },
+      { property: "og:title", content: "ProjectAtlas — One link for all your projects" },
+      { property: "og:description", content: "Linktree for developers. Share every project you've built from a single profile link." },
     ],
   }),
   component: Home,
@@ -73,14 +73,14 @@ function Home() {
           <div className="mx-auto max-w-3xl text-center">
             <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs text-primary-glow backdrop-blur-md">
               <Sparkles className="h-3.5 w-3.5" />
-              AI-powered project catalogue
+              Linktree — but for projects
             </div>
             <h1 className="font-display text-5xl font-bold leading-[1.05] tracking-tight md:text-7xl">
-              Drop a URL.<br />
-              <span className="text-gradient">Get a beautiful project page.</span>
+              One link.<br />
+              <span className="text-gradient">All your projects.</span>
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-base text-muted-foreground md:text-lg">
-              ProjectAtlas helps developers showcase their work without the maintenance overhead of a portfolio.
+              ProjectAtlas gives every developer a shareable profile that showcases every side-project, SaaS, and weekend build — in one place.
             </p>
 
             <div className="mt-10 flex justify-center">
@@ -88,9 +88,9 @@ function Home() {
             </div>
 
             <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5"><Globe className="h-3.5 w-3.5 text-primary-glow" /> Public project pages</span>
-              <span className="inline-flex items-center gap-1.5"><Brain className="h-3.5 w-3.5 text-primary-glow" /> Rich metadata & tags</span>
-              <span className="inline-flex items-center gap-1.5"><Radar className="h-3.5 w-3.5 text-primary-glow" /> Built-in view analytics</span>
+              <span className="inline-flex items-center gap-1.5"><Globe className="h-3.5 w-3.5 text-primary-glow" /> Your own profile page</span>
+              <span className="inline-flex items-center gap-1.5"><Brain className="h-3.5 w-3.5 text-primary-glow" /> Unlimited project links</span>
+              <span className="inline-flex items-center gap-1.5"><Radar className="h-3.5 w-3.5 text-primary-glow" /> Built-in click analytics</span>
             </div>
           </div>
         </div>
@@ -100,13 +100,13 @@ function Home() {
         <div className="mx-auto max-w-7xl px-6 py-20">
           <div className="mx-auto mb-12 max-w-2xl text-center">
             <h2 className="font-display text-3xl font-semibold md:text-4xl">How it works</h2>
-            <p className="mt-3 text-muted-foreground">From idea to a publishable project page in minutes.</p>
+            <p className="mt-3 text-muted-foreground">Build your developer profile in minutes — no portfolio site required.</p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {[
-              { icon: Globe, title: "1. Submit a URL", body: "Paste your project link and a few key details." },
-              { icon: Brain, title: "2. Publish your page", body: "A polished project page goes live in the catalogue." },
-              { icon: Layers, title: "3. Track views", body: "Your dashboard shows real-time views per project." },
+              { icon: Globe, title: "1. Add your projects", body: "Paste a URL for each project — landing pages, repos, demos, anything." },
+              { icon: Brain, title: "2. Get your profile link", body: "Every developer gets a public profile page listing all their projects." },
+              { icon: Layers, title: "3. Share one link", body: "Drop it in your bio, resume, or pitch — track clicks and views per project." },
             ].map((s) => (
               <div key={s.title} className="rounded-2xl border border-border/60 bg-gradient-card p-6 shadow-elegant transition-smooth hover:border-primary/40">
                 <div className="mb-4 grid h-10 w-10 place-items-center rounded-lg bg-gradient-primary shadow-glow">
