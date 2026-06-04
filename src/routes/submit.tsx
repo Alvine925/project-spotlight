@@ -242,3 +242,18 @@ function Submit() {
 }
 
 const inputCls = "w-full rounded-xl border border-border/60 bg-input/50 px-4 py-2.5 text-sm outline-none transition-smooth focus:border-primary/60";
+
+function StageRow({ active, done, label }: { active: boolean; done: boolean; label: string }) {
+  return (
+    <div className="flex items-center gap-2 text-xs">
+      {done ? (
+        <CheckCircle2 className="h-3.5 w-3.5 text-primary-glow" />
+      ) : active ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin text-primary-glow" />
+      ) : (
+        <div className="h-3.5 w-3.5 rounded-full border border-border/60" />
+      )}
+      <span className={done || active ? "text-foreground" : "text-muted-foreground"}>{label}</span>
+    </div>
+  );
+}
