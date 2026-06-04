@@ -23,10 +23,9 @@ type Extracted = {
   description: string;
   category: string;
   tags: string[];
-  tech_stack: string[];
+  what_it_does: string[];
   features: string[];
   use_cases: string[];
-  cover_image_url: string | null;
   url: string;
 };
 
@@ -54,8 +53,7 @@ function Submit() {
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [analyzing]);
 
-  const onAnalyze = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const runAnalyze = async () => {
     setErr(null);
     setExtracted(null);
     setAnalyzing(true);
@@ -67,6 +65,11 @@ function Submit() {
     } finally {
       setAnalyzing(false);
     }
+  };
+
+  const onAnalyze = (e: React.FormEvent) => {
+    e.preventDefault();
+    void runAnalyze();
   };
 
   const onPublish = async () => {
@@ -88,10 +91,9 @@ function Submit() {
         description: extracted.description,
         category: extracted.category,
         tags: extracted.tags,
-        tech_stack: extracted.tech_stack,
+        tech_stack: extracted.what_it_does,
         features: extracted.features,
         use_cases: extracted.use_cases,
-        cover_image_url: extracted.cover_image_url,
         status: "Live",
         published: true,
       } as never).select("slug").single();
@@ -126,7 +128,7 @@ function Submit() {
             Paste a link. <span className="text-gradient">We do the rest.</span>
           </h1>
           <p className="mx-auto mt-3 max-w-md text-muted-foreground">
-            We'll scrape the page, extract everything about your project, and generate a cover image automatically.
+            We'll analyze the page and pull out what the site does, its features, and the best category.
           </p>
         </div>
 
@@ -153,8 +155,8 @@ function Submit() {
             <div className="mt-5 space-y-2 rounded-xl border border-border/40 bg-background/40 p-4">
               <StageRow active={stage >= 0} done={stage > 0} label="Scraping the page" />
               <StageRow active={stage >= 1} done={stage > 1} label="Extracting project details with AI" />
-              <StageRow active={stage >= 2} done={false} label="Generating cover image" />
-              <p className="pt-1 text-[11px] text-muted-foreground">This usually takes 15–25 seconds.</p>
+              <StageRow active={stage >= 2} done={false} label="Summarizing what the site does" />
+              <p className="pt-1 text-[11px] text-muted-foreground">This usually takes 10–20 seconds.</p>
             </div>
           )}
         </form>
@@ -167,14 +169,6 @@ function Submit() {
 
         {extracted && (
           <div className="mt-8 space-y-5 rounded-2xl border border-border/60 bg-gradient-card p-6 shadow-elegant">
-            <div className="overflow-hidden rounded-xl border border-border/40">
-              {extracted.cover_image_url ? (
-                <img src={extracted.cover_image_url} alt="cover" className="aspect-[16/9] w-full object-cover" />
-              ) : (
-                <div className="aspect-[16/9] w-full bg-muted" />
-              )}
-            </div>
-
             <div className="space-y-2">
               <label className="block text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Name</label>
               <input value={extracted.name} onChange={(e) => setExtracted({ ...extracted, name: e.target.value })} className={inputCls} />
@@ -202,10 +196,10 @@ function Submit() {
               </div>
             </div>
             <div className="space-y-2">
-              <label className="block text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Tech stack</label>
+              <label className="block text-[11px] font-medium uppercase tracking-wider text-muted-foreground">What the site does</label>
               <input
-                value={extracted.tech_stack.join(", ")}
-                onChange={(e) => setExtracted({ ...extracted, tech_stack: e.target.value.split(",").map((t) => t.trim()).filter(Boolean) })}
+                value={extracted.what_it_does.join(", ")}
+                onChange={(e) => setExtracted({ ...extracted, what_it_does: e.target.value.split(",").map((t) => t.trim()).filter(Boolean) })}
                 className={inputCls}
               />
             </div>
@@ -213,7 +207,7 @@ function Submit() {
             <div className="flex flex-col gap-2 sm:flex-row">
               <button
                 type="button"
-                onClick={onAnalyze as unknown as () => void}
+                onClick={runAnalyze}
                 disabled={analyzing}
                 className="flex items-center justify-center gap-2 rounded-xl border border-border/60 px-4 py-3 text-sm transition-smooth hover:border-primary/40 disabled:opacity-60"
               >
