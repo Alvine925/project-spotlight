@@ -334,19 +334,39 @@ function ProjectDetail() {
             </div>
           )}
 
-          {/* Gallery — shown when a cover image exists (uses variations) */}
-          {coverUrl && (
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
-              <h2 className="font-display text-base font-bold text-gray-900">Gallery</h2>
-              <div className="mt-3 grid grid-cols-3 gap-2">
-                {[coverUrl, coverUrl, coverUrl].map((src, i) => (
-                  <div key={i} className="aspect-video overflow-hidden rounded-xl border border-gray-100">
-                    <img src={src} alt={`${project.name} screenshot ${i + 1}`} className="h-full w-full object-cover" />
-                  </div>
-                ))}
-              </div>
+          {/* Gallery — always shown; uses cover image or gradient placeholders */}
+          <div className="rounded-2xl bg-white p-5 shadow-sm">
+            <h2 className="font-display text-base font-bold text-gray-900">Gallery</h2>
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="aspect-video overflow-hidden rounded-xl border border-gray-100">
+                  {coverUrl ? (
+                    <img
+                      src={coverUrl}
+                      alt={`${project.name} screenshot ${i + 1}`}
+                      className="h-full w-full object-cover"
+                      style={{ objectPosition: i === 0 ? "top" : i === 1 ? "center" : "bottom" }}
+                    />
+                  ) : (
+                    <div
+                      className="h-full w-full flex items-center justify-center"
+                      style={{
+                        background: i === 0
+                          ? `linear-gradient(135deg, ${from}, ${to})`
+                          : i === 1
+                          ? `linear-gradient(135deg, #1a1a2e, #16213e)`
+                          : `linear-gradient(135deg, #2d2d2d, #1a1a1a)`,
+                      }}
+                    >
+                      <span className="font-display text-2xl font-black text-white/20 select-none">
+                        {project.name[0]?.toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
-          )}
+          </div>
 
           {/* Share */}
           <div className="rounded-2xl bg-white p-5 shadow-sm">
