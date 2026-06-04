@@ -73,9 +73,9 @@ function ProjectDetail() {
         className="relative overflow-hidden border-b border-border/40"
         style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
       >
-        {(project as { cover_image_url?: string | null }).cover_image_url && (
+        {(project as unknown as { cover_image_url?: string | null }).cover_image_url && (
           <img
-            src={(project as { cover_image_url: string }).cover_image_url}
+            src={(project as unknown as { cover_image_url: string }).cover_image_url}
             alt={`${project.name} cover`}
             className="absolute inset-0 h-full w-full object-cover opacity-50"
           />
