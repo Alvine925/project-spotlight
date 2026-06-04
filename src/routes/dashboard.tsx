@@ -16,6 +16,8 @@ import {
   Check,
   X,
   User,
+  Copy,
+  Link2,
 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
@@ -158,6 +160,50 @@ function EditProfileCard({ profile, userId }: { profile: Profile | null; userId:
   );
 }
 
+function ProfileLinkBanner({ userId }: { userId: string }) {
+  const [copied, setCopied] = useState(false);
+  const profileUrl = typeof window !== "undefined"
+    ? `${window.location.origin}/u/${userId}`
+    : `/u/${userId}`;
+
+  const copy = () => {
+    navigator.clipboard.writeText(profileUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <div className="mt-8 flex flex-col gap-2 rounded-2xl border border-primary/30 bg-primary/5 px-5 py-4 shadow-elegant backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-primary shadow-glow">
+          <Link2 className="h-4 w-4 text-primary-foreground" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-xs font-medium uppercase tracking-wider text-primary-glow">Your shareable profile link</p>
+          <p className="truncate font-mono text-sm text-foreground/80">{profileUrl}</p>
+        </div>
+      </div>
+      <div className="flex shrink-0 items-center gap-2">
+        <button
+          onClick={copy}
+          className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-card/60 px-4 py-2 text-sm font-medium text-foreground backdrop-blur-md transition-all hover:border-primary/60 hover:bg-card"
+        >
+          {copied ? <Check className="h-4 w-4 text-primary-glow" /> : <Copy className="h-4 w-4" />}
+          {copied ? "Copied!" : "Copy link"}
+        </button>
+        <Link
+          to="/u/$id"
+          params={{ id: userId }}
+          className="inline-flex items-center gap-2 rounded-full bg-gradient-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow transition-all hover:scale-105"
+        >
+          <ExternalLink className="h-4 w-4" /> Open
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 function Dashboard() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -251,7 +297,9 @@ function Dashboard() {
           </div>
         </div>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <ProfileLinkBanner userId={user.id} />
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <EditProfileCard profile={profileData ?? null} userId={user.id} />
           <Stat label="Projects" value={projects.length} icon={Eye} />
           <Stat label="Total views" value={totalViews} icon={BarChart3} />
