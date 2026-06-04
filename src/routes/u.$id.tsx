@@ -339,9 +339,9 @@ function Profile() {
             <div className="min-w-0">
               <h1 className="font-display text-xl font-bold leading-tight text-gray-900">{name}</h1>
               <p className="font-mono text-xs text-gray-400">@{id.slice(0, 8)}</p>
-              {data?.profile?.bio && (
-                <p className="mt-2 text-sm leading-relaxed text-gray-500 line-clamp-3">{data.profile.bio}</p>
-              )}
+              <p className="mt-2 text-sm leading-relaxed line-clamp-3 text-gray-500">
+                {data?.profile?.bio || "Building cool things with code. Passionate about developer tools, AI and creating products."}
+              </p>
             </div>
           </div>
 
@@ -392,13 +392,12 @@ function Profile() {
             </div>
           ) : (
             <div className="rounded-2xl bg-white p-6 shadow-sm">
-              {data?.profile?.bio ? (
-                <>
-                  <h2 className="font-display text-lg font-bold text-gray-900">About</h2>
-                  <p className="mt-3 leading-relaxed text-gray-600">{data.profile.bio}</p>
-                </>
-              ) : (
-                <p className="py-8 text-center text-sm text-gray-400">No bio added yet.</p>
+              <h2 className="font-display text-lg font-bold text-gray-900">About</h2>
+              <p className="mt-3 leading-relaxed text-gray-600">
+                {data?.profile?.bio || "Building cool things with code. Passionate about developer tools, AI and creating products."}
+              </p>
+              {!data?.profile?.bio && (
+                <p className="mt-4 text-xs text-gray-300 italic">This is a placeholder bio. Update your profile to personalise it.</p>
               )}
             </div>
           )}
