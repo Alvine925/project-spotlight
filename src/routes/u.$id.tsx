@@ -1,18 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { SiteNav } from "@/components/SiteNav";
 import { supabase } from "@/integrations/supabase/client";
 import { pickPalette } from "@/lib/auth";
 import {
-  ExternalLink,
   Loader2,
-  Globe,
   Copy,
   Check,
-  Layers,
   ArrowUpRight,
-  Tag,
+  Compass,
+  ExternalLink,
 } from "lucide-react";
 
 export const Route = createFileRoute("/u/$id")({
@@ -21,8 +18,7 @@ export const Route = createFileRoute("/u/$id")({
       { title: `@${params.id.slice(0, 8)}'s Projects — ProjectAtlas` },
       {
         name: "description",
-        content:
-          "All projects from this developer, in one place. Powered by ProjectAtlas.",
+        content: "All projects from this developer, in one place.",
       },
       {
         property: "og:title",
@@ -47,14 +43,8 @@ type PublicProject = {
   tech_stack: string[];
 };
 
-function copyToClipboard(text: string, setCopied: (v: boolean) => void) {
-  navigator.clipboard.writeText(text).then(() => {
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  });
-}
-
-function ProjectCard({ project }: { project: PublicProject }) {
+/* ── Project card ── */
+function ProjectCard({ project, index }: { project: PublicProject; index: number }) {
   let host = project.url;
   try {
     host = new URL(project.url).hostname.replace("www.", "");
@@ -64,63 +54,71 @@ function ProjectCard({ project }: { project: PublicProject }) {
     <Link
       to="/project/$slug"
       params={{ slug: project.slug }}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-card/60 shadow-elegant backdrop-blur-md transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-glow"
+      className="group flex flex-col overflow-hidden rounded-xl border border-white/5 bg-[#111] transition-all duration-300 hover:-translate-y-1 hover:border-[#ff6600]/60 hover:shadow-[0_0_30px_-5px_rgba(255,102,0,0.35)]"
+      style={{ animationDelay: `${index * 60}ms` }}
     >
+      {/* Colored top strip */}
       <div
-        className="relative h-28 w-full shrink-0 overflow-hidden"
+        className="relative flex h-36 w-full shrink-0 items-center justify-center overflow-hidden"
         style={{
           background: `linear-gradient(135deg, ${project.color_from}, ${project.color_to})`,
         }}
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.18),transparent_60%)]" />
-        <div className="absolute bottom-3 left-3 grid h-9 w-9 place-items-center rounded-xl bg-background/80 font-display text-base font-bold backdrop-blur-md">
+        {/* Subtle shine overlay */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(255,255,255,0.15),transparent_55%)]" />
+        {/* Big letter */}
+        <span className="relative select-none font-display text-7xl font-black text-black/20 leading-none">
           {project.name[0]?.toUpperCase()}
-        </div>
-        <div className="absolute right-3 top-3 rounded-full bg-background/70 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider backdrop-blur-md">
+        </span>
+        {/* Status badge */}
+        <span className="absolute right-3 top-3 rounded-full bg-black/40 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-white/80 backdrop-blur-sm">
           {project.status}
-        </div>
+        </span>
+        {/* Arrow */}
+        <span className="absolute bottom-3 right-3 grid h-7 w-7 place-items-center rounded-full bg-black/30 text-white/70 backdrop-blur-sm transition-all duration-300 group-hover:bg-[#ff6600] group-hover:text-white">
+          <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+        </span>
       </div>
 
-      <div className="flex flex-1 flex-col gap-2 p-4">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <h3 className="truncate font-display text-base font-semibold leading-tight">
-              {project.name}
-            </h3>
-            {project.tagline && (
-              <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
-                {project.tagline}
-              </p>
-            )}
-          </div>
-          <ArrowUpRight className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary-glow" />
-        </div>
-
-        <div className="flex flex-wrap gap-1.5">
-          {project.category && (
-            <span className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[11px] font-medium text-primary-glow">
-              {project.category}
-            </span>
+      {/* Card body */}
+      <div className="flex flex-1 flex-col gap-3 p-5">
+        <div>
+          <h3 className="font-display text-lg font-bold leading-tight text-white group-hover:text-[#ff6600] transition-colors duration-200">
+            {project.name}
+          </h3>
+          {project.tagline && (
+            <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-white/50">
+              {project.tagline}
+            </p>
           )}
-          {project.tags.slice(0, 2).map((t) => (
-            <span
-              key={t}
-              className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] text-muted-foreground"
-            >
-              {t}
-            </span>
-          ))}
         </div>
 
-        <div className="mt-auto flex items-center gap-1.5 border-t border-border/40 pt-3 text-xs text-muted-foreground">
-          <Globe className="h-3 w-3 shrink-0" />
-          <span className="truncate font-mono">{host}</span>
+        <div className="mt-auto flex items-center justify-between gap-2">
+          <div className="flex flex-wrap gap-1.5">
+            {project.category && (
+              <span className="rounded-full bg-[#ff6600]/15 px-2.5 py-0.5 text-[11px] font-semibold text-[#ff6600]">
+                {project.category}
+              </span>
+            )}
+            {project.tags.slice(0, 1).map((t) => (
+              <span
+                key={t}
+                className="rounded-full bg-white/5 px-2.5 py-0.5 text-[11px] text-white/40"
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+          <span className="shrink-0 font-mono text-[11px] text-white/30 truncate max-w-[40%]">
+            {host}
+          </span>
         </div>
       </div>
     </Link>
   );
 }
 
+/* ── Profile page ── */
 function Profile() {
   const { id } = Route.useParams();
   const [copied, setCopied] = useState(false);
@@ -137,9 +135,7 @@ function Profile() {
           .maybeSingle(),
         supabase
           .from("projects")
-          .select(
-            "id, slug, name, tagline, url, category, tags, status, color_from, color_to, tech_stack"
-          )
+          .select("id, slug, name, tagline, url, category, tags, status, color_from, color_to, tech_stack")
           .eq("owner_id", id)
           .eq("published", true)
           .order("created_at", { ascending: false }),
@@ -148,35 +144,23 @@ function Profile() {
     },
   });
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen">
-        <SiteNav />
-        <div className="flex justify-center py-24">
-          <Loader2 className="h-6 w-6 animate-spin text-primary-glow" />
-        </div>
-      </div>
-    );
-  }
-
   const name = data?.profile?.display_name || `dev-${id.slice(0, 6)}`;
   const allProjects = data?.projects ?? [];
-  const initials = name
-    .split(" ")
-    .map((w: string) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
+  const initials = name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
   const [from, to] = pickPalette(id);
 
-  const profileUrl =
-    typeof window !== "undefined" ? window.location.href : "";
+  const profileUrl = typeof window !== "undefined" ? window.location.href : "";
+
+  const copy = () => {
+    navigator.clipboard.writeText(profileUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   const categories = [
     "All",
-    ...Array.from(
-      new Set(allProjects.map((p) => p.category).filter(Boolean) as string[])
-    ),
+    ...Array.from(new Set(allProjects.map((p) => p.category).filter(Boolean) as string[])),
   ];
 
   const filtered =
@@ -184,132 +168,141 @@ function Profile() {
       ? allProjects
       : allProjects.filter((p) => p.category === activeCategory);
 
-  const techAll = allProjects.flatMap((p) => p.tech_stack);
-  const topTech = Array.from(new Set(techAll)).slice(0, 6);
-
   return (
-    <div className="min-h-screen">
-      <SiteNav />
+    <div className="min-h-screen bg-black text-white">
 
-      {/* Hero gradient */}
-      <div className="relative overflow-hidden">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-20"
-          style={{
-            background: `radial-gradient(ellipse 80% 50% at 50% -10%, ${from}, transparent)`,
-          }}
-        />
-
-        <section className="relative mx-auto max-w-3xl px-6 pb-10 pt-16 text-center">
-          {/* Avatar */}
-          <div
-            className="mx-auto grid h-24 w-24 place-items-center rounded-full font-display text-2xl font-bold text-primary-foreground shadow-glow ring-4 ring-background"
-            style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
-          >
-            {initials}
+      {/* ── Minimal top bar ── */}
+      <header className="flex items-center justify-between px-6 py-5 md:px-10">
+        <Link to="/" className="flex items-center gap-2 opacity-70 hover:opacity-100 transition-opacity">
+          <div className="grid h-7 w-7 place-items-center rounded-md bg-[#ff6600]">
+            <Compass className="h-4 w-4 text-black" strokeWidth={2.5} />
           </div>
+          <span className="font-display text-sm font-semibold tracking-tight">ProjectAtlas</span>
+        </Link>
 
-          {/* Name & handle */}
-          <h1 className="mt-5 font-display text-3xl font-semibold md:text-4xl">
-            {name}
-          </h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            @{id.slice(0, 8)}
-          </p>
+        <button
+          onClick={copy}
+          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium text-white/70 transition-all hover:border-[#ff6600]/50 hover:text-white"
+        >
+          {copied ? <Check className="h-3.5 w-3.5 text-[#ff6600]" /> : <Copy className="h-3.5 w-3.5" />}
+          {copied ? "Copied!" : "Copy link"}
+        </button>
+      </header>
 
-          {/* Stats row */}
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-5 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              <Layers className="h-4 w-4 text-primary-glow" />
-              <strong className="text-foreground">{allProjects.length}</strong>
-              &nbsp;{allProjects.length === 1 ? "project" : "projects"}
-            </span>
-            {topTech.length > 0 && (
-              <span className="flex items-center gap-1.5">
-                <Tag className="h-4 w-4 text-primary-glow" />
-                <span className="truncate max-w-xs">{topTech.join(" · ")}</span>
-              </span>
-            )}
-          </div>
-
-          {/* Actions */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-            <button
-              onClick={() => copyToClipboard(profileUrl, setCopied)}
-              className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-4 py-2 text-sm font-medium backdrop-blur-md transition-all hover:border-primary/40 hover:bg-card/80"
-            >
-              {copied ? (
-                <>
-                  <Check className="h-4 w-4 text-primary-glow" />
-                  Copied!
-                </>
-              ) : (
-                <>
-                  <Copy className="h-4 w-4" />
-                  Copy profile link
-                </>
-              )}
-            </button>
-          </div>
-        </section>
-      </div>
-
-      {/* Projects grid */}
-      <section className="mx-auto max-w-5xl px-6 pb-24">
-        {/* Category filter */}
-        {categories.length > 1 && (
-          <div className="mb-8 flex flex-wrap gap-2">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${
-                  activeCategory === cat
-                    ? "bg-gradient-primary text-primary-foreground shadow-glow"
-                    : "border border-border/60 bg-card/40 text-muted-foreground hover:border-primary/40 hover:text-foreground"
-                }`}
-              >
-                {cat}
-                {cat !== "All" && (
-                  <span className="ml-1.5 opacity-70 text-[11px]">
-                    {allProjects.filter((p) => p.category === cat).length}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {filtered.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border/60 bg-card/30 p-14 text-center text-muted-foreground">
-            No public projects yet.
-          </div>
-        ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((p) => (
-              <ProjectCard key={p.id} project={p} />
-            ))}
-          </div>
-        )}
-
-        {/* Footer */}
-        <div className="mt-16 flex flex-col items-center gap-3 border-t border-border/40 pt-10 text-center">
-          <p className="text-xs text-muted-foreground">
-            Built with{" "}
-            <Link to="/" className="text-primary-glow hover:underline">
-              ProjectAtlas
-            </Link>{" "}
-            — one link for all your projects.
-          </p>
-          <Link
-            to="/submit"
-            className="inline-flex items-center gap-1.5 rounded-full bg-gradient-primary px-4 py-1.5 text-xs font-medium text-primary-foreground shadow-glow transition-all hover:scale-105"
-          >
-            <ExternalLink className="h-3 w-3" />
-            Create your own profile
-          </Link>
+      {/* ── Hero ── */}
+      {isLoading ? (
+        <div className="flex justify-center py-32">
+          <Loader2 className="h-6 w-6 animate-spin text-[#ff6600]" />
         </div>
-      </section>
+      ) : (
+        <>
+          <section className="px-6 pb-12 pt-8 md:px-10 md:pt-12">
+            <div className="mx-auto max-w-5xl">
+              <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+
+                {/* Left — identity */}
+                <div className="flex items-center gap-6">
+                  {/* Avatar */}
+                  <div
+                    className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl font-display text-2xl font-black text-black shadow-[0_0_40px_-8px_rgba(255,102,0,0.6)]"
+                    style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
+                  >
+                    {initials}
+                  </div>
+                  <div>
+                    <h1 className="font-display text-3xl font-black leading-none tracking-tight md:text-4xl">
+                      {name}
+                    </h1>
+                    <p className="mt-1.5 font-mono text-sm text-white/40">
+                      @{id.slice(0, 8)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right — big project count */}
+                <div className="flex items-baseline gap-2">
+                  <span
+                    className="font-display text-7xl font-black leading-none md:text-8xl"
+                    style={{ color: "#ff6600" }}
+                  >
+                    {allProjects.length}
+                  </span>
+                  <span className="font-display text-xl font-semibold text-white/30">
+                    {allProjects.length === 1 ? "project" : "projects"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Orange rule */}
+              <div className="mt-10 h-px w-full bg-gradient-to-r from-[#ff6600] via-[#ff6600]/40 to-transparent" />
+            </div>
+          </section>
+
+          {/* ── Filter tabs ── */}
+          {categories.length > 1 && (
+            <div className="px-6 pb-8 md:px-10">
+              <div className="mx-auto max-w-5xl flex flex-wrap gap-2">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCategory(cat)}
+                    className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all ${
+                      activeCategory === cat
+                        ? "bg-[#ff6600] text-black"
+                        : "border border-white/10 bg-white/5 text-white/50 hover:border-[#ff6600]/40 hover:text-white"
+                    }`}
+                  >
+                    {cat}
+                    {cat !== "All" && (
+                      <span className={`ml-1.5 text-[10px] ${activeCategory === cat ? "opacity-60" : "opacity-40"}`}>
+                        {allProjects.filter((p) => p.category === cat).length}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── Projects grid ── */}
+          <section className="px-6 pb-24 md:px-10">
+            <div className="mx-auto max-w-5xl">
+              {filtered.length === 0 ? (
+                <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-white/10 py-20 text-center text-white/30">
+                  <span className="font-display text-4xl font-black text-white/10">∅</span>
+                  <p className="text-sm">No public projects yet.</p>
+                </div>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {filtered.map((p, i) => (
+                    <ProjectCard key={p.id} project={p} index={i} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* ── Footer ── */}
+          <footer className="border-t border-white/5 px-6 py-8 md:px-10">
+            <div className="mx-auto max-w-5xl flex flex-col items-center gap-3 text-center sm:flex-row sm:justify-between">
+              <p className="text-xs text-white/25">
+                Built with{" "}
+                <Link to="/" className="text-[#ff6600]/60 hover:text-[#ff6600] transition-colors">
+                  ProjectAtlas
+                </Link>
+                {" "}— one link for all your projects.
+              </p>
+              <Link
+                to="/submit"
+                className="inline-flex items-center gap-1.5 rounded-full bg-[#ff6600] px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-black transition-all hover:scale-105 hover:shadow-[0_0_20px_-4px_rgba(255,102,0,0.7)]"
+              >
+                <ExternalLink className="h-3 w-3" />
+                Get yours free
+              </Link>
+            </div>
+          </footer>
+        </>
+      )}
     </div>
   );
 }
