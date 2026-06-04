@@ -1,12 +1,11 @@
-// Deterministic gradient picker — returns hex pairs so we can use inline styles
-// (avoids Tailwind class purging issues with dynamic class names).
+// Avatar gradient pairs — all orange-on-black, consistent with the brand palette.
 const gradients: Array<[string, string]> = [
-  ["#f97316", "#fbbf24"], // orange-500 -> amber-400
-  ["#f59e0b", "#fdba74"], // amber-500 -> orange-300
-  ["#ea580c", "#fb7185"], // orange-600 -> rose-400
-  ["#facc15", "#f97316"], // yellow-400 -> orange-500
-  ["#fb923c", "#f87171"], // orange-400 -> red-400
-  ["#fbbf24", "#ea580c"], // amber-400 -> orange-600
+  ["#ff6600", "#ff4400"],
+  ["#ff6600", "#ff8800"],
+  ["#ff5500", "#ff6600"],
+  ["#ff4400", "#ff6600"],
+  ["#ff7700", "#ff5500"],
+  ["#ff6600", "#cc4400"],
 ];
 
 export function pickPalette(seed: string): [string, string] {

@@ -5,7 +5,6 @@ import { SiteNav } from "@/components/SiteNav";
 import { ProjectCard, type ProjectRow } from "@/components/ProjectCard";
 import { UrlSubmit } from "@/components/UrlSubmit";
 import { supabase } from "@/integrations/supabase/client";
-import heroGlow from "@/assets/hero-glow.jpg";
 import { Search, Globe, Brain, Sparkles, Layers, Radar, Loader2 } from "lucide-react";
 
 const CATEGORIES = ["All", "Productivity", "AI", "Developer Tools", "Finance", "Marketing", "Other"];
@@ -58,15 +57,6 @@ function Home() {
       <SiteNav />
 
       <section className="relative overflow-hidden">
-        <div
-          className="absolute inset-0 -z-10 opacity-50"
-          style={{
-            backgroundImage: `url(${heroGlow})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center top",
-            maskImage: "linear-gradient(to bottom, black 30%, transparent 95%)",
-          }}
-        />
         <div className="absolute inset-0 -z-10 bg-gradient-hero" />
 
         <div className="mx-auto max-w-7xl px-6 pb-24 pt-24 md:pt-32">
