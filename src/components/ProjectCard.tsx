@@ -12,7 +12,9 @@ export type ProjectRow = {
   tags: string[];
   status: string;
   created_at: string;
+  cover_image_url?: string | null;
 };
+
 
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
