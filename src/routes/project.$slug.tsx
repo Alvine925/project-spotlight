@@ -245,12 +245,12 @@ function ProjectDetail() {
           </span>
         </div>
 
-        {/* ── Sections ── */}
-        <div className="mt-4 space-y-4 px-4 pb-4">
+        {/* ── Sections — flat on background, divided by hairlines ── */}
+        <div className="mt-5 divide-y divide-gray-200">
 
           {/* About */}
           {project.description && (
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
+            <div className="px-5 py-5">
               <h2 className="font-display text-base font-bold text-gray-900">About</h2>
               <p className="mt-2 text-sm leading-relaxed text-gray-600">{project.description}</p>
             </div>
@@ -258,7 +258,7 @@ function ProjectDetail() {
 
           {/* Tech Stack */}
           {project.tech_stack?.length > 0 && (
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
+            <div className="px-5 py-5">
               <h2 className="font-display text-base font-bold text-gray-900">Tech Stack</h2>
               <div className="mt-3 flex flex-wrap gap-2">
                 {project.tech_stack.map((t: string) => (
@@ -269,14 +269,14 @@ function ProjectDetail() {
           )}
 
           {/* Links */}
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
+          <div className="px-5 py-5">
             <h2 className="font-display text-base font-bold text-gray-900">Links</h2>
-            <div className="mt-3 space-y-2">
+            <div className="mt-3 space-y-0 divide-y divide-gray-100">
               <a
                 href={project.url}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 transition-all hover:border-[#ff6600]/30"
+                className="flex items-center justify-between py-3 transition-colors hover:text-[#ff6600]"
               >
                 <div className="flex items-center gap-2.5">
                   <span className="flex h-6 w-6 items-center justify-center rounded-md bg-green-100">
@@ -286,9 +286,8 @@ function ProjectDetail() {
                 </div>
                 <ExternalLink className="h-3.5 w-3.5 text-gray-400" />
               </a>
-              {/* Features list re-used as documentation link if available */}
               {project.features?.length > 0 && (
-                <div className="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 px-4 py-3">
+                <div className="flex items-center justify-between py-3">
                   <div className="flex items-center gap-2.5">
                     <span className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-100">
                       <svg className="h-3.5 w-3.5 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -304,9 +303,9 @@ function ProjectDetail() {
             </div>
           </div>
 
-          {/* Features / What it does */}
+          {/* Features */}
           {project.features?.length > 0 && (
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
+            <div className="px-5 py-5">
               <h2 className="font-display text-base font-bold text-gray-900">Features</h2>
               <ul className="mt-3 space-y-2">
                 {project.features.map((f: string) => (
@@ -319,9 +318,9 @@ function ProjectDetail() {
             </div>
           )}
 
-          {/* Use cases */}
+          {/* Use Cases */}
           {project.use_cases?.length > 0 && (
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
+            <div className="px-5 py-5">
               <h2 className="font-display text-base font-bold text-gray-900">Use Cases</h2>
               <ul className="mt-3 space-y-2">
                 {project.use_cases.map((u: string) => (
@@ -334,12 +333,12 @@ function ProjectDetail() {
             </div>
           )}
 
-          {/* Gallery — always shown; uses cover image or gradient placeholders */}
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
+          {/* Gallery */}
+          <div className="px-5 py-5">
             <h2 className="font-display text-base font-bold text-gray-900">Gallery</h2>
             <div className="mt-3 grid grid-cols-3 gap-2">
               {[0, 1, 2].map((i) => (
-                <div key={i} className="aspect-video overflow-hidden rounded-xl border border-gray-100">
+                <div key={i} className="aspect-video overflow-hidden rounded-xl">
                   {coverUrl ? (
                     <img
                       src={coverUrl}
@@ -354,8 +353,8 @@ function ProjectDetail() {
                         background: i === 0
                           ? `linear-gradient(135deg, ${from}, ${to})`
                           : i === 1
-                          ? `linear-gradient(135deg, #1a1a2e, #16213e)`
-                          : `linear-gradient(135deg, #2d2d2d, #1a1a1a)`,
+                          ? "linear-gradient(135deg, #1a1a2e, #16213e)"
+                          : "linear-gradient(135deg, #2d2d2d, #1a1a1a)",
                       }}
                     >
                       <span className="font-display text-2xl font-black text-white/20 select-none">
@@ -369,11 +368,11 @@ function ProjectDetail() {
           </div>
 
           {/* Share */}
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
+          <div className="px-5 py-5">
             <h3 className="font-display text-base font-bold text-gray-900">Share this project</h3>
             <p className="mt-1 text-xs text-gray-400">Anyone with this link can view the live site.</p>
 
-            <div className="mt-4 flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 p-1 pl-3">
+            <div className="mt-4 flex items-center gap-2 rounded-xl border border-gray-200 bg-white p-1 pl-3">
               <span className="flex-1 truncate font-mono text-xs text-gray-500">
                 {projectUrlClean}
               </span>
@@ -395,14 +394,14 @@ function ProjectDetail() {
               ].map(({ icon: Icon, label, href, onClick }) =>
                 href ? (
                   <a key={label} href={href} target="_blank" rel="noreferrer" className="flex flex-col items-center gap-1.5">
-                    <div className="grid h-11 w-11 place-items-center rounded-full border border-gray-200 bg-gray-50 text-gray-600 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
+                    <div className="grid h-11 w-11 place-items-center rounded-full border border-gray-200 bg-white text-gray-600 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
                       <Icon className="h-5 w-5" />
                     </div>
                     <span className="text-[10px] text-gray-400">{label}</span>
                   </a>
                 ) : (
                   <button key={label} onClick={onClick} className="flex flex-col items-center gap-1.5">
-                    <div className="grid h-11 w-11 place-items-center rounded-full border border-gray-200 bg-gray-50 text-gray-600 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
+                    <div className="grid h-11 w-11 place-items-center rounded-full border border-gray-200 bg-white text-gray-600 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
                       <Icon className="h-5 w-5" />
                     </div>
                     <span className="text-[10px] text-gray-400">{label}</span>
