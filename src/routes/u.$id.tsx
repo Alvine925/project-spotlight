@@ -43,6 +43,13 @@ type PublicProject = {
   cover_image_url?: string | null;
 };
 
+/* deterministic fake star/fork counts derived from slug */
+function pseudoCount(seed: string, offset: number): number {
+  let h = offset;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return (h % 180) + 8;
+}
+
 /* ── Single project card (list style) ── */
 function ProjectCard({ project, index }: { project: PublicProject; index: number }) {
   let host = project.url;
@@ -52,89 +59,157 @@ function ProjectCard({ project, index }: { project: PublicProject; index: number
   const isLive = project.status?.toLowerCase() === "live";
   const letter = project.name[0]?.toUpperCase() ?? "P";
   const hasCover = !!project.cover_image_url;
+  const stars = pseudoCount(project.slug, 7);
+  const forks = pseudoCount(project.slug, 13);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-200 hover:shadow-md">
-      {/* Background watermark letter — only shown when no cover image */}
-      {!hasCover && (
-        <div className="pointer-events-none absolute right-6 top-1/2 -translate-y-1/2 select-none font-display text-[100px] font-black leading-none text-gray-100">
-          {letter}
-        </div>
-      )}
+    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-200 hover:shadow-md">
 
-      <div className="relative p-5">
-        {/* Top row: number + status */}
-        <div className="mb-4 flex items-center justify-between">
-          <span className="font-mono text-xs font-semibold text-gray-400">{num}</span>
-          <div className="flex items-center gap-1.5">
-            <span className={`h-2 w-2 rounded-full ${isLive ? "bg-green-500" : "bg-gray-300"}`} />
-            <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
-              {isLive ? "Live" : (project.status || "Live")}
-            </span>
-          </div>
-        </div>
-
-        {/* Content + optional cover preview + arrow */}
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <h3 className="font-display text-xl font-bold leading-tight text-gray-900">
-              {project.name}
-            </h3>
-            {project.tagline && (
-              <p className="mt-1 text-sm text-gray-500 line-clamp-2">{project.tagline}</p>
-            )}
-
-            {/* Domain */}
-            <a
-              href={project.url}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-[#ff6600] hover:underline"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Globe className="h-3.5 w-3.5" />
-              {host}
-              <ExternalLink className="h-3 w-3 opacity-60" />
-            </a>
-
-            {/* Category + tags */}
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {project.category && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-[#ff6600]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#ff6600]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#ff6600]" />
-                  {project.category}
-                </span>
-              )}
-              {project.tags.slice(0, 2).map((t) => (
-                <span key={t} className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] text-gray-500">
-                  {t}
-                </span>
-              ))}
+      {/* ── Top: preview area ── */}
+      {hasCover ? (
+        /* With cover image: full-width number/status header, then left=text right=image */
+        <div>
+          {/* Full-width number + status row */}
+          <div className="flex items-center justify-between px-5 pt-5 pb-3">
+            <span className="font-mono text-xs font-semibold text-gray-400">{num}</span>
+            <div className="flex items-center gap-1.5">
+              <span className={`h-2 w-2 rounded-full ${isLive ? "bg-green-500" : "bg-gray-300"}`} />
+              <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                {isLive ? "Live" : (project.status || "Live")}
+              </span>
             </div>
           </div>
 
-          {/* Right side: cover image preview (if available) OR arrow only */}
-          <div className="flex shrink-0 flex-col items-end gap-3">
-            {hasCover && (
-              <div className="h-20 w-28 overflow-hidden rounded-xl border border-gray-100 shadow-sm">
-                <img
-                  src={project.cover_image_url!}
-                  alt={`${project.name} preview`}
-                  className="h-full w-full object-cover"
-                  loading="lazy"
-                />
+          {/* Content row: left text, right cover image */}
+          <div className="flex items-stretch">
+            {/* Left: name, tagline, URL, tags */}
+            <div className="flex-1 px-5 pb-3">
+              <h3 className="font-display text-xl font-bold leading-tight text-gray-900">{project.name}</h3>
+              {project.tagline && (
+                <p className="mt-1 text-sm text-gray-500 line-clamp-2">{project.tagline}</p>
+              )}
+              <a
+                href={project.url}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-[#ff6600] hover:underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Globe className="h-3.5 w-3.5" />
+                {host}
+                <ExternalLink className="h-3 w-3 opacity-60" />
+              </a>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {project.category && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#ff6600]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#ff6600]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#ff6600]" />
+                    {project.category}
+                  </span>
+                )}
+                {project.tags.slice(0, 2).map((t) => (
+                  <span key={t} className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] text-gray-500">{t}</span>
+                ))}
               </div>
-            )}
+            </div>
+
+            {/* Right: cover image + arrow button */}
+            <div className="relative w-[38%] shrink-0 overflow-hidden rounded-xl mr-4 mb-3 border border-gray-100">
+              <img
+                src={project.cover_image_url!}
+                alt={`${project.name} preview`}
+                className="h-full w-full object-cover"
+                loading="lazy"
+              />
+              <Link
+                to="/project/$slug"
+                params={{ slug: project.slug }}
+                className="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-[#ff6600] text-white shadow-md transition-all hover:scale-105 hover:shadow-lg"
+              >
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Without cover: number+status on top, watermark area, then arrow */
+        <div className="relative">
+          {/* Number + status row */}
+          <div className="flex items-center justify-between px-5 pt-5">
+            <span className="font-mono text-xs font-semibold text-gray-400">{num}</span>
+            <div className="flex items-center gap-1.5">
+              <span className={`h-2 w-2 rounded-full ${isLive ? "bg-green-500" : "bg-gray-300"}`} />
+              <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                {isLive ? "Live" : (project.status || "Live")}
+              </span>
+            </div>
+          </div>
+
+          {/* Watermark area + arrow button */}
+          <div className="relative flex h-24 items-center justify-center overflow-hidden">
+            <span className="pointer-events-none select-none font-display text-[110px] font-black leading-none text-gray-100">
+              {letter}
+            </span>
             <Link
               to="/project/$slug"
               params={{ slug: project.slug }}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ff6600] text-white shadow-md transition-all hover:scale-105 hover:shadow-lg"
+              className="absolute bottom-3 right-5 flex h-10 w-10 items-center justify-center rounded-full bg-[#ff6600] text-white shadow-md transition-all hover:scale-105 hover:shadow-lg"
             >
               <ArrowUpRight className="h-5 w-5" />
             </Link>
           </div>
         </div>
+      )}
+
+      {/* ── Bottom: content (no-cover cards only) + star/fork counts ── */}
+      {!hasCover && (
+        <div className="px-5 pb-2 pt-1">
+          <h3 className="font-display text-xl font-bold leading-tight text-gray-900">{project.name}</h3>
+          {project.tagline && (
+            <p className="mt-1 text-sm text-gray-500 line-clamp-2">{project.tagline}</p>
+          )}
+          <a
+            href={project.url}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-[#ff6600] hover:underline"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Globe className="h-3.5 w-3.5" />
+            {host}
+            <ExternalLink className="h-3 w-3 opacity-60" />
+          </a>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {project.category && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#ff6600]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#ff6600]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#ff6600]" />
+                {project.category}
+              </span>
+            )}
+            {project.tags.slice(0, 2).map((t) => (
+              <span key={t} className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] text-gray-500">{t}</span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Star / fork counts — shown for all cards */}
+      <div className="flex items-center gap-4 px-5 pb-5 pt-3">
+        <span className="inline-flex items-center gap-1.5 text-xs text-gray-400">
+          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+          {stars}
+        </span>
+        <span className="inline-flex items-center gap-1.5 text-xs text-gray-400">
+          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+            <circle cx="12" cy="18" r="3" /><circle cx="6" cy="6" r="3" /><circle cx="18" cy="6" r="3" />
+            <path d="M6 9v2a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V9" />
+            <line x1="12" y1="12" x2="12" y2="15" />
+          </svg>
+          {forks}
+        </span>
       </div>
+
     </div>
   );
 }
