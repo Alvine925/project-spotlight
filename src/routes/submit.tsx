@@ -37,6 +37,7 @@ function Submit() {
 
   const [url, setUrl] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
+  const [stage, setStage] = useState(0);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [extracted, setExtracted] = useState<Extracted | null>(null);
@@ -44,6 +45,14 @@ function Submit() {
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth", replace: true });
   }, [user, loading, navigate]);
+
+  useEffect(() => {
+    if (!analyzing) return;
+    setStage(0);
+    const t1 = setTimeout(() => setStage(1), 4000);
+    const t2 = setTimeout(() => setStage(2), 10000);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [analyzing]);
 
   const onAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,9 +150,12 @@ function Submit() {
             </button>
           </div>
           {analyzing && (
-            <p className="mt-3 text-xs text-muted-foreground">
-              Scraping the page, extracting metadata, and generating a cover image. This can take ~20s.
-            </p>
+            <div className="mt-5 space-y-2 rounded-xl border border-border/40 bg-background/40 p-4">
+              <StageRow active={stage >= 0} done={stage > 0} label="Scraping the page" />
+              <StageRow active={stage >= 1} done={stage > 1} label="Extracting project details with AI" />
+              <StageRow active={stage >= 2} done={false} label="Generating cover image" />
+              <p className="pt-1 text-[11px] text-muted-foreground">This usually takes 15–25 seconds.</p>
+            </div>
           )}
         </form>
 
@@ -230,3 +242,18 @@ function Submit() {
 }
 
 const inputCls = "w-full rounded-xl border border-border/60 bg-input/50 px-4 py-2.5 text-sm outline-none transition-smooth focus:border-primary/60";
+
+function StageRow({ active, done, label }: { active: boolean; done: boolean; label: string }) {
+  return (
+    <div className="flex items-center gap-2 text-xs">
+      {done ? (
+        <CheckCircle2 className="h-3.5 w-3.5 text-primary-glow" />
+      ) : active ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin text-primary-glow" />
+      ) : (
+        <div className="h-3.5 w-3.5 rounded-full border border-border/60" />
+      )}
+      <span className={done || active ? "text-foreground" : "text-muted-foreground"}>{label}</span>
+    </div>
+  );
+}
