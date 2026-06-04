@@ -113,5 +113,54 @@ export const analyzeProjectUrl = createServerFn({ method: "POST" })
     if (!argsStr) throw new Error("AI did not return structured metadata");
     const parsed = JSON.parse(argsStr) as Extracted;
 
-    return { ...parsed, url: data.url };
+    // 3) Generate a cover image and upload to the `covers` storage bucket
+    let cover_image_url: string | null = null;
+    try {
+      const imgRes = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-image",
+          messages: [
+            {
+              role: "user",
+              content: `Modern abstract cover image for a product named "${parsed.name}". Theme: ${parsed.tagline}. Style: minimal, vibrant gradient, soft geometric shapes, no text, 16:9 wide.`,
+            },
+          ],
+          modalities: ["image", "text"],
+        }),
+      });
+      if (imgRes.ok) {
+        const imgJson = (await imgRes.json()) as {
+          choices?: Array<{ message?: { images?: Array<{ image_url?: { url?: string } }> } }>;
+          data?: Array<{ b64_json?: string }>;
+        };
+        let b64 = imgJson.data?.[0]?.b64_json ?? null;
+        if (!b64) {
+          const dataUrl = imgJson.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+          if (dataUrl && dataUrl.startsWith("data:")) b64 = dataUrl.split(",")[1] ?? null;
+        }
+        if (b64) {
+          const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const filePath = `${userId}/${Date.now()}.png`;
+          const { error: upErr } = await supabaseAdmin.storage
+            .from("covers")
+            .upload(filePath, bytes, { contentType: "image/png", upsert: true });
+          if (!upErr) {
+            const { data: pub } = supabaseAdmin.storage.from("covers").getPublicUrl(filePath);
+            cover_image_url = pub.publicUrl;
+          } else {
+            console.error("cover upload failed", upErr);
+          }
+        }
+      } else {
+        console.error("image gen failed", imgRes.status, await imgRes.text().catch(() => ""));
+      }
+    } catch (e) {
+      console.error("cover image generation failed", e);
+    }
+
+    return { ...parsed, cover_image_url, url: data.url };
   });
+
