@@ -26,8 +26,10 @@ type Extracted = {
   what_it_does: string[];
   features: string[];
   use_cases: string[];
+  cover_image_url: string | null;
   url: string;
 };
+
 
 function Submit() {
   const { user, loading } = useAuth();
