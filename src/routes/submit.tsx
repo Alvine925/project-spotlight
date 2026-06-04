@@ -37,6 +37,7 @@ function Submit() {
 
   const [url, setUrl] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
+  const [stage, setStage] = useState(0);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [extracted, setExtracted] = useState<Extracted | null>(null);
@@ -44,6 +45,14 @@ function Submit() {
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth", replace: true });
   }, [user, loading, navigate]);
+
+  useEffect(() => {
+    if (!analyzing) return;
+    setStage(0);
+    const t1 = setTimeout(() => setStage(1), 4000);
+    const t2 = setTimeout(() => setStage(2), 10000);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [analyzing]);
 
   const onAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
