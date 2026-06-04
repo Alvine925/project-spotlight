@@ -64,7 +64,7 @@ function ProjectCard({ project, index }: { project: PublicProject; index: number
   const forks = pseudoCount(project.slug, 13);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-200 hover:shadow-md">
+    <div className="overflow-hidden rounded-2xl border border-gray-200 transition-all duration-200 hover:border-gray-300">
 
       {/* ── Top: preview area ── */}
       {hasCover ? (
@@ -294,7 +294,7 @@ function Profile() {
         </header>
 
         {/* ── Hero ── */}
-        <section className="relative overflow-hidden bg-white px-5 pb-5 pt-6">
+        <section className="relative overflow-hidden px-5 pb-5 pt-6">
           {/* Decorative floating 3-D-style blocks (top-right) */}
           <div className="pointer-events-none absolute right-4 top-3 select-none">
             <div className="relative h-28 w-28">
@@ -372,7 +372,7 @@ function Profile() {
         </section>
 
         {/* ── Tab bar ── */}
-        <div className="flex border-b border-gray-200 bg-white px-5">
+        <div className="flex border-b border-gray-200 px-5">
           {(["projects", "about"] as const).map((t) => (
             <button
               key={t}
@@ -394,7 +394,7 @@ function Profile() {
           {tab === "projects" ? (
             <div className="space-y-4">
               {allProjects.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center text-gray-400">
+                <div className="border border-dashed border-gray-200 py-16 rounded-2xl text-center text-gray-400">
                   <p className="text-sm">No public projects yet.</p>
                 </div>
               ) : (
@@ -402,10 +402,10 @@ function Profile() {
               )}
             </div>
           ) : (
-            <div className="space-y-4">
-              {/* Intro card */}
-              <div className="rounded-2xl bg-white p-6 shadow-sm">
-                <div className="flex items-center gap-2 mb-4">
+            <div className="divide-y divide-gray-200">
+              {/* Background */}
+              <div className="py-5">
+                <div className="flex items-center gap-2 mb-3">
                   <div className="h-1 w-5 rounded-full bg-[#ff6600]" />
                   <span className="text-[11px] font-bold uppercase tracking-widest text-[#ff6600]">Background</span>
                 </div>
@@ -416,9 +416,9 @@ function Profile() {
                 </p>
               </div>
 
-              {/* What I build card */}
-              <div className="rounded-2xl bg-white p-6 shadow-sm">
-                <div className="flex items-center gap-2 mb-4">
+              {/* What I Build */}
+              <div className="py-5">
+                <div className="flex items-center gap-2 mb-3">
                   <div className="h-1 w-5 rounded-full bg-[#ff6600]" />
                   <span className="text-[11px] font-bold uppercase tracking-widest text-[#ff6600]">What I Build</span>
                 </div>
@@ -435,9 +435,9 @@ function Profile() {
                 </ul>
               </div>
 
-              {/* Stats / highlights card */}
-              <div className="rounded-2xl bg-white p-6 shadow-sm">
-                <div className="flex items-center gap-2 mb-4">
+              {/* By the Numbers */}
+              <div className="py-5">
+                <div className="flex items-center gap-2 mb-3">
                   <div className="h-1 w-5 rounded-full bg-[#ff6600]" />
                   <span className="text-[11px] font-bold uppercase tracking-widest text-[#ff6600]">By the Numbers</span>
                 </div>
@@ -456,28 +456,27 @@ function Profile() {
               </div>
 
               {/* Closing note */}
-              <div className="rounded-2xl border border-dashed border-[#ff6600]/30 bg-[#ff6600]/5 p-5">
+              <div className="py-5">
                 <p className="text-sm leading-relaxed text-gray-600">
                   Interested in collaborating or just want to talk shop?{" "}
                   <span className="font-semibold text-[#ff6600]">Check out my projects above</span> — each one links directly to the live product.
                 </p>
+                {!data?.profile?.bio && (
+                  <p className="mt-3 text-[11px] text-gray-300 italic">
+                    This is a placeholder about page. Update your profile to personalise it.
+                  </p>
+                )}
               </div>
-
-              {!data?.profile?.bio && (
-                <p className="text-center text-[11px] text-gray-300 italic pb-2">
-                  This is a placeholder about page. Update your profile to personalise it.
-                </p>
-              )}
             </div>
           )}
         </div>
 
         {/* ── Share section ── */}
-        <div className="mx-4 mb-4 rounded-2xl bg-white p-5 shadow-sm">
+        <div className="border-t border-gray-200 px-5 py-5">
           <h3 className="font-display text-base font-bold text-gray-900">Share this profile</h3>
           <p className="mt-1 text-xs text-gray-400">Share your projects with the world.</p>
 
-          <div className="mt-4 flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 p-1 pl-3">
+          <div className="mt-4 flex items-center gap-2 rounded-xl border border-gray-200 bg-white p-1 pl-3">
             <span className="flex-1 truncate font-mono text-xs text-gray-500">
               {profileUrlClean}
             </span>
@@ -526,7 +525,7 @@ function Profile() {
                   rel="noreferrer"
                   className="flex flex-col items-center gap-1.5"
                 >
-                  <div className="grid h-11 w-11 place-items-center rounded-full border border-gray-200 bg-gray-50 text-gray-600 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
+                  <div className="grid h-11 w-11 place-items-center rounded-full border border-gray-200 bg-white text-gray-600 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
                     <Icon className="h-5 w-5" />
                   </div>
                   <span className="text-[10px] text-gray-400">{label}</span>
@@ -537,7 +536,7 @@ function Profile() {
                   onClick={onClick}
                   className="flex flex-col items-center gap-1.5"
                 >
-                  <div className="grid h-11 w-11 place-items-center rounded-full border border-gray-200 bg-gray-50 text-gray-600 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
+                  <div className="grid h-11 w-11 place-items-center rounded-full border border-gray-200 bg-white text-gray-600 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
                     <Icon className="h-5 w-5" />
                   </div>
                   <span className="text-[10px] text-gray-400">{label}</span>
