@@ -159,8 +159,9 @@ function Submit() {
             <div className="mt-5 space-y-2 rounded-xl border border-border/40 bg-background/40 p-4">
               <StageRow active={stage >= 0} done={stage > 0} label="Scraping the page" />
               <StageRow active={stage >= 1} done={stage > 1} label="Extracting project details with AI" />
-              <StageRow active={stage >= 2} done={false} label="Summarizing what the site does" />
-              <p className="pt-1 text-[11px] text-muted-foreground">This usually takes 10–20 seconds.</p>
+              <StageRow active={stage >= 2} done={false} label="Generating cover image" />
+              <p className="pt-1 text-[11px] text-muted-foreground">This usually takes 15–25 seconds.</p>
+
             </div>
           )}
         </form>
