@@ -73,13 +73,6 @@ function ProjectDetail() {
         className="relative overflow-hidden border-b border-border/40"
         style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
       >
-        {(project as unknown as { cover_image_url?: string | null }).cover_image_url && (
-          <img
-            src={(project as unknown as { cover_image_url: string }).cover_image_url}
-            alt={`${project.name} cover`}
-            className="absolute inset-0 h-full w-full object-cover opacity-50"
-          />
-        )}
         <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" />
         <div className="relative mx-auto max-w-5xl px-6 py-16">
           <div className="flex flex-col items-start gap-6 md:flex-row md:items-end md:justify-between">
@@ -158,7 +151,7 @@ function ProjectDetail() {
             {project.tech_stack?.length > 0 && (
               <div className="rounded-2xl border border-border/60 bg-gradient-card p-5 shadow-elegant">
                 <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <Tag className="h-3.5 w-3.5" /> Tech stack
+                  <Tag className="h-3.5 w-3.5" /> What it does
                 </h3>
                 <div className="flex flex-wrap gap-1.5">
                   {project.tech_stack.map((t: string) => (

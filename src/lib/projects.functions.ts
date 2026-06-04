@@ -10,7 +10,7 @@ type Extracted = {
   description: string;
   category: string;
   tags: string[];
-  tech_stack: string[];
+  what_it_does: string[];
   features: string[];
   use_cases: string[];
 };
@@ -18,13 +18,11 @@ type Extracted = {
 export const analyzeProjectUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => analyzeInput.parse(input))
-  .handler(async ({ data, context }): Promise<Extracted & { cover_image_url: string | null; url: string }> => {
+  .handler(async ({ data }): Promise<Extracted & { url: string }> => {
     const firecrawlKey = process.env.FIRECRAWL_API_KEY;
     const lovableKey = process.env.LOVABLE_API_KEY;
     if (!firecrawlKey) throw new Error("Firecrawl is not configured");
     if (!lovableKey) throw new Error("AI gateway is not configured");
-
-    const userId = (context as { userId: string }).userId;
 
     // 1) Scrape the URL via Firecrawl
     const scrapeRes = await fetch("https://api.firecrawl.dev/v2/scrape", {
@@ -89,11 +87,11 @@ export const analyzeProjectUrl = createServerFn({ method: "POST" })
                     enum: ["Productivity", "AI", "Developer Tools", "Finance", "Marketing", "Other"],
                   },
                   tags: { type: "array", items: { type: "string" } },
-                  tech_stack: { type: "array", items: { type: "string" } },
+                  what_it_does: { type: "array", items: { type: "string" } },
                   features: { type: "array", items: { type: "string" } },
                   use_cases: { type: "array", items: { type: "string" } },
                 },
-                required: ["name", "tagline", "description", "category", "tags", "tech_stack", "features", "use_cases"],
+                required: ["name", "tagline", "description", "category", "tags", "what_it_does", "features", "use_cases"],
               },
             },
           },
@@ -112,49 +110,5 @@ export const analyzeProjectUrl = createServerFn({ method: "POST" })
     if (!argsStr) throw new Error("AI did not return structured metadata");
     const parsed = JSON.parse(argsStr) as Extracted;
 
-    // 3) Generate a cover image and upload to storage
-    let cover_image_url: string | null = null;
-    try {
-      const imgRes = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${lovableKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash-image",
-          messages: [
-            {
-              role: "user",
-              content: `Modern abstract cover image for a product named "${parsed.name}". Theme: ${parsed.tagline}. Style: minimal, vibrant gradient, soft geometric shapes, no text, 16:9 wide.`,
-            },
-          ],
-          modalities: ["image", "text"],
-        }),
-      });
-      if (imgRes.ok) {
-        const imgJson = (await imgRes.json()) as { data?: Array<{ b64_json?: string }> };
-        const b64 = imgJson.data?.[0]?.b64_json;
-        if (b64) {
-          const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          const filePath = `${userId}/${Date.now()}.png`;
-          const { error: upErr } = await supabaseAdmin.storage
-            .from("covers")
-            .upload(filePath, bytes, { contentType: "image/png", upsert: true });
-          if (!upErr) {
-            const { data: pub } = supabaseAdmin.storage.from("covers").getPublicUrl(filePath);
-            cover_image_url = pub.publicUrl;
-          } else {
-            console.error("cover upload failed", upErr);
-          }
-        }
-      } else {
-        console.error("image gen failed", imgRes.status, await imgRes.text().catch(() => ""));
-      }
-    } catch (e) {
-      console.error("cover image generation failed", e);
-    }
-
-    return { ...parsed, cover_image_url, url: data.url };
+    return { ...parsed, url: data.url };
   });
