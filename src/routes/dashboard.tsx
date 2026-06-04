@@ -18,6 +18,8 @@ import {
   User,
   Copy,
   Link2,
+  Globe,
+  EyeOff,
 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
@@ -252,10 +254,19 @@ function Dashboard() {
     },
   });
 
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
   const onDelete = async (id: string) => {
     if (!confirm("Delete this project? This cannot be undone.")) return;
     await supabase.from("projects").delete().eq("id", id);
     refetch();
+  };
+
+  const onTogglePublish = async (id: string, current: boolean) => {
+    setTogglingId(id);
+    await supabase.from("projects").update({ published: !current }).eq("id", id);
+    await refetch();
+    setTogglingId(null);
   };
 
   if (loading || !user) {
@@ -330,7 +341,7 @@ function Dashboard() {
                     <th className="px-4 py-3 text-left">Project</th>
                     <th className="px-4 py-3 text-left">Category</th>
                     <th className="px-4 py-3 text-right">Views</th>
-                    <th className="px-4 py-3 text-left">Status</th>
+                    <th className="px-4 py-3 text-left">Visibility</th>
                     <th className="px-4 py-3"></th>
                   </tr>
                 </thead>
@@ -346,15 +357,32 @@ function Dashboard() {
                       <td className="px-4 py-3 text-muted-foreground">{p.category || "—"}</td>
                       <td className="px-4 py-3 text-right font-mono">{viewMap[p.id] || 0}</td>
                       <td className="px-4 py-3">
-                        <span
-                          className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${
+                        <button
+                          onClick={() => onTogglePublish(p.id, p.published)}
+                          disabled={togglingId === p.id}
+                          title={p.published ? "Click to unpublish" : "Click to publish"}
+                          className={`group inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium transition-all disabled:opacity-50 ${
                             p.published
-                              ? "bg-primary/15 text-primary-glow"
-                              : "bg-muted text-muted-foreground"
+                              ? "bg-primary/15 text-primary-glow hover:bg-destructive/15 hover:text-destructive"
+                              : "bg-muted text-muted-foreground hover:bg-primary/15 hover:text-primary-glow"
                           }`}
                         >
-                          {p.published ? p.status : "Draft"}
-                        </span>
+                          {togglingId === p.id ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : p.published ? (
+                            <>
+                              <Globe className="h-3 w-3" />
+                              <span className="group-hover:hidden">Published</span>
+                              <span className="hidden group-hover:inline">Unpublish</span>
+                            </>
+                          ) : (
+                            <>
+                              <EyeOff className="h-3 w-3" />
+                              <span className="group-hover:hidden">Draft</span>
+                              <span className="hidden group-hover:inline">Publish</span>
+                            </>
+                          )}
+                        </button>
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
