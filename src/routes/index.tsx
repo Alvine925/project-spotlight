@@ -13,10 +13,10 @@ const CATEGORIES = ["All", "Productivity", "AI", "Developer Tools", "Finance", "
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ProjectAtlas — AI-powered catalogue of developer projects" },
-      { name: "description", content: "Drop a URL. ProjectAtlas turns your project into a beautiful, searchable showcase — automatically." },
-      { property: "og:title", content: "ProjectAtlas" },
-      { property: "og:description", content: "An AI-powered catalogue for the projects developers actually build." },
+      { title: "ProjectAtlas — One link for all your projects" },
+      { name: "description", content: "Linktree for developers. Share every project you've built from a single, beautiful profile link." },
+      { property: "og:title", content: "ProjectAtlas — One link for all your projects" },
+      { property: "og:description", content: "Linktree for developers. Share every project you've built from a single profile link." },
     ],
   }),
   component: Home,
