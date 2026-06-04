@@ -192,22 +192,32 @@ function ProjectCard({ project, index }: { project: PublicProject; index: number
         </div>
       )}
 
-      {/* Star / fork counts — shown for all cards */}
-      <div className="flex items-center gap-4 px-5 pb-5 pt-3">
-        <span className="inline-flex items-center gap-1.5 text-xs text-gray-400">
-          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-          </svg>
-          {stars}
-        </span>
-        <span className="inline-flex items-center gap-1.5 text-xs text-gray-400">
-          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-            <circle cx="12" cy="18" r="3" /><circle cx="6" cy="6" r="3" /><circle cx="18" cy="6" r="3" />
-            <path d="M6 9v2a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V9" />
-            <line x1="12" y1="12" x2="12" y2="15" />
-          </svg>
-          {forks}
-        </span>
+      {/* Star / fork counts + View details link */}
+      <div className="flex items-center justify-between px-5 pb-5 pt-3">
+        <div className="flex items-center gap-4">
+          <span className="inline-flex items-center gap-1.5 text-xs text-gray-400">
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+            {stars}
+          </span>
+          <span className="inline-flex items-center gap-1.5 text-xs text-gray-400">
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+              <circle cx="12" cy="18" r="3" /><circle cx="6" cy="6" r="3" /><circle cx="18" cy="6" r="3" />
+              <path d="M6 9v2a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V9" />
+              <line x1="12" y1="12" x2="12" y2="15" />
+            </svg>
+            {forks}
+          </span>
+        </div>
+        <Link
+          to="/project/$slug"
+          params={{ slug: project.slug }}
+          className="inline-flex items-center gap-1 text-xs font-semibold text-[#ff6600] hover:underline"
+        >
+          View details
+          <ArrowUpRight className="h-3.5 w-3.5" />
+        </Link>
       </div>
 
     </div>
