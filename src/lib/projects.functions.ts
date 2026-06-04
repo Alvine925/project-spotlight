@@ -123,7 +123,13 @@ export const analyzeProjectUrl = createServerFn({ method: "POST" })
         },
         body: JSON.stringify({
           model: "google/gemini-2.5-flash-image",
-          prompt: `Modern abstract cover image for a product named "${parsed.name}". Theme: ${parsed.tagline}. Style: minimal, vibrant gradient, soft geometric shapes, no text, 16:9 wide.`,
+          messages: [
+            {
+              role: "user",
+              content: `Modern abstract cover image for a product named "${parsed.name}". Theme: ${parsed.tagline}. Style: minimal, vibrant gradient, soft geometric shapes, no text, 16:9 wide.`,
+            },
+          ],
+          modalities: ["image", "text"],
         }),
       });
       if (imgRes.ok) {
