@@ -48,12 +48,14 @@ type Profile = {
   id: string;
   display_name: string | null;
   avatar_url: string | null;
+  bio: string | null;
 };
 
 function EditProfileCard({ profile, userId }: { profile: Profile | null; userId: string }) {
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(profile?.display_name ?? "");
+  const [bio, setBio] = useState(profile?.bio ?? "");
 
   const [from, to] = pickPalette(userId);
   const displayName = profile?.display_name || `dev-${userId.slice(0, 6)}`;
@@ -64,11 +66,17 @@ function EditProfileCard({ profile, userId }: { profile: Profile | null; userId:
     .toUpperCase()
     .slice(0, 2);
 
+  const startEdit = () => {
+    setName(profile?.display_name ?? "");
+    setBio(profile?.bio ?? "");
+    setEditing(true);
+  };
+
   const { mutate: save, isPending } = useMutation({
-    mutationFn: async (newName: string) => {
+    mutationFn: async () => {
       const { error } = await supabase
         .from("profiles")
-        .update({ display_name: newName.trim() || null })
+        .update({ display_name: name.trim() || null, bio: bio.trim() || null })
         .eq("id", userId);
       if (error) throw error;
     },
@@ -81,6 +89,7 @@ function EditProfileCard({ profile, userId }: { profile: Profile | null; userId:
 
   const cancel = () => {
     setName(profile?.display_name ?? "");
+    setBio(profile?.bio ?? "");
     setEditing(false);
   };
 
@@ -92,7 +101,7 @@ function EditProfileCard({ profile, userId }: { profile: Profile | null; userId:
         </span>
         {!editing && (
           <button
-            onClick={() => { setName(profile?.display_name ?? ""); setEditing(true); }}
+            onClick={startEdit}
             className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-all"
           >
             <Pencil className="h-3 w-3" /> Edit
@@ -110,39 +119,49 @@ function EditProfileCard({ profile, userId }: { profile: Profile | null; userId:
 
         <div className="min-w-0 flex-1">
           {editing ? (
-            <div className="flex items-center gap-2">
+            <div className="space-y-2">
               <input
                 autoFocus
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") save(name);
-                  if (e.key === "Escape") cancel();
-                }}
-                placeholder="Your display name"
+                onKeyDown={(e) => { if (e.key === "Escape") cancel(); }}
+                placeholder="Display name"
                 maxLength={40}
-                className="flex-1 rounded-lg border border-border/60 bg-background/60 px-3 py-1.5 text-sm font-medium outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30"
+                className="w-full rounded-lg border border-border/60 bg-background/60 px-3 py-1.5 text-sm font-medium outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30"
               />
-              <button
-                onClick={() => save(name)}
-                disabled={isPending}
-                className="grid h-8 w-8 place-items-center rounded-lg bg-primary/20 text-primary-glow hover:bg-primary/30 transition-all disabled:opacity-50"
-                aria-label="Save"
-              >
-                {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
-              </button>
-              <button
-                onClick={cancel}
-                className="grid h-8 w-8 place-items-center rounded-lg bg-muted hover:bg-muted/80 text-muted-foreground transition-all"
-                aria-label="Cancel"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
+              <textarea
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Short bio — what you build, where you work…"
+                maxLength={160}
+                rows={2}
+                className="w-full resize-none rounded-lg border border-border/60 bg-background/60 px-3 py-1.5 text-sm text-muted-foreground outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30"
+              />
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => save()}
+                  disabled={isPending}
+                  className="flex items-center gap-1.5 rounded-lg bg-primary/20 px-3 py-1.5 text-xs font-medium text-primary-glow hover:bg-primary/30 transition-all disabled:opacity-50"
+                >
+                  {isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                  Save
+                </button>
+                <button
+                  onClick={cancel}
+                  className="rounded-lg px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           ) : (
             <div>
               <p className="font-display font-semibold truncate">{displayName}</p>
-              <p className="text-xs text-muted-foreground">@{userId.slice(0, 8)}</p>
+              {profile?.bio ? (
+                <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">{profile.bio}</p>
+              ) : (
+                <p className="text-xs text-muted-foreground">@{userId.slice(0, 8)}</p>
+              )}
             </div>
           )}
         </div>
@@ -220,7 +239,7 @@ function Dashboard() {
     queryFn: async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("id, display_name, avatar_url")
+        .select("id, display_name, avatar_url, bio")
         .eq("id", user!.id)
         .maybeSingle();
       return data as Profile | null;

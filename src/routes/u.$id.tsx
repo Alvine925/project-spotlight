@@ -127,7 +127,7 @@ function Profile() {
     queryKey: ["profile", id],
     queryFn: async () => {
       const [{ data: profile }, { data: projects }] = await Promise.all([
-        supabase.from("profiles").select("id, display_name, avatar_url, created_at").eq("id", id).maybeSingle(),
+        supabase.from("profiles").select("id, display_name, avatar_url, bio, created_at").eq("id", id).maybeSingle(),
         supabase.from("projects")
           .select("id, slug, name, tagline, url, category, tags, status, color_from, color_to, tech_stack")
           .eq("owner_id", id).eq("published", true).order("created_at", { ascending: false }),
@@ -205,6 +205,13 @@ function Profile() {
 
           {/* Handle */}
           <p className="mt-3 font-mono text-sm text-white/30">@{id.slice(0, 8)}</p>
+
+          {/* Bio */}
+          {data?.profile?.bio && (
+            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-white/50">
+              {data.profile.bio}
+            </p>
+          )}
 
           {/* Stats */}
           <div className="mt-6 inline-flex items-center gap-3 rounded-full border border-white/[0.06] bg-white/[0.03] px-5 py-2.5">
