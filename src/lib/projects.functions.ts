@@ -18,11 +18,14 @@ type Extracted = {
 export const analyzeProjectUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => analyzeInput.parse(input))
-  .handler(async ({ data }): Promise<Extracted & { url: string }> => {
+  .handler(async ({ data, context }): Promise<Extracted & { cover_image_url: string | null; url: string }> => {
     const firecrawlKey = process.env.FIRECRAWL_API_KEY;
     const lovableKey = process.env.LOVABLE_API_KEY;
     if (!firecrawlKey) throw new Error("Firecrawl is not configured");
     if (!lovableKey) throw new Error("AI gateway is not configured");
+
+    const userId = (context as { userId: string }).userId;
+
 
     // 1) Scrape the URL via Firecrawl
     const scrapeRes = await fetch("https://api.firecrawl.dev/v2/scrape", {
