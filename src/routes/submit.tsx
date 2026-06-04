@@ -85,7 +85,7 @@ function Submit() {
         cover_image_url: extracted.cover_image_url,
         status: "Live",
         published: true,
-      }).select("slug").single();
+      } as never).select("slug").single();
 
       if (error) throw error;
       navigate({ to: "/project/$slug", params: { slug: data.slug } });
