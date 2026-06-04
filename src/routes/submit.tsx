@@ -174,7 +174,16 @@ function Submit() {
 
         {extracted && (
           <div className="mt-8 space-y-5 rounded-2xl border border-border/60 bg-gradient-card p-6 shadow-elegant">
+            <div className="overflow-hidden rounded-xl border border-border/40">
+              {extracted.cover_image_url ? (
+                <img src={extracted.cover_image_url} alt="cover" className="aspect-[16/9] w-full object-cover" />
+              ) : (
+                <div className="aspect-[16/9] w-full bg-muted" />
+              )}
+            </div>
+
             <div className="space-y-2">
+
               <label className="block text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Name</label>
               <input value={extracted.name} onChange={(e) => setExtracted({ ...extracted, name: e.target.value })} className={inputCls} />
             </div>
