@@ -339,7 +339,8 @@ function Profile() {
             <div className="min-w-0">
               <h1 className="font-display text-xl font-bold leading-tight text-gray-900">{name}</h1>
               <p className="font-mono text-xs text-gray-400">@{id.slice(0, 8)}</p>
-              <p className="mt-2 text-sm leading-relaxed line-clamp-3 text-gray-500">
+              {/* Short tagline — kept to 2 lines max */}
+              <p className="mt-2 text-sm leading-relaxed line-clamp-2 text-gray-500">
                 {data?.profile?.bio || "Building cool things with code. Passionate about developer tools, AI and creating products."}
               </p>
             </div>
@@ -391,13 +392,71 @@ function Profile() {
               )}
             </div>
           ) : (
-            <div className="rounded-2xl bg-white p-6 shadow-sm">
-              <h2 className="font-display text-lg font-bold text-gray-900">About</h2>
-              <p className="mt-3 leading-relaxed text-gray-600">
-                {data?.profile?.bio || "Building cool things with code. Passionate about developer tools, AI and creating products."}
-              </p>
+            <div className="space-y-4">
+              {/* Intro card */}
+              <div className="rounded-2xl bg-white p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-1 w-5 rounded-full bg-[#ff6600]" />
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-[#ff6600]">Background</span>
+                </div>
+                <p className="leading-relaxed text-gray-700">
+                  {data?.profile?.bio
+                    ? data.profile.bio
+                    : `Hey, I'm ${name} — a developer who loves turning ideas into real, working products. I've been writing code for several years, building everything from weekend side-projects to production-grade tools used by real people.`}
+                </p>
+              </div>
+
+              {/* What I build card */}
+              <div className="rounded-2xl bg-white p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-1 w-5 rounded-full bg-[#ff6600]" />
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-[#ff6600]">What I Build</span>
+                </div>
+                <p className="leading-relaxed text-gray-700">
+                  I'm particularly drawn to developer tools, AI-powered products, and anything that removes friction from how people work. My projects tend to start as something I personally needed — and then I ship them for others to use too.
+                </p>
+                <ul className="mt-4 space-y-2">
+                  {["Developer tools & productivity apps", "AI-assisted workflows", "SaaS products & web apps", "Open-source utilities"].map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm text-gray-600">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#ff6600]" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Stats / highlights card */}
+              <div className="rounded-2xl bg-white p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-1 w-5 rounded-full bg-[#ff6600]" />
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-[#ff6600]">By the Numbers</span>
+                </div>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  {[
+                    { value: allProjects.length.toString(), label: "Projects shipped" },
+                    { value: `${categories.length || 1}+`, label: "Categories" },
+                    { value: "∞", label: "Ideas in progress" },
+                  ].map(({ value, label }) => (
+                    <div key={label} className="flex flex-col items-center gap-1">
+                      <span className="font-display text-2xl font-black text-gray-900">{value}</span>
+                      <span className="text-[11px] text-gray-400 leading-tight">{label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Closing note */}
+              <div className="rounded-2xl border border-dashed border-[#ff6600]/30 bg-[#ff6600]/5 p-5">
+                <p className="text-sm leading-relaxed text-gray-600">
+                  Interested in collaborating or just want to talk shop?{" "}
+                  <span className="font-semibold text-[#ff6600]">Check out my projects above</span> — each one links directly to the live product.
+                </p>
+              </div>
+
               {!data?.profile?.bio && (
-                <p className="mt-4 text-xs text-gray-300 italic">This is a placeholder bio. Update your profile to personalise it.</p>
+                <p className="text-center text-[11px] text-gray-300 italic pb-2">
+                  This is a placeholder about page. Update your profile to personalise it.
+                </p>
               )}
             </div>
           )}
