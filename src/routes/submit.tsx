@@ -96,8 +96,10 @@ function Submit() {
         tech_stack: extracted.what_it_does,
         features: extracted.features,
         use_cases: extracted.use_cases,
+        cover_image_url: extracted.cover_image_url,
         status: "Live",
         published: true,
+
       } as never).select("slug").single();
 
       if (error) throw error;
