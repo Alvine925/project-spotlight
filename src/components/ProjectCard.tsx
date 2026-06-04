@@ -12,7 +12,6 @@ export type ProjectRow = {
   tags: string[];
   status: string;
   created_at: string;
-  cover_image_url?: string | null;
 };
 
 function timeAgo(iso: string) {
@@ -42,17 +41,7 @@ export function ProjectCard({ project }: { project: ProjectRow }) {
         className="relative mb-5 h-32 overflow-hidden rounded-xl"
         style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
       >
-        {project.cover_image_url && (
-          <img
-            src={project.cover_image_url}
-            alt={`${project.name} cover`}
-            className="absolute inset-0 h-full w-full object-cover"
-            loading="lazy"
-          />
-        )}
-        {!project.cover_image_url && (
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.35),transparent_60%)]" />
-        )}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,color-mix(in_oklab,var(--color-foreground)_35%,transparent),transparent_60%)]" />
         <div className="absolute bottom-3 left-3 grid h-10 w-10 place-items-center rounded-lg bg-background/80 font-display font-bold backdrop-blur-md">
           {project.name[0]?.toUpperCase()}
         </div>
