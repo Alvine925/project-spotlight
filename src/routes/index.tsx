@@ -31,12 +31,12 @@ function Home() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select("id, slug, url, name, tagline, category, tags, status, created_at")
+        .select("*")
         .eq("published", true)
         .order("created_at", { ascending: false })
         .limit(60);
       if (error) throw error;
-      return (data ?? []) as ProjectRow[];
+      return ((data ?? []) as unknown) as ProjectRow[];
     },
   });
 
