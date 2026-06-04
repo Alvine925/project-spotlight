@@ -1,0 +1,10 @@
+
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS website TEXT,
+  ADD COLUMN IF NOT EXISTS github TEXT,
+  ADD COLUMN IF NOT EXISTS twitter TEXT,
+  ADD COLUMN IF NOT EXISTS linkedin TEXT,
+  ADD COLUMN IF NOT EXISTS location TEXT;
+
+ALTER TABLE public.projects
+  ADD COLUMN IF NOT EXISTS cover_image_url TEXT;

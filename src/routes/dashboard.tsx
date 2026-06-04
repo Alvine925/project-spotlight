@@ -1,10 +1,10 @@
+import React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { SiteNav } from "@/components/SiteNav";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth";
-import { pickPalette } from "@/lib/auth";
+import { useAuth, pickPalette } from "@/lib/auth";
 import {
   Eye,
   Plus,
@@ -20,6 +20,11 @@ import {
   Link2,
   Globe,
   EyeOff,
+  Github,
+  Twitter,
+  Linkedin,
+  MapPin,
+  ChevronUp,
 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
@@ -42,6 +47,11 @@ type MyProject = {
   published: boolean;
   category: string | null;
   created_at: string;
+  description: string | null;
+  tags: string[];
+  tech_stack: string[];
+  features: string[];
+  use_cases: string[];
 };
 
 type Profile = {
@@ -49,13 +59,28 @@ type Profile = {
   display_name: string | null;
   avatar_url: string | null;
   bio: string | null;
+  website: string | null;
+  github: string | null;
+  twitter: string | null;
+  linkedin: string | null;
+  location: string | null;
 };
+
+const CATEGORIES = ["Productivity", "AI", "Developer Tools", "Finance", "Marketing", "Other"];
+
+const inputCls =
+  "w-full rounded-lg border border-border/60 bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30";
 
 function EditProfileCard({ profile, userId }: { profile: Profile | null; userId: string }) {
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(profile?.display_name ?? "");
   const [bio, setBio] = useState(profile?.bio ?? "");
+  const [website, setWebsite] = useState(profile?.website ?? "");
+  const [github, setGithub] = useState(profile?.github ?? "");
+  const [twitter, setTwitter] = useState(profile?.twitter ?? "");
+  const [linkedin, setLinkedin] = useState(profile?.linkedin ?? "");
+  const [location, setLocation] = useState(profile?.location ?? "");
 
   const [from, to] = pickPalette(userId);
   const displayName = profile?.display_name || `dev-${userId.slice(0, 6)}`;
@@ -69,6 +94,11 @@ function EditProfileCard({ profile, userId }: { profile: Profile | null; userId:
   const startEdit = () => {
     setName(profile?.display_name ?? "");
     setBio(profile?.bio ?? "");
+    setWebsite(profile?.website ?? "");
+    setGithub(profile?.github ?? "");
+    setTwitter(profile?.twitter ?? "");
+    setLinkedin(profile?.linkedin ?? "");
+    setLocation(profile?.location ?? "");
     setEditing(true);
   };
 
@@ -76,7 +106,15 @@ function EditProfileCard({ profile, userId }: { profile: Profile | null; userId:
     mutationFn: async () => {
       const { error } = await supabase
         .from("profiles")
-        .update({ display_name: name.trim() || null, bio: bio.trim() || null })
+        .update({
+          display_name: name.trim() || null,
+          bio: bio.trim() || null,
+          website: website.trim() || null,
+          github: github.trim() || null,
+          twitter: twitter.trim() || null,
+          linkedin: linkedin.trim() || null,
+          location: location.trim() || null,
+        })
         .eq("id", userId);
       if (error) throw error;
     },
@@ -90,11 +128,16 @@ function EditProfileCard({ profile, userId }: { profile: Profile | null; userId:
   const cancel = () => {
     setName(profile?.display_name ?? "");
     setBio(profile?.bio ?? "");
+    setWebsite(profile?.website ?? "");
+    setGithub(profile?.github ?? "");
+    setTwitter(profile?.twitter ?? "");
+    setLinkedin(profile?.linkedin ?? "");
+    setLocation(profile?.location ?? "");
     setEditing(false);
   };
 
   return (
-    <div className="rounded-2xl border border-border/60 bg-gradient-card p-5 shadow-elegant">
+    <div className="rounded-2xl border border-border/60 bg-gradient-card p-5 shadow-elegant col-span-full sm:col-span-2">
       <div className="flex items-center justify-between mb-4">
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
           <User className="h-3.5 w-3.5" /> Profile
@@ -119,32 +162,105 @@ function EditProfileCard({ profile, userId }: { profile: Profile | null; userId:
 
         <div className="min-w-0 flex-1">
           {editing ? (
-            <div className="space-y-2">
-              <input
-                autoFocus
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Escape") cancel(); }}
-                placeholder="Display name"
-                maxLength={40}
-                className="w-full rounded-lg border border-border/60 bg-background/60 px-3 py-1.5 text-sm font-medium outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30"
-              />
-              <textarea
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                placeholder="Short bio — what you build, where you work…"
-                maxLength={160}
-                rows={2}
-                className="w-full resize-none rounded-lg border border-border/60 bg-background/60 px-3 py-1.5 text-sm text-muted-foreground outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30"
-              />
-              <div className="flex items-center gap-2">
+            <div className="space-y-3">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <div>
+                  <label className="block text-[11px] font-medium text-muted-foreground mb-1">Display name</label>
+                  <input
+                    autoFocus
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Display name"
+                    maxLength={40}
+                    className={inputCls}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-muted-foreground mb-1">Location</label>
+                  <div className="relative">
+                    <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <input
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      placeholder="San Francisco, CA"
+                      maxLength={80}
+                      className={`${inputCls} pl-8`}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-muted-foreground mb-1">Bio</label>
+                <textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  placeholder="Short bio — what you build, where you work…"
+                  maxLength={160}
+                  rows={2}
+                  className={`${inputCls} resize-none`}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <div>
+                  <label className="block text-[11px] font-medium text-muted-foreground mb-1">Website</label>
+                  <div className="relative">
+                    <Globe className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <input
+                      value={website}
+                      onChange={(e) => setWebsite(e.target.value)}
+                      placeholder="https://yoursite.com"
+                      className={`${inputCls} pl-8`}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-muted-foreground mb-1">GitHub</label>
+                  <div className="relative">
+                    <Github className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <input
+                      value={github}
+                      onChange={(e) => setGithub(e.target.value)}
+                      placeholder="username"
+                      className={`${inputCls} pl-8`}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-muted-foreground mb-1">Twitter / X</label>
+                  <div className="relative">
+                    <Twitter className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <input
+                      value={twitter}
+                      onChange={(e) => setTwitter(e.target.value)}
+                      placeholder="handle (no @)"
+                      className={`${inputCls} pl-8`}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-muted-foreground mb-1">LinkedIn</label>
+                  <div className="relative">
+                    <Linkedin className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <input
+                      value={linkedin}
+                      onChange={(e) => setLinkedin(e.target.value)}
+                      placeholder="linkedin.com/in/username"
+                      className={`${inputCls} pl-8`}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
                 <button
                   onClick={() => save()}
                   disabled={isPending}
                   className="flex items-center gap-1.5 rounded-lg bg-primary/20 px-3 py-1.5 text-xs font-medium text-primary-glow hover:bg-primary/30 transition-all disabled:opacity-50"
                 >
                   {isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
-                  Save
+                  Save profile
                 </button>
                 <button
                   onClick={cancel}
@@ -157,27 +273,182 @@ function EditProfileCard({ profile, userId }: { profile: Profile | null; userId:
           ) : (
             <div>
               <p className="font-display font-semibold truncate">{displayName}</p>
+              {profile?.location && (
+                <p className="mt-0.5 text-xs text-muted-foreground flex items-center gap-1">
+                  <MapPin className="h-3 w-3" /> {profile.location}
+                </p>
+              )}
               {profile?.bio ? (
                 <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">{profile.bio}</p>
               ) : (
                 <p className="text-xs text-muted-foreground">@{userId.slice(0, 8)}</p>
               )}
+              <div className="mt-2 flex flex-wrap gap-2">
+                {profile?.website && (
+                  <a href={profile.website} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary-glow hover:underline">
+                    <Globe className="h-3 w-3" /> Website
+                  </a>
+                )}
+                {profile?.github && (
+                  <a href={`https://github.com/${profile.github}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary-glow hover:underline">
+                    <Github className="h-3 w-3" /> GitHub
+                  </a>
+                )}
+                {profile?.twitter && (
+                  <a href={`https://x.com/${profile.twitter}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary-glow hover:underline">
+                    <Twitter className="h-3 w-3" /> Twitter
+                  </a>
+                )}
+                {profile?.linkedin && (
+                  <a href={profile.linkedin.startsWith("http") ? profile.linkedin : `https://${profile.linkedin}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary-glow hover:underline">
+                    <Linkedin className="h-3 w-3" /> LinkedIn
+                  </a>
+                )}
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      <div className="mt-4 pt-4 border-t border-border/40">
-        <Link
-          to="/u/$id"
-          params={{ id: userId }}
-          className="inline-flex items-center gap-1.5 text-xs text-primary-glow hover:underline"
-        >
-          <ExternalLink className="h-3 w-3" />
-          View public profile
-        </Link>
-      </div>
+      {!editing && (
+        <div className="mt-4 pt-4 border-t border-border/40">
+          <Link
+            to="/u/$id"
+            params={{ id: userId }}
+            className="inline-flex items-center gap-1.5 text-xs text-primary-glow hover:underline"
+          >
+            <ExternalLink className="h-3 w-3" />
+            View public profile
+          </Link>
+        </div>
+      )}
     </div>
+  );
+}
+
+function EditProjectRow({ project, onDone }: { project: MyProject; onDone: () => void }) {
+  const qc = useQueryClient();
+  const [name, setName] = useState(project.name);
+  const [tagline, setTagline] = useState(project.tagline ?? "");
+  const [description, setDescription] = useState(project.description ?? "");
+  const [url, setUrl] = useState(project.url);
+  const [category, setCategory] = useState(project.category ?? "");
+  const [status, setStatus] = useState(project.status);
+  const [tags, setTags] = useState(project.tags.join(", "));
+  const [techStack, setTechStack] = useState(project.tech_stack.join(", "));
+  const [features, setFeatures] = useState(project.features.join("\n"));
+  const [useCases, setUseCases] = useState(project.use_cases.join("\n"));
+
+  const { mutate: save, isPending } = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("projects")
+        .update({
+          name: name.trim(),
+          tagline: tagline.trim() || null,
+          description: description.trim() || null,
+          url: url.trim(),
+          category: category || null,
+          status,
+          tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+          tech_stack: techStack.split(",").map((t) => t.trim()).filter(Boolean),
+          features: features.split("\n").map((t) => t.trim()).filter(Boolean),
+          use_cases: useCases.split("\n").map((t) => t.trim()).filter(Boolean),
+        })
+        .eq("id", project.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-projects"] });
+      onDone();
+    },
+  });
+
+  const rowInput = `${inputCls} text-sm`;
+
+  return (
+    <tr>
+      <td colSpan={5} className="px-4 py-5 bg-muted/20 border-t border-border/40">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <Pencil className="h-3.5 w-3.5" /> Editing: {project.name}
+            </span>
+            <button onClick={onDone} className="rounded-lg p-1 text-muted-foreground hover:text-foreground">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <label className="block text-[11px] font-medium text-muted-foreground mb-1">Project name</label>
+              <input value={name} onChange={(e) => setName(e.target.value)} className={rowInput} />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-muted-foreground mb-1">Status</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className={rowInput}
+              >
+                {["Live", "Beta", "In Development", "Archived"].map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <label className="block text-[11px] font-medium text-muted-foreground mb-1">Tagline</label>
+              <input value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="One-line description" className={rowInput} />
+            </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <label className="block text-[11px] font-medium text-muted-foreground mb-1">URL</label>
+              <input value={url} onChange={(e) => setUrl(e.target.value)} type="url" className={rowInput} />
+            </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <label className="block text-[11px] font-medium text-muted-foreground mb-1">Description</label>
+              <textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Full description shown on the project page" className={`${rowInput} resize-none`} />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-muted-foreground mb-1">Category</label>
+              <select value={category} onChange={(e) => setCategory(e.target.value)} className={rowInput}>
+                <option value="">— None —</option>
+                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-[11px] font-medium text-muted-foreground mb-1">Tags <span className="text-muted-foreground/60">(comma-separated)</span></label>
+              <input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="react, saas, ai" className={rowInput} />
+            </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <label className="block text-[11px] font-medium text-muted-foreground mb-1">Tech Stack <span className="text-muted-foreground/60">(comma-separated)</span></label>
+              <input value={techStack} onChange={(e) => setTechStack(e.target.value)} placeholder="React, TypeScript, Supabase" className={rowInput} />
+            </div>
+            <div className="sm:col-span-1">
+              <label className="block text-[11px] font-medium text-muted-foreground mb-1">Features <span className="text-muted-foreground/60">(one per line)</span></label>
+              <textarea rows={4} value={features} onChange={(e) => setFeatures(e.target.value)} placeholder={"Real-time sync\nAI-powered search\nExport to CSV"} className={`${rowInput} resize-none`} />
+            </div>
+            <div className="sm:col-span-1">
+              <label className="block text-[11px] font-medium text-muted-foreground mb-1">Use Cases <span className="text-muted-foreground/60">(one per line)</span></label>
+              <textarea rows={4} value={useCases} onChange={(e) => setUseCases(e.target.value)} placeholder={"Manage team projects\nTrack client work\nPersonal task list"} className={`${rowInput} resize-none`} />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              onClick={() => save()}
+              disabled={isPending}
+              className="flex items-center gap-1.5 rounded-lg bg-primary/20 px-4 py-2 text-xs font-medium text-primary-glow hover:bg-primary/30 transition-all disabled:opacity-50"
+            >
+              {isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+              Save changes
+            </button>
+            <button onClick={onDone} className="rounded-lg px-4 py-2 text-xs text-muted-foreground hover:text-foreground transition-all">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </td>
+    </tr>
   );
 }
 
@@ -228,6 +499,7 @@ function ProfileLinkBanner({ userId }: { userId: string }) {
 function Dashboard() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth", replace: true });
@@ -239,7 +511,7 @@ function Dashboard() {
     queryFn: async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("id, display_name, avatar_url, bio")
+        .select("id, display_name, avatar_url, bio, website, github, twitter, linkedin, location")
         .eq("id", user!.id)
         .maybeSingle();
       return data as Profile | null;
@@ -252,7 +524,7 @@ function Dashboard() {
     queryFn: async () => {
       const { data: projects, error } = await supabase
         .from("projects")
-        .select("id, slug, name, tagline, url, status, published, category, created_at")
+        .select("id, slug, name, tagline, url, status, published, category, created_at, description, tags, tech_stack, features, use_cases")
         .eq("owner_id", user!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -366,64 +638,83 @@ function Dashboard() {
                 </thead>
                 <tbody>
                   {projects.map((p) => (
-                    <tr key={p.id} className="border-t border-border/40 transition-smooth hover:bg-muted/20">
-                      <td className="px-4 py-3">
-                        <Link to="/project/$slug" params={{ slug: p.slug }} className="block">
-                          <div className="font-medium">{p.name}</div>
-                          <div className="text-xs text-muted-foreground line-clamp-1">{p.tagline}</div>
-                        </Link>
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground">{p.category || "—"}</td>
-                      <td className="px-4 py-3 text-right font-mono">{viewMap[p.id] || 0}</td>
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => onTogglePublish(p.id, p.published)}
-                          disabled={togglingId === p.id}
-                          title={p.published ? "Click to unpublish" : "Click to publish"}
-                          className={`group inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium transition-all disabled:opacity-50 ${
-                            p.published
-                              ? "bg-primary/15 text-primary-glow hover:bg-destructive/15 hover:text-destructive"
-                              : "bg-muted text-muted-foreground hover:bg-primary/15 hover:text-primary-glow"
-                          }`}
-                        >
-                          {togglingId === p.id ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : p.published ? (
-                            <>
-                              <Globe className="h-3 w-3" />
-                              <span className="group-hover:hidden">Published</span>
-                              <span className="hidden group-hover:inline">Unpublish</span>
-                            </>
-                          ) : (
-                            <>
-                              <EyeOff className="h-3 w-3" />
-                              <span className="group-hover:hidden">Draft</span>
-                              <span className="hidden group-hover:inline">Publish</span>
-                            </>
-                          )}
-                        </button>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <a
-                            href={p.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="rounded p-1.5 text-muted-foreground hover:text-foreground"
-                            aria-label="Open"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </a>
+                    <React.Fragment key={p.id}>
+                      <tr className={`border-t border-border/40 transition-smooth hover:bg-muted/20 ${editingProjectId === p.id ? "bg-muted/30" : ""}`}>
+                        <td className="px-4 py-3">
+                          <Link to="/project/$slug" params={{ slug: p.slug }} className="block">
+                            <div className="font-medium">{p.name}</div>
+                            <div className="text-xs text-muted-foreground line-clamp-1">{p.tagline}</div>
+                          </Link>
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground">{p.category || "—"}</td>
+                        <td className="px-4 py-3 text-right font-mono">{viewMap[p.id] || 0}</td>
+                        <td className="px-4 py-3">
                           <button
-                            onClick={() => onDelete(p.id)}
-                            className="rounded p-1.5 text-muted-foreground hover:text-destructive"
-                            aria-label="Delete"
+                            onClick={() => onTogglePublish(p.id, p.published)}
+                            disabled={togglingId === p.id}
+                            title={p.published ? "Click to unpublish" : "Click to publish"}
+                            className={`group inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium transition-all disabled:opacity-50 ${
+                              p.published
+                                ? "bg-primary/15 text-primary-glow hover:bg-destructive/15 hover:text-destructive"
+                                : "bg-muted text-muted-foreground hover:bg-primary/15 hover:text-primary-glow"
+                            }`}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            {togglingId === p.id ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : p.published ? (
+                              <>
+                                <Globe className="h-3 w-3" />
+                                <span className="group-hover:hidden">Published</span>
+                                <span className="hidden group-hover:inline">Unpublish</span>
+                              </>
+                            ) : (
+                              <>
+                                <EyeOff className="h-3 w-3" />
+                                <span className="group-hover:hidden">Draft</span>
+                                <span className="hidden group-hover:inline">Publish</span>
+                              </>
+                            )}
                           </button>
-                        </div>
-                      </td>
-                    </tr>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => setEditingProjectId(editingProjectId === p.id ? null : p.id)}
+                              title="Edit project"
+                              className={`rounded p-1.5 transition-colors ${editingProjectId === p.id ? "text-primary-glow" : "text-muted-foreground hover:text-foreground"}`}
+                              aria-label="Edit"
+                            >
+                              {editingProjectId === p.id ? <ChevronUp className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+                            </button>
+                            <a
+                              href={p.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="rounded p-1.5 text-muted-foreground hover:text-foreground"
+                              aria-label="Open"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                            <button
+                              onClick={() => onDelete(p.id)}
+                              className="rounded p-1.5 text-muted-foreground hover:text-destructive"
+                              aria-label="Delete"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                      {editingProjectId === p.id && (
+                        <EditProjectRow
+                          project={p}
+                          onDone={() => {
+                            setEditingProjectId(null);
+                            refetch();
+                          }}
+                        />
+                      )}
+                    </React.Fragment>
                   ))}
                 </tbody>
               </table>

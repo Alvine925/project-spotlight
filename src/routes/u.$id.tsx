@@ -16,6 +16,8 @@ import {
   MoreHorizontal,
   QrCode,
   MessageCircle,
+  Github,
+  MapPin,
 } from "lucide-react";
 import { QrModal } from "@/components/QrModal";
 
@@ -42,6 +44,19 @@ type PublicProject = {
   color_to: string;
   tech_stack: string[];
   cover_image_url?: string | null;
+};
+
+type ProfileData = {
+  id: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  website: string | null;
+  github: string | null;
+  twitter: string | null;
+  linkedin: string | null;
+  location: string | null;
+  created_at: string;
 };
 
 /* deterministic fake star/fork counts derived from slug */
@@ -236,12 +251,16 @@ function Profile() {
     queryKey: ["profile", id],
     queryFn: async () => {
       const [{ data: profile }, { data: projects }] = await Promise.all([
-        supabase.from("profiles").select("id, display_name, avatar_url, bio, created_at").eq("id", id).maybeSingle(),
+        supabase
+          .from("profiles")
+          .select("id, display_name, avatar_url, bio, website, github, twitter, linkedin, location, created_at")
+          .eq("id", id)
+          .maybeSingle(),
         supabase.from("projects")
           .select("id, slug, name, tagline, url, category, tags, status, color_from, color_to, tech_stack, cover_image_url")
           .eq("owner_id", id).eq("published", true).order("created_at", { ascending: false }),
       ]);
-      return { profile, projects: (projects ?? []) as PublicProject[] };
+      return { profile: profile as ProfileData | null, projects: (projects ?? []) as PublicProject[] };
     },
   });
 
@@ -269,6 +288,9 @@ function Profile() {
       </div>
     );
   }
+
+  const profile = data?.profile;
+  const hasSocials = profile?.website || profile?.github || profile?.twitter || profile?.linkedin;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -298,7 +320,6 @@ function Profile() {
           {/* Decorative floating 3-D-style blocks (top-right) */}
           <div className="pointer-events-none absolute right-4 top-3 select-none">
             <div className="relative h-28 w-28">
-              {/* Big letter block */}
               <div
                 className="absolute right-0 top-1 flex h-16 w-16 items-center justify-center rounded-2xl font-display text-3xl font-black text-white shadow-xl"
                 style={{
@@ -309,7 +330,6 @@ function Profile() {
               >
                 {initials[0]}
               </div>
-              {/* Small AI block */}
               <div
                 className="absolute bottom-1 left-0 flex h-10 w-10 items-center justify-center rounded-xl font-display text-xs font-black text-white shadow-md"
                 style={{
@@ -320,7 +340,6 @@ function Profile() {
               >
                 AI
               </div>
-              {/* Tiny code block */}
               <div
                 className="absolute left-7 top-0 flex h-7 w-7 items-center justify-center rounded-lg bg-gray-800 font-display text-[10px] font-black text-white shadow-md"
                 style={{ transform: "rotate(15deg)" }}
@@ -332,9 +351,9 @@ function Profile() {
 
           {/* Avatar + info */}
           <div className="flex items-start gap-4 pr-32">
-            {data?.profile?.avatar_url ? (
+            {profile?.avatar_url ? (
               <img
-                src={data.profile.avatar_url}
+                src={profile.avatar_url}
                 alt={name}
                 className="h-14 w-14 shrink-0 rounded-2xl object-cover shadow-md"
               />
@@ -349,12 +368,62 @@ function Profile() {
             <div className="min-w-0">
               <h1 className="font-display text-xl font-bold leading-tight text-gray-900">{name}</h1>
               <p className="font-mono text-xs text-gray-400">@{id.slice(0, 8)}</p>
-              {/* Short tagline — kept to 2 lines max */}
-              <p className="mt-2 text-sm leading-relaxed line-clamp-2 text-gray-500">
-                {data?.profile?.bio || "Building cool things with code. Passionate about developer tools, AI and creating products."}
+              {profile?.location && (
+                <p className="mt-1 inline-flex items-center gap-1 text-xs text-gray-400">
+                  <MapPin className="h-3 w-3" /> {profile.location}
+                </p>
+              )}
+              <p className="mt-1.5 text-sm leading-relaxed line-clamp-2 text-gray-500">
+                {profile?.bio || "Building cool things with code. Passionate about developer tools, AI and creating products."}
               </p>
             </div>
           </div>
+
+          {/* Social links row */}
+          {hasSocials && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {profile?.website && (
+                <a
+                  href={profile.website}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600 transition-all hover:border-[#ff6600]/40 hover:text-[#ff6600]"
+                >
+                  <Globe className="h-3.5 w-3.5" /> Website
+                </a>
+              )}
+              {profile?.github && (
+                <a
+                  href={`https://github.com/${profile.github}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600 transition-all hover:border-[#ff6600]/40 hover:text-[#ff6600]"
+                >
+                  <Github className="h-3.5 w-3.5" /> {profile.github}
+                </a>
+              )}
+              {profile?.twitter && (
+                <a
+                  href={`https://x.com/${profile.twitter}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600 transition-all hover:border-[#ff6600]/40 hover:text-[#ff6600]"
+                >
+                  <Twitter className="h-3.5 w-3.5" /> @{profile.twitter}
+                </a>
+              )}
+              {profile?.linkedin && (
+                <a
+                  href={profile.linkedin.startsWith("http") ? profile.linkedin : `https://${profile.linkedin}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600 transition-all hover:border-[#ff6600]/40 hover:text-[#ff6600]"
+                >
+                  <Linkedin className="h-3.5 w-3.5" /> LinkedIn
+                </a>
+              )}
+            </div>
+          )}
 
           {/* Stats pills */}
           <div className="mt-4 flex flex-wrap gap-2">
@@ -410,30 +479,51 @@ function Profile() {
                   <span className="text-[11px] font-bold uppercase tracking-widest text-[#ff6600]">Background</span>
                 </div>
                 <p className="leading-relaxed text-gray-700">
-                  {data?.profile?.bio
-                    ? data.profile.bio
+                  {profile?.bio
+                    ? profile.bio
                     : `Hey, I'm ${name} — a developer who loves turning ideas into real, working products. I've been writing code for several years, building everything from weekend side-projects to production-grade tools used by real people.`}
                 </p>
               </div>
 
-              {/* What I Build */}
-              <div className="py-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="h-1 w-5 rounded-full bg-[#ff6600]" />
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-[#ff6600]">What I Build</span>
+              {/* Connect / Social links */}
+              {hasSocials && (
+                <div className="py-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="h-1 w-5 rounded-full bg-[#ff6600]" />
+                    <span className="text-[11px] font-bold uppercase tracking-widest text-[#ff6600]">Connect</span>
+                  </div>
+                  <div className="space-y-2">
+                    {profile?.website && (
+                      <a href={profile.website} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3 text-sm text-gray-700 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
+                        <Globe className="h-4 w-4 shrink-0" />
+                        <span className="truncate">{profile.website.replace(/^https?:\/\//, "")}</span>
+                        <ExternalLink className="ml-auto h-3.5 w-3.5 shrink-0 text-gray-300" />
+                      </a>
+                    )}
+                    {profile?.github && (
+                      <a href={`https://github.com/${profile.github}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3 text-sm text-gray-700 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
+                        <Github className="h-4 w-4 shrink-0" />
+                        <span>github.com/{profile.github}</span>
+                        <ExternalLink className="ml-auto h-3.5 w-3.5 shrink-0 text-gray-300" />
+                      </a>
+                    )}
+                    {profile?.twitter && (
+                      <a href={`https://x.com/${profile.twitter}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3 text-sm text-gray-700 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
+                        <Twitter className="h-4 w-4 shrink-0" />
+                        <span>@{profile.twitter}</span>
+                        <ExternalLink className="ml-auto h-3.5 w-3.5 shrink-0 text-gray-300" />
+                      </a>
+                    )}
+                    {profile?.linkedin && (
+                      <a href={profile.linkedin.startsWith("http") ? profile.linkedin : `https://${profile.linkedin}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3 text-sm text-gray-700 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
+                        <Linkedin className="h-4 w-4 shrink-0" />
+                        <span className="truncate">{profile.linkedin.replace(/^https?:\/\/(www\.)?/, "")}</span>
+                        <ExternalLink className="ml-auto h-3.5 w-3.5 shrink-0 text-gray-300" />
+                      </a>
+                    )}
+                  </div>
                 </div>
-                <p className="leading-relaxed text-gray-700">
-                  I'm particularly drawn to developer tools, AI-powered products, and anything that removes friction from how people work. My projects tend to start as something I personally needed — and then I ship them for others to use too.
-                </p>
-                <ul className="mt-4 space-y-2">
-                  {["Developer tools & productivity apps", "AI-assisted workflows", "SaaS products & web apps", "Open-source utilities"].map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-gray-600">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#ff6600]" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              )}
 
               {/* By the Numbers */}
               <div className="py-5">
@@ -461,7 +551,7 @@ function Profile() {
                   Interested in collaborating or just want to talk shop?{" "}
                   <span className="font-semibold text-[#ff6600]">Check out my projects above</span> — each one links directly to the live product.
                 </p>
-                {!data?.profile?.bio && (
+                {!profile?.bio && (
                   <p className="mt-3 text-[11px] text-gray-300 italic">
                     This is a placeholder about page. Update your profile to personalise it.
                   </p>
@@ -547,7 +637,7 @@ function Profile() {
         </div>
 
         {/* ── Footer ── */}
-        <footer className="py-6 text-center">
+        <footer className="py-6 text-center border-t border-gray-100">
           <div className="inline-flex items-center gap-2 text-xs text-gray-400">
             <div className="flex h-5 w-5 items-center justify-center rounded-md bg-[#ff6600]">
               <span className="text-[9px] font-black text-white">PA</span>
@@ -565,7 +655,7 @@ function Profile() {
       {showQr && (
         <QrModal
           url={profileUrl}
-          title={`${name}'s ProjectAtlas`}
+          title={name}
           onClose={() => setShowQr(false)}
         />
       )}

@@ -7,8 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
@@ -20,24 +18,39 @@ export type Database = {
           bio: string | null
           created_at: string
           display_name: string | null
+          github: string | null
           id: string
+          linkedin: string | null
+          location: string | null
+          twitter: string | null
           updated_at: string
+          website: string | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
           display_name?: string | null
+          github?: string | null
           id: string
+          linkedin?: string | null
+          location?: string | null
+          twitter?: string | null
           updated_at?: string
+          website?: string | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
           display_name?: string | null
+          github?: string | null
           id?: string
+          linkedin?: string | null
+          location?: string | null
+          twitter?: string | null
           updated_at?: string
+          website?: string | null
         }
         Relationships: []
       }
@@ -75,6 +88,7 @@ export type Database = {
           category: string | null
           color_from: string
           color_to: string
+          cover_image_url: string | null
           created_at: string
           description: string | null
           features: string[]
@@ -95,6 +109,7 @@ export type Database = {
           category?: string | null
           color_from?: string
           color_to?: string
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           features?: string[]
@@ -115,6 +130,7 @@ export type Database = {
           category?: string | null
           color_from?: string
           color_to?: string
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           features?: string[]
@@ -265,9 +281,3 @@ export type CompositeTypes<
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
-
-export const Constants = {
-  public: {
-    Enums: {},
-  },
-} as const
