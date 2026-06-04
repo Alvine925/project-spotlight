@@ -8,6 +8,7 @@ import {
   MoreHorizontal, Twitter, Linkedin, Link2, QrCode, MessageCircle,
   Calendar,
 } from "lucide-react";
+import { QrModal } from "@/components/QrModal";
 
 export const Route = createFileRoute("/project/$slug")({
   head: () => ({
@@ -56,6 +57,7 @@ function ProjectDetail() {
   const { slug } = Route.useParams();
   const router = useRouter();
   const [copied, setCopied] = useState(false);
+  const [showQr, setShowQr] = useState(false);
 
   const { data: project, isLoading, error } = useQuery({
     queryKey: ["project", slug],
@@ -118,9 +120,7 @@ function ProjectDetail() {
     });
   };
 
-  const openQr = () => {
-    window.open(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(projectUrl)}`, "_blank");
-  };
+  const openQr = () => setShowQr(true);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -428,6 +428,14 @@ function ProjectDetail() {
         </footer>
 
       </div>
+
+      {showQr && (
+        <QrModal
+          url={projectUrl}
+          title={project.name}
+          onClose={() => setShowQr(false)}
+        />
+      )}
     </div>
   );
 }

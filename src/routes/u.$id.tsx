@@ -17,6 +17,7 @@ import {
   QrCode,
   MessageCircle,
 } from "lucide-react";
+import { QrModal } from "@/components/QrModal";
 
 export const Route = createFileRoute("/u/$id")({
   head: ({ params }) => ({
@@ -229,6 +230,7 @@ function Profile() {
   const { id } = Route.useParams();
   const [copied, setCopied] = useState(false);
   const [tab, setTab] = useState<"projects" | "about">("projects");
+  const [showQr, setShowQr] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["profile", id],
@@ -258,9 +260,7 @@ function Profile() {
     });
   };
 
-  const openQr = () => {
-    window.open(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(profileUrl)}`, "_blank");
-  };
+  const openQr = () => setShowQr(true);
 
   if (isLoading) {
     return (
@@ -562,6 +562,14 @@ function Profile() {
         </footer>
 
       </div>
+
+      {showQr && (
+        <QrModal
+          url={profileUrl}
+          title={`${name}'s ProjectAtlas`}
+          onClose={() => setShowQr(false)}
+        />
+      )}
     </div>
   );
 }
