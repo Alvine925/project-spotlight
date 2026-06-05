@@ -116,9 +116,10 @@ function Home() {
       <section className="mx-auto max-w-7xl px-6 py-20">
         <div className="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <h2 className="font-display text-3xl font-semibold md:text-4xl">Discover projects</h2>
-            <p className="mt-2 text-muted-foreground">A growing catalogue of indie builds, AI tools, and weekend experiments.</p>
+            <h2 className="font-display text-3xl font-semibold md:text-4xl">Discover work</h2>
+            <p className="mt-2 text-muted-foreground">A growing catalogue of projects, portfolios, and side-builds from freelancers and creators.</p>
           </div>
+
           <div className="relative w-full md:w-80">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
