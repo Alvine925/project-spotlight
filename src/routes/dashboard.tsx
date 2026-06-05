@@ -3,8 +3,11 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { SiteNav } from "@/components/SiteNav";
+import { ProfileTypeOnboarding } from "@/components/ProfileTypeOnboarding";
+import { ProfileItemsManager } from "@/components/ProfileItemsManager";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, pickPalette } from "@/lib/auth";
+
 import {
   Eye,
   Plus,
