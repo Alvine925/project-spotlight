@@ -7,6 +7,8 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
@@ -16,7 +18,6 @@ export type Database = {
         Row: {
           about: string | null
           avatar_url: string | null
-          bio: string | null
           created_at: string
           display_name: string | null
           github: string | null
@@ -30,7 +31,6 @@ export type Database = {
         Insert: {
           about?: string | null
           avatar_url?: string | null
-          bio?: string | null
           created_at?: string
           display_name?: string | null
           github?: string | null
@@ -44,7 +44,6 @@ export type Database = {
         Update: {
           about?: string | null
           avatar_url?: string | null
-          bio?: string | null
           created_at?: string
           display_name?: string | null
           github?: string | null
@@ -59,19 +58,19 @@ export type Database = {
       }
       project_likes: {
         Row: {
-          created_at: string
+          created_at: string | null
           id: string
           project_id: string
           visitor_id: string
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           id?: string
           project_id: string
           visitor_id: string
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           id?: string
           project_id?: string
           visitor_id?: string
@@ -88,19 +87,19 @@ export type Database = {
       }
       project_shares: {
         Row: {
-          created_at: string
+          created_at: string | null
           id: string
           platform: string | null
           project_id: string
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           id?: string
           platform?: string | null
           project_id: string
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           id?: string
           platform?: string | null
           project_id?: string
@@ -152,6 +151,7 @@ export type Database = {
           cover_image_url: string | null
           created_at: string
           description: string | null
+          detail_image_urls: string[]
           documentation_url: string | null
           features: string[]
           gallery_images: string[]
@@ -177,6 +177,7 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
+          detail_image_urls?: string[]
           documentation_url?: string | null
           features?: string[]
           gallery_images?: string[]
@@ -202,6 +203,7 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
+          detail_image_urls?: string[]
           documentation_url?: string | null
           features?: string[]
           gallery_images?: string[]
@@ -354,3 +356,9 @@ export type CompositeTypes<
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const

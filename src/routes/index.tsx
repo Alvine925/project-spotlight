@@ -12,10 +12,11 @@ const CATEGORIES = ["All", "Productivity", "AI", "Developer Tools", "Finance", "
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ProjectAtlas — One link for all your projects" },
-      { name: "description", content: "Linktree for developers. Share every project you've built from a single, beautiful profile link." },
-      { property: "og:title", content: "ProjectAtlas — One link for all your projects" },
-      { property: "og:description", content: "Linktree for developers. Share every project you've built from a single profile link." },
+      { title: "ProjectAtlas — One link for all your work" },
+      { name: "description", content: "The link-in-bio for builders. Freelancers, developers, designers, and creators — showcase every project, skill, and qualification from a single beautiful link." },
+      { property: "og:title", content: "ProjectAtlas — One link for all your work" },
+      { property: "og:description", content: "Freelancers, developers, and creators — showcase every project and skill from a single link." },
+
     ],
   }),
   component: Home,
@@ -63,14 +64,14 @@ function Home() {
           <div className="mx-auto max-w-3xl text-center">
             <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs text-primary-glow backdrop-blur-md">
               <Sparkles className="h-3.5 w-3.5" />
-              Linktree — but for projects
+              Link-in-bio — for everything you've built
             </div>
             <h1 className="font-display text-5xl font-bold leading-[1.05] tracking-tight md:text-7xl">
               One link.<br />
-              <span className="text-gradient">All your projects.</span>
+              <span className="text-gradient">All your work.</span>
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-base text-muted-foreground md:text-lg">
-              ProjectAtlas gives every developer a shareable profile that showcases every side-project, SaaS, and weekend build — in one place.
+              For freelancers, developers, designers, and creators. ProjectAtlas turns every project, skill, and qualification you've built into a single shareable profile.
             </p>
 
             <div className="mt-10 flex justify-center">
@@ -79,9 +80,10 @@ function Home() {
 
             <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5"><Globe className="h-3.5 w-3.5 text-primary-glow" /> Your own profile page</span>
-              <span className="inline-flex items-center gap-1.5"><Brain className="h-3.5 w-3.5 text-primary-glow" /> Unlimited project links</span>
+              <span className="inline-flex items-center gap-1.5"><Brain className="h-3.5 w-3.5 text-primary-glow" /> Projects, skills & qualifications</span>
               <span className="inline-flex items-center gap-1.5"><Radar className="h-3.5 w-3.5 text-primary-glow" /> Built-in click analytics</span>
             </div>
+
           </div>
         </div>
       </section>
@@ -90,13 +92,14 @@ function Home() {
         <div className="mx-auto max-w-7xl px-6 py-20">
           <div className="mx-auto mb-12 max-w-2xl text-center">
             <h2 className="font-display text-3xl font-semibold md:text-4xl">How it works</h2>
-            <p className="mt-3 text-muted-foreground">Build your developer profile in minutes — no portfolio site required.</p>
+            <p className="mt-3 text-muted-foreground">Build your profile in minutes — no portfolio site required.</p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {[
-              { icon: Globe, title: "1. Add your projects", body: "Paste a URL for each project — landing pages, repos, demos, anything." },
-              { icon: Brain, title: "2. Get your profile link", body: "Every developer gets a public profile page listing all their projects." },
-              { icon: Layers, title: "3. Share one link", body: "Drop it in your bio, resume, or pitch — track clicks and views per project." },
+              { icon: Globe, title: "1. Add your work", body: "Paste a URL for any project, case study, repo, demo, or portfolio piece." },
+              { icon: Brain, title: "2. Get your profile link", body: "Get a public page showcasing your projects, skills, and qualifications." },
+              { icon: Layers, title: "3. Share one link", body: "Drop it in your bio, resume, or proposals — track views and clicks." },
+
             ].map((s) => (
               <div key={s.title} className="rounded-2xl border border-border/60 bg-gradient-card p-6 shadow-elegant transition-smooth hover:border-primary/40">
                 <div className="mb-4 grid h-10 w-10 place-items-center rounded-lg bg-gradient-primary shadow-glow">
@@ -113,9 +116,10 @@ function Home() {
       <section className="mx-auto max-w-7xl px-6 py-20">
         <div className="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <h2 className="font-display text-3xl font-semibold md:text-4xl">Discover projects</h2>
-            <p className="mt-2 text-muted-foreground">A growing catalogue of indie builds, AI tools, and weekend experiments.</p>
+            <h2 className="font-display text-3xl font-semibold md:text-4xl">Discover work</h2>
+            <p className="mt-2 text-muted-foreground">A growing catalogue of projects, portfolios, and side-builds from freelancers and creators.</p>
           </div>
+
           <div className="relative w-full md:w-80">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
@@ -166,7 +170,7 @@ function Home() {
       </section>
 
       <footer className="border-t border-border/40 py-10 text-center text-xs text-muted-foreground">
-        ProjectAtlas · An AI-powered home for the projects developers actually build.
+        ProjectAtlas · One link for every project, skill, and qualification you've built.
       </footer>
     </div>
   );
