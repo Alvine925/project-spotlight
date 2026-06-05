@@ -64,14 +64,14 @@ function Home() {
           <div className="mx-auto max-w-3xl text-center">
             <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs text-primary-glow backdrop-blur-md">
               <Sparkles className="h-3.5 w-3.5" />
-              Linktree — but for projects
+              Link-in-bio — for everything you've built
             </div>
             <h1 className="font-display text-5xl font-bold leading-[1.05] tracking-tight md:text-7xl">
               One link.<br />
-              <span className="text-gradient">All your projects.</span>
+              <span className="text-gradient">All your work.</span>
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-base text-muted-foreground md:text-lg">
-              ProjectAtlas gives every developer a shareable profile that showcases every side-project, SaaS, and weekend build — in one place.
+              For freelancers, developers, designers, and creators. ProjectAtlas turns every project, skill, and qualification you've built into a single shareable profile.
             </p>
 
             <div className="mt-10 flex justify-center">
@@ -80,9 +80,10 @@ function Home() {
 
             <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5"><Globe className="h-3.5 w-3.5 text-primary-glow" /> Your own profile page</span>
-              <span className="inline-flex items-center gap-1.5"><Brain className="h-3.5 w-3.5 text-primary-glow" /> Unlimited project links</span>
+              <span className="inline-flex items-center gap-1.5"><Brain className="h-3.5 w-3.5 text-primary-glow" /> Projects, skills & qualifications</span>
               <span className="inline-flex items-center gap-1.5"><Radar className="h-3.5 w-3.5 text-primary-glow" /> Built-in click analytics</span>
             </div>
+
           </div>
         </div>
       </section>
