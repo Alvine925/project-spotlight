@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, slugify } from "@/lib/auth";
 import { analyzeProjectUrl } from "@/lib/projects.functions";
+import { CoverUploader, GalleryUploader } from "@/components/MediaUploader";
 import { X, Loader2, CheckCircle2, Wand2, PenLine, RefreshCw, ArrowRight } from "lucide-react";
 
 const CATEGORIES = ["App", "Website", "AI Tool", "Design", "Photography", "Branding", "Writing", "Architecture", "Video", "Marketing", "Other"];
@@ -35,13 +36,12 @@ type Extracted = {
 type Manual = {
   url: string; name: string; tagline: string; description: string;
   category: string; tags: string; tech_stack: string; features: string;
-  use_cases: string; cover_image_url: string; status: string;
+  use_cases: string; status: string;
 };
 
 const EMPTY_MANUAL: Manual = {
   url: "", name: "", tagline: "", description: "", category: "",
-  tags: "", tech_stack: "", features: "", use_cases: "",
-  cover_image_url: "", status: "Live",
+  tags: "", tech_stack: "", features: "", use_cases: "", status: "Live",
 };
 
 export function AddWorkModal({ onClose, onSuccess }: {
@@ -53,16 +53,22 @@ export function AddWorkModal({ onClose, onSuccess }: {
 
   const [mode, setMode] = useState<"auto" | "manual">("auto");
 
+  /* ── Auto mode ── */
   const [url, setUrl] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
   const [stage, setStage] = useState(0);
   const [extracted, setExtracted] = useState<Extracted | null>(null);
+  const [autoCover, setAutoCover] = useState<string | null>(null);
 
+  /* ── Manual mode ── */
   const [manual, setManual] = useState<Manual>(EMPTY_MANUAL);
+  const [manualCover, setManualCover] = useState<string | null>(null);
   const setM = (k: keyof Manual) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
       setManual((prev) => ({ ...prev, [k]: e.target.value }));
 
+  /* ── Shared ── */
+  const [gallery, setGallery] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -75,9 +81,15 @@ export function AddWorkModal({ onClose, onSuccess }: {
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [analyzing]);
 
+  /* When AI finishes, seed autoCover from extracted URL */
+  useEffect(() => {
+    if (extracted?.cover_image_url) setAutoCover(extracted.cover_image_url);
+  }, [extracted?.cover_image_url]);
+
   const runAnalyze = async () => {
     setErr(null);
     setExtracted(null);
+    setAutoCover(null);
     setAnalyzing(true);
     try {
       const data = await analyze({ data: { url } });
@@ -94,9 +106,7 @@ export function AddWorkModal({ onClose, onSuccess }: {
     setErr(null);
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from("projects")
-        .insert(fields as never);
+      const { error } = await supabase.from("projects").insert(fields as never);
       if (error) throw error;
       setDone(true);
       setTimeout(() => { onSuccess(); onClose(); }, 1200);
@@ -118,7 +128,8 @@ export function AddWorkModal({ onClose, onSuccess }: {
       description: extracted.description, category: extracted.category,
       tags: extracted.tags, tech_stack: extracted.what_it_does,
       features: extracted.features, use_cases: extracted.use_cases,
-      cover_image_url: extracted.cover_image_url,
+      cover_image_url: autoCover ?? extracted.cover_image_url,
+      gallery_images: gallery,
       status: "Live", published: true,
     });
   };
@@ -134,7 +145,8 @@ export function AddWorkModal({ onClose, onSuccess }: {
       description: manual.description, category: manual.category,
       tags: splitTrim(manual.tags), tech_stack: splitTrim(manual.tech_stack),
       features: splitLines(manual.features), use_cases: splitLines(manual.use_cases),
-      cover_image_url: manual.cover_image_url || null,
+      cover_image_url: manualCover,
+      gallery_images: gallery,
       status: manual.status, published: true,
     });
   };
@@ -142,10 +154,7 @@ export function AddWorkModal({ onClose, onSuccess }: {
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
       {/* Drawer */}
       <div className="fixed inset-y-0 right-0 z-50 flex w-full max-w-xl flex-col bg-white shadow-2xl">
@@ -155,17 +164,14 @@ export function AddWorkModal({ onClose, onSuccess }: {
             <h2 className="font-display text-lg font-bold text-gray-900">Add work</h2>
             <p className="text-xs text-gray-400">Paste a URL for instant AI fill, or enter details manually.</p>
           </div>
-          <button
-            onClick={onClose}
-            className="rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
-          >
+          <button onClick={onClose} className="rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700">
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        {/* Success state */}
+        {/* Success */}
         {done && (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center px-6">
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
             <CheckCircle2 className="h-10 w-10 text-[#ff6600]" />
             <p className="font-display text-lg font-bold text-gray-900">Added!</p>
             <p className="text-sm text-gray-400">Your work has been published to your profile.</p>
@@ -177,44 +183,28 @@ export function AddWorkModal({ onClose, onSuccess }: {
 
             {/* Mode toggle */}
             <div className="flex rounded-xl border border-gray-200 bg-gray-50 p-1">
-              <button
-                type="button"
-                onClick={() => setMode("auto")}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-sm font-semibold transition-colors ${mode === "auto" ? "bg-white text-gray-900 shadow-sm" : "text-gray-400 hover:text-gray-700"}`}
-              >
-                <Wand2 className="h-4 w-4" /> AI Fill
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode("manual")}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-sm font-semibold transition-colors ${mode === "manual" ? "bg-white text-gray-900 shadow-sm" : "text-gray-400 hover:text-gray-700"}`}
-              >
-                <PenLine className="h-4 w-4" /> Manual
-              </button>
+              {([["auto", Wand2, "AI Fill"], ["manual", PenLine, "Manual"]] as const).map(([m, Icon, label]) => (
+                <button key={m} type="button" onClick={() => setMode(m)}
+                  className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-sm font-semibold transition-colors ${mode === m ? "bg-white text-gray-900 shadow-sm" : "text-gray-400 hover:text-gray-700"}`}>
+                  <Icon className="h-4 w-4" /> {label}
+                </button>
+              ))}
             </div>
 
-            {err && (
-              <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{err}</div>
-            )}
+            {err && <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{err}</div>}
 
-            {/* ── AUTO MODE ── */}
+            {/* ────────── AUTO MODE ────────── */}
             {mode === "auto" && (
               <div className="space-y-4">
                 <div className="flex gap-2">
-                  <input
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
+                  <input value={url} onChange={(e) => setUrl(e.target.value)}
                     placeholder="https://yourproject.com"
                     className={inputCls + " flex-1"}
                     onKeyDown={(e) => e.key === "Enter" && !analyzing && url && runAnalyze()}
                     disabled={analyzing}
                   />
-                  <button
-                    type="button"
-                    onClick={runAnalyze}
-                    disabled={analyzing || !url}
-                    className="flex items-center gap-2 rounded-lg bg-[#ff6600] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#e55a00] disabled:opacity-50"
-                  >
+                  <button type="button" onClick={runAnalyze} disabled={analyzing || !url}
+                    className="flex items-center gap-2 rounded-lg bg-[#ff6600] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#e55a00] disabled:opacity-50">
                     {analyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
                     Analyze
                   </button>
@@ -224,13 +214,9 @@ export function AddWorkModal({ onClose, onSuccess }: {
                   <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 space-y-2.5">
                     {["Fetching page content…", "Running AI analysis…", "Building your project page…"].map((label, i) => (
                       <div key={i} className="flex items-center gap-2.5 text-sm">
-                        {stage > i ? (
-                          <CheckCircle2 className="h-4 w-4 text-[#ff6600]" />
-                        ) : stage === i ? (
-                          <Loader2 className="h-4 w-4 animate-spin text-[#ff6600]" />
-                        ) : (
-                          <div className="h-4 w-4 rounded-full border-2 border-gray-200" />
-                        )}
+                        {stage > i ? <CheckCircle2 className="h-4 w-4 text-[#ff6600]" />
+                          : stage === i ? <Loader2 className="h-4 w-4 animate-spin text-[#ff6600]" />
+                          : <div className="h-4 w-4 rounded-full border-2 border-gray-200" />}
                         <span className={stage >= i ? "text-gray-800" : "text-gray-400"}>{label}</span>
                       </div>
                     ))}
@@ -239,30 +225,23 @@ export function AddWorkModal({ onClose, onSuccess }: {
 
                 {extracted && (
                   <div className="space-y-4">
+                    {/* Summary pill */}
                     <div className="rounded-xl border border-[#ff6600]/20 bg-[#ff6600]/5 p-4">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <p className="font-display text-sm font-bold text-gray-900">{extracted.name}</p>
-                          {extracted.tagline && (
-                            <p className="mt-0.5 text-xs text-gray-500 line-clamp-2">{extracted.tagline}</p>
-                          )}
+                          {extracted.tagline && <p className="mt-0.5 text-xs text-gray-500 line-clamp-2">{extracted.tagline}</p>}
                           <div className="mt-2 flex flex-wrap gap-1.5">
                             {extracted.category && (
-                              <span className="rounded-full bg-[#ff6600]/10 px-2 py-0.5 text-[10px] font-semibold text-[#ff6600]">
-                                {extracted.category}
-                              </span>
+                              <span className="rounded-full bg-[#ff6600]/10 px-2 py-0.5 text-[10px] font-semibold text-[#ff6600]">{extracted.category}</span>
                             )}
                             {extracted.tags?.slice(0, 3).map((t) => (
                               <span key={t} className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-500">{t}</span>
                             ))}
                           </div>
                         </div>
-                        <button
-                          type="button"
-                          onClick={runAnalyze}
-                          className="rounded-full p-1.5 text-gray-400 hover:bg-white hover:text-gray-700"
-                          title="Re-analyze"
-                        >
+                        <button type="button" onClick={runAnalyze}
+                          className="rounded-full p-1.5 text-gray-400 hover:bg-white hover:text-gray-700" title="Re-analyze">
                           <RefreshCw className="h-3.5 w-3.5" />
                         </button>
                       </div>
@@ -284,14 +263,18 @@ export function AddWorkModal({ onClose, onSuccess }: {
                       <Field label="Description">
                         <textarea rows={3} value={extracted.description} onChange={(e) => setExtracted({ ...extracted, description: e.target.value })} className={`${inputCls} resize-none`} />
                       </Field>
+
+                      <Field label="Cover image / video">
+                        <CoverUploader value={autoCover} onChange={setAutoCover} userId={user!.id} />
+                      </Field>
+
+                      <Field label="Gallery" hint="images & videos">
+                        <GalleryUploader values={gallery} onChange={setGallery} userId={user!.id} />
+                      </Field>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={onPublishAuto}
-                      disabled={saving}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#ff6600] py-3 text-sm font-bold text-white transition-colors hover:bg-[#e55a00] disabled:opacity-50"
-                    >
+                    <button type="button" onClick={onPublishAuto} disabled={saving}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#ff6600] py-3 text-sm font-bold text-white transition-colors hover:bg-[#e55a00] disabled:opacity-50">
                       {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
                       Publish to profile
                     </button>
@@ -300,7 +283,7 @@ export function AddWorkModal({ onClose, onSuccess }: {
               </div>
             )}
 
-            {/* ── MANUAL MODE ── */}
+            {/* ────────── MANUAL MODE ────────── */}
             {mode === "manual" && (
               <form onSubmit={onPublishManual} className="space-y-4">
                 <Field label="URL" required>
@@ -334,18 +317,20 @@ export function AddWorkModal({ onClose, onSuccess }: {
                 <Field label="Tech stack" hint="comma-separated">
                   <input value={manual.tech_stack} onChange={setM("tech_stack")} placeholder="React, Node.js, PostgreSQL" className={inputCls} />
                 </Field>
-                <Field label="Cover image URL" hint="optional">
-                  <input value={manual.cover_image_url} onChange={setM("cover_image_url")} placeholder="https://..." type="url" className={inputCls} />
-                </Field>
                 <Field label="Key features" hint="one per line or comma-separated">
-                  <textarea rows={3} value={manual.features} onChange={setM("features")} placeholder="Real-time collaboration&#10;Export to PDF&#10;Team workspaces" className={`${inputCls} resize-none`} />
+                  <textarea rows={3} value={manual.features} onChange={setM("features")} placeholder={"Real-time collaboration\nExport to PDF\nTeam workspaces"} className={`${inputCls} resize-none`} />
                 </Field>
 
-                <button
-                  type="submit"
-                  disabled={saving || !manual.name || !manual.url}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#ff6600] py-3 text-sm font-bold text-white transition-colors hover:bg-[#e55a00] disabled:opacity-50"
-                >
+                <Field label="Cover image / video">
+                  <CoverUploader value={manualCover} onChange={setManualCover} userId={user!.id} />
+                </Field>
+
+                <Field label="Gallery" hint="images & videos">
+                  <GalleryUploader values={gallery} onChange={setGallery} userId={user!.id} />
+                </Field>
+
+                <button type="submit" disabled={saving || !manual.name || !manual.url}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#ff6600] py-3 text-sm font-bold text-white transition-colors hover:bg-[#e55a00] disabled:opacity-50">
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
                   Publish to profile
                 </button>

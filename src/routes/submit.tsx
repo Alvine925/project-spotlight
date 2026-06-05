@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth, slugify } from "@/lib/auth";
 import { analyzeProjectUrl } from "@/lib/projects.functions";
 import { Loader2, CheckCircle2, ArrowRight, RefreshCw, Wand2, PenLine } from "lucide-react";
+import { CoverUploader, GalleryUploader } from "@/components/MediaUploader";
 
 export const Route = createFileRoute("/submit")({
   head: () => ({
@@ -163,6 +164,11 @@ function Submit() {
   const setM = (k: keyof Manual) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setManual((prev) => ({ ...prev, [k]: e.target.value }));
 
+  /* ── Media state ── */
+  const [autoCover, setAutoCover] = useState<string | null>(null);
+  const [manualCover, setManualCover] = useState<string | null>(null);
+  const [gallery, setGallery] = useState<string[]>([]);
+
   /* ── Shared state ── */
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -183,9 +189,15 @@ function Submit() {
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [analyzing]);
 
+  /* Seed autoCover when AI result arrives */
+  useEffect(() => {
+    if (extracted?.cover_image_url) setAutoCover(extracted.cover_image_url);
+  }, [extracted?.cover_image_url]);
+
   const runAnalyze = async () => {
     setErr(null);
     setExtracted(null);
+    setAutoCover(null);
     setAnalyzing(true);
     try {
       const data = await analyze({ data: { url } });
@@ -231,7 +243,8 @@ function Submit() {
       description: extracted.description, category: extracted.category,
       tags: extracted.tags, tech_stack: extracted.what_it_does,
       features: extracted.features, use_cases: extracted.use_cases,
-      cover_image_url: extracted.cover_image_url,
+      cover_image_url: autoCover ?? extracted.cover_image_url,
+      gallery_images: gallery,
       status: "Live", published: true,
     });
   };
@@ -247,7 +260,8 @@ function Submit() {
       description: manual.description, category: manual.category,
       tags: splitTrim(manual.tags), tech_stack: splitTrim(manual.tech_stack),
       features: splitLines(manual.features), use_cases: splitLines(manual.use_cases),
-      cover_image_url: manual.cover_image_url || null,
+      cover_image_url: manualCover,
+      gallery_images: gallery,
       status: manual.status, published: true,
     });
   };
@@ -347,13 +361,6 @@ function Submit() {
 
             {extracted && (
               <div className="mt-6 space-y-5 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                <div className="overflow-hidden rounded-lg border border-gray-100">
-                  {extracted.cover_image_url
-                    ? <img src={extracted.cover_image_url} alt="cover" className="aspect-video w-full object-cover" />
-                    : <div className="aspect-video w-full bg-gray-100" />
-                  }
-                </div>
-
                 <Field label="Project URL" required>
                   <input value={extracted.url} onChange={(e) => setExtracted({ ...extracted, url: e.target.value })} type="url" className={inputCls} />
                 </Field>
@@ -379,6 +386,14 @@ function Submit() {
                 </div>
                 <Field label="Tech stack" hint="comma-separated">
                   <input value={extracted.what_it_does.join(", ")} onChange={(e) => setExtracted({ ...extracted, what_it_does: e.target.value.split(",").map((t) => t.trim()).filter(Boolean) })} className={inputCls} />
+                </Field>
+
+                <Field label="Cover image / video">
+                  <CoverUploader value={autoCover} onChange={setAutoCover} userId={user!.id} />
+                </Field>
+
+                <Field label="Gallery" hint="images & videos">
+                  <GalleryUploader values={gallery} onChange={setGallery} userId={user!.id} />
                 </Field>
 
                 <FreelancePanel
@@ -466,8 +481,12 @@ function Submit() {
                   <Field label="Use cases" hint="one per line or comma-separated">
                     <textarea rows={3} value={manual.use_cases} onChange={setM("use_cases")} placeholder={"Teams managing remote projects\nFreelancers tracking billable hours"} className={`${inputCls} resize-none`} />
                   </Field>
-                  <Field label="Cover image URL" hint="optional — direct image link">
-                    <input value={manual.cover_image_url} onChange={setM("cover_image_url")} placeholder="https://..." className={inputCls} />
+                  <Field label="Cover image / video" hint="upload or paste URL">
+                    <CoverUploader value={manualCover} onChange={setManualCover} userId={user!.id} />
+                  </Field>
+
+                  <Field label="Gallery" hint="images & videos">
+                    <GalleryUploader values={gallery} onChange={setGallery} userId={user!.id} />
                   </Field>
                 </div>
               </div>
