@@ -421,17 +421,20 @@ function Profile() {
         </section>
 
         {/* ── Tab bar ── */}
-        <div className="flex border-b border-gray-200 bg-white px-5">
-          {(["projects", "about"] as const).map((t) => (
+        <div className="flex overflow-x-auto border-b border-gray-200 bg-white px-5">
+          {availableTabs.map((t) => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`relative mr-6 pb-3 pt-3 text-sm font-semibold capitalize transition-colors ${
-                tab === t ? "text-[#ff6600]" : "text-gray-400 hover:text-gray-700"
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={`relative mr-6 shrink-0 pb-3 pt-3 text-sm font-semibold transition-colors ${
+                tab === t.key ? "text-[#ff6600]" : "text-gray-400 hover:text-gray-700"
               }`}
             >
-              {t}
-              {tab === t && (
+              {t.label}
+              {typeof t.count === "number" && (
+                <span className="ml-1 text-[10px] font-mono text-gray-300">{t.count}</span>
+              )}
+              {tab === t.key && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#ff6600]" />
               )}
             </button>
@@ -441,6 +444,7 @@ function Profile() {
         {/* ── Content ── */}
         <div className="px-4 py-4">
           {tab === "projects" ? (
+
             <div className="divide-y divide-gray-200">
               {allProjects.length === 0 ? (
                 <div className="py-16 text-center text-gray-400">
