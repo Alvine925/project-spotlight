@@ -120,7 +120,8 @@ function EditProfileCard({ profile, userId }: { profile: Profile | null; userId:
           twitter: twitter.trim() || null,
           linkedin: linkedin.trim() || null,
           location: location.trim() || null,
-        })
+        } as never)
+
         .eq("id", userId);
       if (error) throw error;
     },
