@@ -634,17 +634,31 @@ function Dashboard() {
   return (
     <div className="min-h-screen">
       <SiteNav />
+      {showOnboarding && (
+        <ProfileTypeOnboarding userId={user.id} onClose={() => setShowOnboarding(false)} />
+      )}
       <section className="mx-auto max-w-6xl px-6 py-12">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Dashboard</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Dashboard
+              {profileData?.profile_type && (
+                <span className="ml-2 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary-glow">
+                  {profileData.profile_type}
+                </span>
+              )}
+            </p>
             <h1 className="mt-1 font-display text-3xl font-semibold md:text-4xl">
               Welcome back,{" "}
               <span className="text-gradient">
                 {profileData?.display_name || user.email?.split("@")[0]}
               </span>
             </h1>
+            {profileData?.headline && (
+              <p className="mt-1 text-sm text-muted-foreground">{profileData.headline}</p>
+            )}
           </div>
+
           <div className="flex flex-wrap items-center gap-2">
             <Link
               to="/submit"
