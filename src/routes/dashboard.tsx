@@ -67,7 +67,10 @@ type Profile = {
   twitter: string | null;
   linkedin: string | null;
   location: string | null;
+  profile_type: string | null;
+  headline: string | null;
 };
+
 
 const CATEGORIES = ["Productivity", "AI", "Developer Tools", "Finance", "Marketing", "Other"];
 
