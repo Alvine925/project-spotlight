@@ -798,7 +798,20 @@ function Dashboard() {
             </div>
           )}
         </div>
+
+        <div className="mt-12">
+          <div className="mb-4 flex items-end justify-between gap-4">
+            <div>
+              <h2 className="font-display text-xl font-semibold">Services, skills & qualifications</h2>
+              <p className="text-sm text-muted-foreground">
+                Add anything beyond project URLs — services you offer, skills you have, qualifications you've earned, and career highlights.
+              </p>
+            </div>
+          </div>
+          <ProfileItemsManager userId={user.id} profileType={profileData?.profile_type ?? null} />
+        </div>
       </section>
+
     </div>
   );
 }
