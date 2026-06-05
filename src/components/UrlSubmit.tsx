@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
 export function UrlSubmit() {
@@ -19,22 +19,19 @@ export function UrlSubmit() {
   };
 
   return (
-    <form onSubmit={onSubmit} className="w-full max-w-2xl">
-      <div className="group relative flex items-center gap-2 rounded-2xl border border-border/70 bg-card/60 p-2 shadow-elegant backdrop-blur-xl transition-smooth focus-within:border-primary/60 focus-within:shadow-glow">
-        <div className="ml-2 grid place-items-center text-primary-glow">
-          <Sparkles className="h-5 w-5" />
-        </div>
+    <form onSubmit={onSubmit} className="w-full max-w-xl">
+      <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white p-1.5 shadow-sm focus-within:border-[#ff6600]/50 focus-within:shadow-[0_0_0_3px_rgba(255,102,0,0.08)]">
         <input
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           type="url"
           required
           placeholder="https://your-project.com"
-          className="flex-1 bg-transparent py-3 text-base text-foreground placeholder:text-muted-foreground/60 outline-none"
+          className="flex-1 bg-transparent px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 outline-none"
         />
         <button
           type="submit"
-          className="flex items-center gap-2 rounded-xl bg-gradient-primary px-5 py-3 text-sm font-medium text-primary-foreground shadow-glow transition-smooth hover:scale-[1.03]"
+          className="flex shrink-0 items-center gap-2 rounded-lg bg-[#ff6600] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#e55a00]"
         >
           Add project <ArrowRight className="h-4 w-4" />
         </button>

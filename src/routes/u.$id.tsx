@@ -13,7 +13,6 @@ import {
   Twitter,
   Linkedin,
   Link2,
-  MoreHorizontal,
   QrCode,
   MessageCircle,
   Github,
@@ -24,8 +23,8 @@ import { QrModal } from "@/components/QrModal";
 export const Route = createFileRoute("/u/$id")({
   head: ({ params }) => ({
     meta: [
-      { title: `@${params.id.slice(0, 8)}'s Projects — ProjectAtlas` },
-      { name: "description", content: "All projects from this developer, in one place." },
+      { title: `@${params.id.slice(0, 8)}'s Profile — ProjectAtlas` },
+      { name: "description", content: "All projects and work from this profile, in one place." },
     ],
   }),
   component: Profile,
@@ -72,67 +71,63 @@ type PublicProfileItem = {
   tags: string[];
 };
 
-
-function pseudoCount(seed: string, offset: number): number {
-  let h = offset;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
-  return (h % 180) + 8;
-}
+type TabKey = "projects" | "services" | "skills" | "qualifications" | "highlights" | "about";
 
 function ProjectCard({ project, index }: { project: PublicProject; index: number }) {
   let host = project.url;
-  try { host = new URL(project.url).hostname.replace("www.", ""); } catch {}
+  try {
+    host = new URL(project.url).hostname.replace("www.", "");
+  } catch {}
 
   const num = String(index + 1).padStart(2, "0");
   const isLive = project.status?.toLowerCase() === "live";
   const letter = project.name[0]?.toUpperCase() ?? "P";
   const hasCover = !!project.cover_image_url;
-  const stars = pseudoCount(project.slug, 7);
-  const forks = pseudoCount(project.slug, 13);
 
   return (
-    <div className="py-4">
+    <div className="rounded-xl border border-gray-100 bg-white">
       {hasCover ? (
         <div>
-          <div className="flex items-center justify-between px-5 pt-5 pb-3">
-            <span className="font-mono text-xs font-semibold text-gray-400">{num}</span>
+          <div className="flex items-center justify-between px-4 pt-4 pb-2">
+            <span className="font-mono text-xs font-semibold text-gray-300">{num}</span>
             <div className="flex items-center gap-1.5">
-              <span className={`h-2 w-2 rounded-full ${isLive ? "bg-green-500" : "bg-gray-300"}`} />
-              <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
-                {isLive ? "Live" : (project.status || "Live")}
+              <span className={`h-1.5 w-1.5 rounded-full ${isLive ? "bg-green-500" : "bg-gray-300"}`} />
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                {isLive ? "Live" : project.status || "Live"}
               </span>
             </div>
           </div>
-          <div className="flex items-stretch">
-            <div className="flex-1 px-5 pb-3">
-              <h3 className="font-display text-xl font-bold leading-tight text-gray-900">{project.name}</h3>
+          <div className="flex items-stretch gap-3 px-4 pb-4">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-display text-base font-bold leading-snug text-gray-900">{project.name}</h3>
               {project.tagline && (
-                <p className="mt-1 text-sm text-gray-500 line-clamp-2">{project.tagline}</p>
+                <p className="mt-0.5 text-xs text-gray-500 line-clamp-2">{project.tagline}</p>
               )}
               <a
                 href={project.url}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-[#ff6600] hover:underline"
+                className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-[#ff6600] hover:underline"
                 onClick={(e) => e.stopPropagation()}
               >
-                <Globe className="h-3.5 w-3.5" />
+                <Globe className="h-3 w-3" />
                 {host}
-                <ExternalLink className="h-3 w-3 opacity-60" />
+                <ExternalLink className="h-2.5 w-2.5 opacity-60" />
               </a>
-              <div className="mt-2 flex flex-wrap gap-1.5">
+              <div className="mt-2 flex flex-wrap gap-1">
                 {project.category && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#ff6600]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#ff6600]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#ff6600]" />
+                  <span className="rounded-full bg-[#ff6600]/10 px-2 py-0.5 text-[10px] font-semibold text-[#ff6600]">
                     {project.category}
                   </span>
                 )}
                 {project.tags.slice(0, 2).map((t) => (
-                  <span key={t} className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] text-gray-500">{t}</span>
+                  <span key={t} className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-500">
+                    {t}
+                  </span>
                 ))}
               </div>
             </div>
-            <div className="relative w-[38%] shrink-0 overflow-hidden rounded-xl mr-4 mb-3 border border-gray-100">
+            <div className="relative w-28 shrink-0 overflow-hidden rounded-lg border border-gray-100">
               <img
                 src={project.cover_image_url!}
                 alt={`${project.name} preview`}
@@ -142,101 +137,72 @@ function ProjectCard({ project, index }: { project: PublicProject; index: number
               <Link
                 to="/project/$slug"
                 params={{ slug: project.slug }}
-                className="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-[#ff6600] text-white shadow-md transition-all hover:scale-105 hover:shadow-lg"
+                className="absolute bottom-1.5 right-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-[#ff6600] text-white shadow transition-all hover:scale-105"
               >
-                <ArrowUpRight className="h-4 w-4" />
+                <ArrowUpRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           </div>
         </div>
       ) : (
-        <div className="relative">
-          <div className="flex items-center justify-between px-5 pt-5">
-            <span className="font-mono text-xs font-semibold text-gray-400">{num}</span>
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-mono text-xs font-semibold text-gray-300">{num}</span>
             <div className="flex items-center gap-1.5">
-              <span className={`h-2 w-2 rounded-full ${isLive ? "bg-green-500" : "bg-gray-300"}`} />
-              <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
-                {isLive ? "Live" : (project.status || "Live")}
+              <span className={`h-1.5 w-1.5 rounded-full ${isLive ? "bg-green-500" : "bg-gray-300"}`} />
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                {isLive ? "Live" : project.status || "Live"}
               </span>
             </div>
           </div>
-          <div className="relative flex h-24 items-center justify-center overflow-hidden">
-            <span className="pointer-events-none select-none font-display text-[110px] font-black leading-none text-gray-100">
-              {letter}
-            </span>
-            <Link
-              to="/project/$slug"
-              params={{ slug: project.slug }}
-              className="absolute bottom-3 right-5 flex h-10 w-10 items-center justify-center rounded-full bg-[#ff6600] text-white shadow-md transition-all hover:scale-105 hover:shadow-lg"
-            >
-              <ArrowUpRight className="h-5 w-5" />
-            </Link>
-          </div>
-        </div>
-      )}
-
-      {!hasCover && (
-        <div className="px-5 pb-2 pt-1">
-          <h3 className="font-display text-xl font-bold leading-tight text-gray-900">{project.name}</h3>
-          {project.tagline && (
-            <p className="mt-1 text-sm text-gray-500 line-clamp-2">{project.tagline}</p>
-          )}
-          <a
-            href={project.url}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-[#ff6600] hover:underline"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Globe className="h-3.5 w-3.5" />
-            {host}
-            <ExternalLink className="h-3 w-3 opacity-60" />
-          </a>
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {project.category && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-[#ff6600]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#ff6600]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#ff6600]" />
-                {project.category}
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <h3 className="font-display text-base font-bold leading-snug text-gray-900">{project.name}</h3>
+              {project.tagline && (
+                <p className="mt-0.5 text-xs text-gray-500 line-clamp-2">{project.tagline}</p>
+              )}
+              <a
+                href={project.url}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-[#ff6600] hover:underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Globe className="h-3 w-3" />
+                {host}
+                <ExternalLink className="h-2.5 w-2.5 opacity-60" />
+              </a>
+              <div className="mt-2 flex flex-wrap gap-1">
+                {project.category && (
+                  <span className="rounded-full bg-[#ff6600]/10 px-2 py-0.5 text-[10px] font-semibold text-[#ff6600]">
+                    {project.category}
+                  </span>
+                )}
+                {project.tags.slice(0, 2).map((t) => (
+                  <span key={t} className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-500">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gray-50">
+              <span className="select-none font-display text-5xl font-black text-gray-100">
+                {letter}
               </span>
-            )}
-            {project.tags.slice(0, 2).map((t) => (
-              <span key={t} className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] text-gray-500">{t}</span>
-            ))}
+              <Link
+                to="/project/$slug"
+                params={{ slug: project.slug }}
+                className="absolute bottom-1.5 right-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-[#ff6600] text-white shadow transition-all hover:scale-105"
+              >
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
           </div>
         </div>
       )}
-
-      <div className="flex items-center justify-between px-5 pb-5 pt-3">
-        <div className="flex items-center gap-4">
-          <span className="inline-flex items-center gap-1.5 text-xs text-gray-400">
-            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-            </svg>
-            {stars}
-          </span>
-          <span className="inline-flex items-center gap-1.5 text-xs text-gray-400">
-            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-              <circle cx="12" cy="18" r="3" /><circle cx="6" cy="6" r="3" /><circle cx="18" cy="6" r="3" />
-              <path d="M6 9v2a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V9" />
-              <line x1="12" y1="12" x2="12" y2="15" />
-            </svg>
-            {forks}
-          </span>
-        </div>
-        <Link
-          to="/project/$slug"
-          params={{ slug: project.slug }}
-          className="inline-flex items-center gap-1 text-xs font-semibold text-[#ff6600] hover:underline"
-        >
-          View details
-          <ArrowUpRight className="h-3.5 w-3.5" />
-        </Link>
-      </div>
     </div>
   );
 }
-
-type TabKey = "projects" | "services" | "skills" | "qualifications" | "highlights" | "about";
 
 function Profile() {
   const { id } = Route.useParams();
@@ -253,12 +219,18 @@ function Profile() {
           .select("id, display_name, avatar_url, bio, about, website, github, twitter, linkedin, location, created_at, profile_type, headline")
           .eq("id", id)
           .maybeSingle(),
-        supabase.from("projects")
+        supabase
+          .from("projects")
           .select("id, slug, name, tagline, url, category, tags, status, color_from, color_to, tech_stack, cover_image_url")
-          .eq("owner_id", id).eq("published", true).order("created_at", { ascending: false }),
-        supabase.from("profile_items")
+          .eq("owner_id", id)
+          .eq("published", true)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("profile_items")
           .select("id, type, title, subtitle, body, meta, tags")
-          .eq("owner_id", id).eq("published", true).order("position", { ascending: true }),
+          .eq("owner_id", id)
+          .eq("published", true)
+          .order("position", { ascending: true }),
       ]);
       return {
         profile: profile as ProfileData | null,
@@ -275,13 +247,17 @@ function Profile() {
   const skills = allItems.filter((i) => i.type === "skill");
   const qualifications = allItems.filter((i) => i.type === "qualification");
   const highlights = allItems.filter((i) => i.type === "highlight");
-  const initials = name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
+  const initials = name
+    .split(" ")
+    .map((w: string) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
   const [from, to] = pickPalette(id);
   const profileUrl = typeof window !== "undefined" ? window.location.href : "";
   const profileUrlClean = profileUrl.replace(/^https?:\/\//, "");
   const categories = Array.from(new Set(allProjects.map((p) => p.category).filter(Boolean)));
   const profile = data?.profile;
-  const hasSocials = profile?.website || profile?.github || profile?.twitter || profile?.linkedin;
 
   const availableTabs: { key: TabKey; label: string; count?: number }[] = [
     { key: "projects", label: "Projects", count: allProjects.length },
@@ -292,7 +268,6 @@ function Profile() {
     { key: "about", label: "About" },
   ];
 
-
   const copy = () => {
     navigator.clipboard.writeText(profileUrl).then(() => {
       setCopied(true);
@@ -302,19 +277,22 @@ function Profile() {
 
   const shareItems = [
     {
-      icon: Twitter, label: "Twitter",
+      icon: Twitter,
+      label: "Twitter",
       href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(profileUrl)}&text=Check+out+my+projects+on+ProjectAtlas`,
     },
     {
-      icon: Linkedin, label: "LinkedIn",
+      icon: Linkedin,
+      label: "LinkedIn",
       href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(profileUrl)}`,
     },
     {
-      icon: MessageCircle, label: "WhatsApp",
+      icon: MessageCircle,
+      label: "WhatsApp",
       href: `https://wa.me/?text=${encodeURIComponent(`Check out my projects on ProjectAtlas: ${profileUrl}`)}`,
     },
     { icon: Link2, label: "Link", onClick: copy },
-    { icon: QrCode, label: "QR Code", onClick: () => setShowQr(true) },
+    { icon: QrCode, label: "QR", onClick: () => setShowQr(true) },
   ];
 
   if (isLoading) {
@@ -327,362 +305,385 @@ function Profile() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-lg">
-
-        {/* ── Top bar ── */}
-        <header className="flex items-center justify-between bg-white px-5 py-4 shadow-sm">
+      {/* ── Top bar ── */}
+      <header className="sticky top-0 z-30 border-b border-gray-200 bg-white">
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 md:px-6">
           <Link to="/" className="font-display text-base font-bold text-[#ff6600]">
             ProjectAtlas
           </Link>
           <div className="flex items-center gap-2">
             <button
               onClick={copy}
-              className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 transition-all hover:border-[#ff6600]/40 hover:text-[#ff6600]"
+              className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-[#ff6600]/40 hover:text-[#ff6600]"
             >
               {copied ? <Check className="h-3.5 w-3.5 text-[#ff6600]" /> : <Copy className="h-3.5 w-3.5" />}
               {copied ? "Copied!" : "Copy Link"}
             </button>
-            <button className="grid h-8 w-8 place-items-center rounded-full text-gray-400 hover:bg-gray-100">
-              <MoreHorizontal className="h-4 w-4" />
-            </button>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* ── Hero ── */}
-        <section className="relative overflow-hidden bg-white px-5 pb-5 pt-6">
-          {/* Decorative blocks */}
-          <div className="pointer-events-none absolute right-4 top-3 select-none">
-            <div className="relative h-28 w-28">
-              <div
-                className="absolute right-0 top-1 flex h-16 w-16 items-center justify-center rounded-2xl font-display text-3xl font-black text-white shadow-xl"
-                style={{
-                  background: `linear-gradient(145deg, ${from}, ${to})`,
-                  transform: "rotate(8deg)",
-                  boxShadow: `4px 6px 20px ${from}55`,
-                }}
-              >
-                {initials[0]}
-              </div>
-              <div
-                className="absolute bottom-1 left-0 flex h-10 w-10 items-center justify-center rounded-xl font-display text-xs font-black text-white shadow-md"
-                style={{ background: "linear-gradient(145deg, #1a1a2e, #16213e)", transform: "rotate(-9deg)" }}
-              >
-                AI
-              </div>
-              <div
-                className="absolute left-7 top-0 flex h-7 w-7 items-center justify-center rounded-lg bg-gray-800 font-display text-[10px] font-black text-white shadow-md"
-                style={{ transform: "rotate(15deg)" }}
-              >
-                {"</>"}
+      {/* ── Body ── */}
+      <div className="mx-auto max-w-5xl px-4 py-8 md:px-6 lg:py-10">
+        <div className="lg:grid lg:grid-cols-[260px_1fr] lg:gap-12">
+
+          {/* ── LEFT SIDEBAR ── */}
+          <aside className="mb-8 lg:mb-0 lg:sticky lg:top-24 lg:h-fit">
+            {/* Avatar + identity */}
+            <div className="flex items-center gap-4 lg:flex-col lg:items-start lg:gap-3">
+              {profile?.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt={name}
+                  className="h-16 w-16 shrink-0 rounded-2xl object-cover ring-2 ring-gray-100 lg:h-20 lg:w-20"
+                />
+              ) : (
+                <div
+                  className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl font-display text-xl font-black text-white lg:h-20 lg:w-20 lg:text-2xl"
+                  style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
+                >
+                  {initials}
+                </div>
+              )}
+
+              <div className="min-w-0 lg:w-full">
+                <h1 className="font-display text-xl font-bold text-gray-900 lg:text-2xl">{name}</h1>
+                <p className="font-mono text-xs text-gray-400">@{id.slice(0, 8)}</p>
+                {profile?.profile_type && (
+                  <span className="mt-1 inline-block rounded-full border border-gray-200 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">
+                    {profile.profile_type}
+                  </span>
+                )}
               </div>
             </div>
-          </div>
 
-          {/* Avatar + info */}
-          <div className="flex items-start gap-4 pr-32">
-            {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt={name} className="h-14 w-14 shrink-0 rounded-2xl object-cover shadow-md" />
-            ) : (
-              <div
-                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl font-display text-xl font-black text-white shadow-md"
-                style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
-              >
-                {initials}
+            {/* Bio / headline */}
+            {(profile?.headline || profile?.bio) && (
+              <p className="mt-4 text-sm leading-relaxed text-gray-600">
+                {profile.headline || profile.bio}
+              </p>
+            )}
+
+            {/* Location */}
+            {profile?.location && (
+              <p className="mt-3 flex items-center gap-1.5 text-xs text-gray-400">
+                <MapPin className="h-3.5 w-3.5 shrink-0" />
+                {profile.location}
+              </p>
+            )}
+
+            {/* Stats pills */}
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600">
+                <span className="font-bold text-gray-900">{allProjects.length}</span>{" "}
+                {allProjects.length === 1 ? "Project" : "Projects"}
+              </span>
+              {categories.length > 0 && (
+                <span className="rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600">
+                  <span className="font-bold text-gray-900">{categories.length}</span>{" "}
+                  {categories.length === 1 ? "Category" : "Categories"}
+                </span>
+              )}
+            </div>
+
+            {/* Social links */}
+            {(profile?.website || profile?.github || profile?.twitter || profile?.linkedin) && (
+              <div className="mt-5 flex flex-wrap gap-2">
+                {profile.website && (
+                  <a
+                    href={profile.website}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-[#ff6600]/30 hover:text-[#ff6600]"
+                  >
+                    <Globe className="h-3.5 w-3.5" /> Website
+                  </a>
+                )}
+                {profile.github && (
+                  <a
+                    href={`https://github.com/${profile.github}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-[#ff6600]/30 hover:text-[#ff6600]"
+                  >
+                    <Github className="h-3.5 w-3.5" /> GitHub
+                  </a>
+                )}
+                {profile.twitter && (
+                  <a
+                    href={`https://x.com/${profile.twitter}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-[#ff6600]/30 hover:text-[#ff6600]"
+                  >
+                    <Twitter className="h-3.5 w-3.5" /> Twitter
+                  </a>
+                )}
+                {profile.linkedin && (
+                  <a
+                    href={
+                      profile.linkedin.startsWith("http")
+                        ? profile.linkedin
+                        : `https://${profile.linkedin}`
+                    }
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-[#ff6600]/30 hover:text-[#ff6600]"
+                  >
+                    <Linkedin className="h-3.5 w-3.5" /> LinkedIn
+                  </a>
+                )}
               </div>
             )}
-            <div className="min-w-0">
-              <h1 className="font-display text-xl font-bold leading-tight text-gray-900">{name}</h1>
-              <p className="font-mono text-xs text-gray-400">@{id.slice(0, 8)}</p>
-              {profile?.location && (
-                <p className="mt-1 inline-flex items-center gap-1 text-xs text-gray-400">
-                  <MapPin className="h-3 w-3" /> {profile.location}
-                </p>
-              )}
-              <p className="mt-1.5 text-sm leading-relaxed line-clamp-2 text-gray-500">
-                {profile?.headline || profile?.bio || "Building cool things."}
+
+            {/* Share */}
+            <div className="mt-6 border-t border-gray-100 pt-5">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                Share profile
               </p>
 
-            </div>
-          </div>
-
-          {/* Stats pills */}
-          <div className="mt-4 flex flex-wrap gap-2">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600">
-              <span className="font-bold text-gray-900">{allProjects.length}</span>
-              {allProjects.length === 1 ? "Project" : "Projects"}
-            </div>
-            {categories.length > 0 && (
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600">
-                <span className="font-bold text-gray-900">{categories.length}</span>
-                {categories.length === 1 ? "Category" : "Categories"}
+              <div className="mb-3 flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-1 pl-3">
+                <span className="flex-1 truncate font-mono text-xs text-gray-400">
+                  {profileUrlClean}
+                </span>
+                <button
+                  onClick={copy}
+                  className="shrink-0 rounded-md bg-[#ff6600] px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#e55a00]"
+                >
+                  {copied ? "Copied!" : "Copy"}
+                </button>
               </div>
-            )}
-          </div>
-        </section>
 
-        {/* ── Tab bar ── */}
-        <div className="flex overflow-x-auto border-b border-gray-200 bg-white px-5">
-          {availableTabs.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`relative mr-6 shrink-0 pb-3 pt-3 text-sm font-semibold transition-colors ${
-                tab === t.key ? "text-[#ff6600]" : "text-gray-400 hover:text-gray-700"
-              }`}
-            >
-              {t.label}
-              {typeof t.count === "number" && (
-                <span className="ml-1 text-[10px] font-mono text-gray-300">{t.count}</span>
-              )}
-              {tab === t.key && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#ff6600]" />
-              )}
-            </button>
-          ))}
-        </div>
-
-        {/* ── Content ── */}
-        <div className="px-4 py-4">
-          {tab === "projects" ? (
-            <div className="divide-y divide-gray-200">
-              {allProjects.length === 0 ? (
-                <div className="py-16 text-center text-gray-400">
-                  <p className="text-sm">No public projects yet.</p>
-                </div>
-              ) : (
-                allProjects.map((p, i) => <ProjectCard key={p.id} project={p} index={i} />)
-              )}
+              <div className="flex items-center gap-2">
+                {shareItems.map(({ icon: Icon, label, href, onClick }) =>
+                  href ? (
+                    <a
+                      key={label}
+                      href={href}
+                      target="_blank"
+                      rel="noreferrer"
+                      title={label}
+                      className="grid h-9 w-9 place-items-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:border-[#ff6600]/30 hover:text-[#ff6600]"
+                    >
+                      <Icon className="h-4 w-4" />
+                    </a>
+                  ) : (
+                    <button
+                      key={label}
+                      onClick={onClick}
+                      title={label}
+                      className="grid h-9 w-9 place-items-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:border-[#ff6600]/30 hover:text-[#ff6600]"
+                    >
+                      <Icon className="h-4 w-4" />
+                    </button>
+                  )
+                )}
+              </div>
             </div>
-          ) : tab === "services" ? (
-            <div className="space-y-3 py-2">
-              {services.map((s) => (
-                <div key={s.id} className="rounded-xl border border-gray-200 bg-white p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <h3 className="font-display text-base font-bold text-gray-900">{s.title}</h3>
-                    {typeof s.meta.price === "string" && (
-                      <span className="shrink-0 rounded-full bg-[#ff6600]/10 px-2.5 py-0.5 text-xs font-semibold text-[#ff6600]">{String(s.meta.price)}</span>
-                    )}
-                  </div>
-                  {s.subtitle && <p className="mt-1 text-sm text-gray-500">{s.subtitle}</p>}
-                  {s.body && <p className="mt-2 text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">{s.body}</p>}
-                  {s.tags.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {s.tags.map((t) => (
-                        <span key={t} className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] text-gray-500">{t}</span>
-                      ))}
-                    </div>
+          </aside>
+
+          {/* ── MAIN CONTENT ── */}
+          <main>
+            {/* Tab bar */}
+            <div className="mb-6 flex overflow-x-auto border-b border-gray-200">
+              {availableTabs.map((t) => (
+                <button
+                  key={t.key}
+                  onClick={() => setTab(t.key)}
+                  className={`relative mr-5 shrink-0 pb-3 pt-1 text-sm font-semibold transition-colors ${
+                    tab === t.key ? "text-[#ff6600]" : "text-gray-400 hover:text-gray-700"
+                  }`}
+                >
+                  {t.label}
+                  {typeof t.count === "number" && (
+                    <span className="ml-1 font-mono text-[10px] text-gray-300">{t.count}</span>
                   )}
-                </div>
+                  {tab === t.key && (
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#ff6600]" />
+                  )}
+                </button>
               ))}
             </div>
-          ) : tab === "skills" ? (
-            <div className="grid grid-cols-1 gap-2 py-2 sm:grid-cols-2">
-              {skills.map((s) => {
-                const level = Number(s.meta.level ?? 0);
-                return (
-                  <div key={s.id} className="rounded-xl border border-gray-200 bg-white p-3">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold text-sm text-gray-900">{s.title}</span>
-                      {level > 0 && (
-                        <span className="text-xs text-gray-400">
-                          {"●".repeat(level)}<span className="text-gray-200">{"●".repeat(5 - level)}</span>
+
+            {/* Projects tab */}
+            {tab === "projects" && (
+              <div className="space-y-3">
+                {allProjects.length === 0 ? (
+                  <div className="py-16 text-center text-sm text-gray-400">
+                    No public projects yet.
+                  </div>
+                ) : (
+                  allProjects.map((p, i) => (
+                    <ProjectCard key={p.id} project={p} index={i} />
+                  ))
+                )}
+              </div>
+            )}
+
+            {/* Services tab */}
+            {tab === "services" && (
+              <div className="space-y-3">
+                {services.map((s) => (
+                  <div key={s.id} className="rounded-xl border border-gray-100 bg-white p-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <h3 className="font-display text-base font-bold text-gray-900">{s.title}</h3>
+                      {typeof s.meta.price === "string" && (
+                        <span className="shrink-0 rounded-full bg-[#ff6600]/10 px-2.5 py-0.5 text-xs font-semibold text-[#ff6600]">
+                          {String(s.meta.price)}
                         </span>
                       )}
                     </div>
-                    {s.subtitle && <p className="mt-0.5 text-xs text-gray-500">{s.subtitle}</p>}
-                    {typeof s.meta.years === "number" && (
-                      <p className="mt-0.5 text-[11px] text-gray-400">{String(s.meta.years)} yrs experience</p>
+                    {s.subtitle && <p className="mt-1 text-sm text-gray-500">{s.subtitle}</p>}
+                    {s.body && (
+                      <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-gray-700">
+                        {s.body}
+                      </p>
+                    )}
+                    {s.tags.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {s.tags.map((t) => (
+                          <span
+                            key={t}
+                            className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] text-gray-500"
+                          >
+                            {t}
+                          </span>
+                        ))}
+                      </div>
                     )}
                   </div>
-                );
-              })}
-            </div>
-          ) : tab === "qualifications" ? (
-            <div className="space-y-2 py-2">
-              {qualifications.map((q) => (
-                <div key={q.id} className="rounded-xl border border-gray-200 bg-white p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h3 className="font-semibold text-sm text-gray-900">{q.title}</h3>
-                      {typeof q.meta.issuer === "string" && (
-                        <p className="text-xs text-gray-500">{String(q.meta.issuer)}</p>
+                ))}
+              </div>
+            )}
+
+            {/* Skills tab */}
+            {tab === "skills" && (
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {skills.map((s) => {
+                  const level = Number(s.meta.level ?? 0);
+                  return (
+                    <div key={s.id} className="rounded-xl border border-gray-100 bg-white p-4">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-sm text-gray-900">{s.title}</span>
+                        {level > 0 && (
+                          <span className="text-xs text-gray-300">
+                            {"●".repeat(level)}
+                            <span className="text-gray-100">{"●".repeat(5 - level)}</span>
+                          </span>
+                        )}
+                      </div>
+                      {s.subtitle && (
+                        <p className="mt-0.5 text-xs text-gray-500">{s.subtitle}</p>
                       )}
-                    </div>
-                    {typeof q.meta.date === "string" && (
-                      <span className="text-xs text-gray-400">{String(q.meta.date)}</span>
-                    )}
-                  </div>
-                  {typeof q.meta.url === "string" && q.meta.url && (
-                    <a href={String(q.meta.url)} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-[#ff6600] hover:underline">
-                      Verify <ExternalLink className="h-3 w-3" />
-                    </a>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : tab === "highlights" ? (
-            <div className="space-y-3 py-2">
-              {highlights.map((h) => (
-                <div key={h.id} className="rounded-xl border border-gray-200 bg-white p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h3 className="font-semibold text-sm text-gray-900">{h.title}</h3>
-                      {(h.subtitle || typeof h.meta.org === "string") && (
-                        <p className="text-xs text-gray-500">
-                          {h.subtitle}{h.subtitle && h.meta.org ? " · " : ""}{typeof h.meta.org === "string" ? String(h.meta.org) : ""}
+                      {typeof s.meta.years === "number" && (
+                        <p className="mt-0.5 text-[11px] text-gray-400">
+                          {String(s.meta.years)} yrs experience
                         </p>
                       )}
                     </div>
-                    {typeof h.meta.period === "string" && (
-                      <span className="shrink-0 text-xs text-gray-400">{String(h.meta.period)}</span>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Qualifications / Credentials tab */}
+            {tab === "qualifications" && (
+              <div className="space-y-2">
+                {qualifications.map((q) => (
+                  <div key={q.id} className="rounded-xl border border-gray-100 bg-white p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h3 className="font-semibold text-sm text-gray-900">{q.title}</h3>
+                        {typeof q.meta.issuer === "string" && (
+                          <p className="text-xs text-gray-500">{String(q.meta.issuer)}</p>
+                        )}
+                      </div>
+                      {typeof q.meta.date === "string" && (
+                        <span className="shrink-0 text-xs text-gray-400">
+                          {String(q.meta.date)}
+                        </span>
+                      )}
+                    </div>
+                    {typeof q.meta.url === "string" && q.meta.url && (
+                      <a
+                        href={String(q.meta.url)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-[#ff6600] hover:underline"
+                      >
+                        Verify <ExternalLink className="h-3 w-3" />
+                      </a>
                     )}
                   </div>
-                  {h.body && <p className="mt-2 text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">{h.body}</p>}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-200">
+                ))}
+              </div>
+            )}
 
+            {/* Highlights tab */}
+            {tab === "highlights" && (
+              <div className="space-y-3">
+                {highlights.map((h) => (
+                  <div key={h.id} className="rounded-xl border border-gray-100 bg-white p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h3 className="font-semibold text-sm text-gray-900">{h.title}</h3>
+                        {(h.subtitle || typeof h.meta.org === "string") && (
+                          <p className="text-xs text-gray-500">
+                            {h.subtitle}
+                            {h.subtitle && h.meta.org ? " · " : ""}
+                            {typeof h.meta.org === "string" ? String(h.meta.org) : ""}
+                          </p>
+                        )}
+                      </div>
+                      {typeof h.meta.period === "string" && (
+                        <span className="shrink-0 text-xs text-gray-400">
+                          {String(h.meta.period)}
+                        </span>
+                      )}
+                    </div>
+                    {h.body && (
+                      <p className="mt-2 text-sm leading-relaxed text-gray-600">{h.body}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
 
-              {/* About the user */}
-              <div className="py-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="h-1 w-5 rounded-full bg-[#ff6600]" />
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-[#ff6600]">About</span>
-                </div>
-                <p className="leading-relaxed text-sm text-gray-700">
-                  {profile?.about || profile?.bio
-                    ? (profile.about ?? profile.bio)
-                    : `Hey, I'm ${name} — a developer who loves turning ideas into real, working products. I've been writing code for several years, building everything from weekend side-projects to production-grade tools used by real people.`}
-                </p>
-                {!profile?.about && !profile?.bio && (
-                  <p className="mt-3 text-[11px] text-gray-300 italic">
-                    This is placeholder text. Update your profile to personalise it.
-                  </p>
+            {/* About tab */}
+            {tab === "about" && (
+              <div className="space-y-6">
+                {profile?.about ? (
+                  <div className="rounded-xl border border-gray-100 bg-white p-5">
+                    <h2 className="font-display text-base font-bold text-gray-900">About</h2>
+                    <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-gray-600">
+                      {profile.about}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="py-10 text-center text-sm text-gray-400">
+                    No about section yet.
+                  </div>
                 )}
               </div>
-
-              {/* Connect / Social links */}
-              {hasSocials && (
-                <div className="py-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="h-1 w-5 rounded-full bg-[#ff6600]" />
-                    <span className="text-[11px] font-bold uppercase tracking-widest text-[#ff6600]">Connect</span>
-                  </div>
-                  <div className="space-y-2">
-                    {profile?.website && (
-                      <a href={profile.website} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3 text-sm text-gray-700 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
-                        <Globe className="h-4 w-4 shrink-0" />
-                        <span className="truncate">{profile.website.replace(/^https?:\/\//, "")}</span>
-                        <ExternalLink className="ml-auto h-3.5 w-3.5 shrink-0 text-gray-300" />
-                      </a>
-                    )}
-                    {profile?.github && (
-                      <a href={`https://github.com/${profile.github}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3 text-sm text-gray-700 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
-                        <Github className="h-4 w-4 shrink-0" />
-                        <span>github.com/{profile.github}</span>
-                        <ExternalLink className="ml-auto h-3.5 w-3.5 shrink-0 text-gray-300" />
-                      </a>
-                    )}
-                    {profile?.twitter && (
-                      <a href={`https://x.com/${profile.twitter}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3 text-sm text-gray-700 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
-                        <Twitter className="h-4 w-4 shrink-0" />
-                        <span>@{profile.twitter}</span>
-                        <ExternalLink className="ml-auto h-3.5 w-3.5 shrink-0 text-gray-300" />
-                      </a>
-                    )}
-                    {profile?.linkedin && (
-                      <a href={profile.linkedin.startsWith("http") ? profile.linkedin : `https://${profile.linkedin}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3 text-sm text-gray-700 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
-                        <Linkedin className="h-4 w-4 shrink-0" />
-                        <span className="truncate">{profile.linkedin.replace(/^https?:\/\/(www\.)?/, "")}</span>
-                        <ExternalLink className="ml-auto h-3.5 w-3.5 shrink-0 text-gray-300" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* By the Numbers */}
-              <div className="py-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="h-1 w-5 rounded-full bg-[#ff6600]" />
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-[#ff6600]">By the Numbers</span>
-                </div>
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  {[
-                    { value: allProjects.length.toString(), label: "Projects shipped" },
-                    { value: `${categories.length || 1}+`, label: "Categories" },
-                    { value: "∞", label: "Ideas in progress" },
-                  ].map(({ value, label }) => (
-                    <div key={label} className="flex flex-col items-center gap-1">
-                      <span className="font-display text-2xl font-black text-gray-900">{value}</span>
-                      <span className="text-[11px] text-gray-400 leading-tight">{label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-            </div>
-          )}
-        </div>
-
-        {/* ── Share section ── */}
-        <div className="border-t border-gray-200 px-5 py-5">
-          <h3 className="font-display text-base font-bold text-gray-900">Share this profile</h3>
-          <p className="mt-1 text-xs text-gray-400">Share your projects with the world.</p>
-
-          <div className="mt-4 flex items-center gap-2 rounded-xl border border-gray-200 bg-white p-1 pl-3">
-            <span className="flex-1 truncate font-mono text-xs text-gray-500">{profileUrlClean}</span>
-            <button
-              onClick={copy}
-              className="shrink-0 rounded-lg bg-[#ff6600] px-4 py-2 text-xs font-bold text-white transition-all hover:bg-[#e55a00]"
-            >
-              {copied ? "Copied!" : "Copy"}
-            </button>
-          </div>
-
-          {/* Share icons — for sharing the profile URL */}
-          <div className="mt-5 flex items-center justify-around">
-            {shareItems.map(({ icon: Icon, label, href, onClick }) =>
-              href ? (
-                <a key={label} href={href} target="_blank" rel="noreferrer" className="flex flex-col items-center gap-1.5">
-                  <div className="grid h-11 w-11 place-items-center rounded-full border border-gray-200 bg-white text-gray-600 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <span className="text-[10px] text-gray-400">{label}</span>
-                </a>
-              ) : (
-                <button key={label} onClick={onClick} className="flex flex-col items-center gap-1.5">
-                  <div className="grid h-11 w-11 place-items-center rounded-full border border-gray-200 bg-white text-gray-600 transition-all hover:border-[#ff6600]/30 hover:text-[#ff6600]">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <span className="text-[10px] text-gray-400">{label}</span>
-                </button>
-              )
             )}
-          </div>
+          </main>
         </div>
-
-        {/* ── Footer ── */}
-        <footer className="py-6 text-center border-t border-gray-100">
-          <div className="inline-flex items-center gap-2 text-xs text-gray-400">
-            <div className="flex h-5 w-5 items-center justify-center rounded-md bg-[#ff6600]">
-              <span className="text-[9px] font-black text-white">PA</span>
-            </div>
-            Made with{" "}
-            <Link to="/" className="font-semibold text-gray-600 hover:text-[#ff6600]">
-              ProjectAtlas
-            </Link>
-          </div>
-          <p className="mt-1 text-[10px] text-gray-300">© {new Date().getFullYear()} All rights reserved.</p>
-        </footer>
-
       </div>
 
-      {showQr && (
-        <QrModal url={profileUrl} title={name} onClose={() => setShowQr(false)} />
-      )}
+      {/* Footer */}
+      <footer className="mt-8 border-t border-gray-100 py-6 text-center">
+        <div className="inline-flex items-center gap-2 text-xs text-gray-400">
+          <div className="flex h-5 w-5 items-center justify-center rounded-md bg-[#ff6600]">
+            <span className="text-[8px] font-black text-white">PA</span>
+          </div>
+          Made with{" "}
+          <Link to="/" className="font-semibold text-gray-600 hover:text-[#ff6600]">
+            ProjectAtlas
+          </Link>
+        </div>
+      </footer>
+
+      {showQr && <QrModal url={profileUrl} title={name} onClose={() => setShowQr(false)} />}
     </div>
   );
 }

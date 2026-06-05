@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Compass, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -59,32 +59,36 @@ function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen">
-      <div className="mx-auto max-w-md px-6 py-20">
-        <Link to="/" className="mb-10 flex items-center justify-center gap-2">
-          <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-primary shadow-glow">
-            <Compass className="h-5 w-5 text-primary-foreground" strokeWidth={2.5} />
-          </div>
-          <span className="font-display text-xl font-semibold">
-            Project<span className="text-gradient">Atlas</span>
-          </span>
-        </Link>
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
+      <div className="w-full max-w-sm">
+        <div className="mb-8 text-center">
+          <Link to="/" className="inline-flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#ff6600]">
+              <span className="text-[10px] font-black text-white">PA</span>
+            </div>
+            <span className="font-display text-lg font-bold text-gray-900">
+              Project<span className="text-[#ff6600]">Atlas</span>
+            </span>
+          </Link>
+        </div>
 
-        <div className="rounded-2xl border border-border/60 bg-gradient-card p-8 shadow-elegant">
-          <h1 className="font-display text-2xl font-semibold">
+        <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+          <h1 className="font-display text-xl font-bold text-gray-900">
             {mode === "signin" ? "Welcome back" : "Create your account"}
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {mode === "signin" ? "Sign in to manage your projects." : "Start showcasing what you build."}
+          <p className="mt-1 text-sm text-gray-500">
+            {mode === "signin"
+              ? "Sign in to manage your projects."
+              : "Start showcasing what you build."}
           </p>
 
-          <form onSubmit={onSubmit} className="mt-6 space-y-4">
+          <form onSubmit={onSubmit} className="mt-6 space-y-3">
             {mode === "signup" && (
               <input
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="Display name"
-                className="w-full rounded-xl border border-border/60 bg-input/50 px-4 py-3 text-sm outline-none transition-smooth focus:border-primary/60"
+                className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#ff6600] focus:ring-1 focus:ring-[#ff6600]/20"
               />
             )}
             <input
@@ -93,7 +97,7 @@ function AuthPage() {
               type="email"
               required
               placeholder="you@example.com"
-              className="w-full rounded-xl border border-border/60 bg-input/50 px-4 py-3 text-sm outline-none transition-smooth focus:border-primary/60"
+              className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#ff6600] focus:ring-1 focus:ring-[#ff6600]/20"
             />
             <input
               value={password}
@@ -102,11 +106,11 @@ function AuthPage() {
               required
               minLength={6}
               placeholder="Password"
-              className="w-full rounded-xl border border-border/60 bg-input/50 px-4 py-3 text-sm outline-none transition-smooth focus:border-primary/60"
+              className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#ff6600] focus:ring-1 focus:ring-[#ff6600]/20"
             />
 
             {err && (
-              <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive-foreground">
+              <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-600">
                 {err}
               </div>
             )}
@@ -114,19 +118,19 @@ function AuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-primary py-3 text-sm font-medium text-primary-foreground shadow-glow transition-smooth hover:scale-[1.02] disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#ff6600] py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#e55a00] disabled:opacity-60"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               {mode === "signin" ? "Sign in" : "Create account"}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-xs text-muted-foreground">
+          <p className="mt-5 text-center text-xs text-gray-500">
             {mode === "signin" ? "New to ProjectAtlas?" : "Already have an account?"}{" "}
             <button
               type="button"
               onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-              className="text-primary-glow hover:underline"
+              className="font-medium text-[#ff6600] hover:underline"
             >
               {mode === "signin" ? "Create one" : "Sign in"}
             </button>

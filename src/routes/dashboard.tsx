@@ -78,7 +78,7 @@ type Profile = {
 const CATEGORIES = ["Productivity", "AI", "Developer Tools", "Finance", "Marketing", "Other"];
 
 const inputCls =
-  "w-full rounded-lg border border-border/60 bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30";
+  "w-full rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#ff6600]/50 focus:ring-1 focus:ring-[#ff6600]/15";
 
 function EditProfileCard({ profile, userId }: { profile: Profile | null; userId: string }) {
   const qc = useQueryClient();

@@ -5,7 +5,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { ProjectCard, type ProjectRow } from "@/components/ProjectCard";
 import { UrlSubmit } from "@/components/UrlSubmit";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Globe, Brain, Sparkles, Layers, Radar, Loader2 } from "lucide-react";
+import { Search, Globe, BarChart3, Layers, Loader2 } from "lucide-react";
 
 const CATEGORIES = ["All", "Productivity", "AI", "Developer Tools", "Finance", "Marketing", "Other"];
 
@@ -13,10 +13,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "ProjectAtlas — One link for all your work" },
-      { name: "description", content: "The link-in-bio for builders. Freelancers, developers, designers, and creators — showcase every project, skill, and qualification from a single beautiful link." },
+      { name: "description", content: "The link-in-bio for builders. Freelancers, developers, designers, and creators — showcase every project, skill, and qualification from a single link." },
       { property: "og:title", content: "ProjectAtlas — One link for all your work" },
       { property: "og:description", content: "Freelancers, developers, and creators — showcase every project and skill from a single link." },
-
     ],
   }),
   component: Home,
@@ -45,7 +44,8 @@ function Home() {
     return list.filter((p) => {
       const matchCat = cat === "All" || p.category === cat;
       const q = query.toLowerCase();
-      const matchQ = !q ||
+      const matchQ =
+        !q ||
         p.name.toLowerCase().includes(q) ||
         (p.tagline ?? "").toLowerCase().includes(q) ||
         p.tags.some((t) => t.toLowerCase().includes(q));
@@ -54,79 +54,100 @@ function Home() {
   }, [projects, query, cat]);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-white">
       <SiteNav />
 
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10 bg-gradient-hero" />
+      {/* Hero */}
+      <section className="border-b border-gray-100">
+        <div className="mx-auto max-w-4xl px-6 pb-20 pt-20 text-center md:pt-28">
+          <h1 className="font-display text-5xl font-bold leading-tight tracking-tight text-gray-900 md:text-6xl">
+            One link.<br />
+            <span className="text-[#ff6600]">All your work.</span>
+          </h1>
+          <p className="mx-auto mt-5 max-w-xl text-base text-gray-500 md:text-lg">
+            For freelancers, developers, designers, and creators. ProjectAtlas turns every
+            project, skill, and qualification you've built into a single shareable profile.
+          </p>
 
-        <div className="mx-auto max-w-7xl px-6 pb-24 pt-24 md:pt-32">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs text-primary-glow backdrop-blur-md">
-              <Sparkles className="h-3.5 w-3.5" />
-              Link-in-bio — for everything you've built
-            </div>
-            <h1 className="font-display text-5xl font-bold leading-[1.05] tracking-tight md:text-7xl">
-              One link.<br />
-              <span className="text-gradient">All your work.</span>
-            </h1>
-            <p className="mx-auto mt-6 max-w-xl text-base text-muted-foreground md:text-lg">
-              For freelancers, developers, designers, and creators. ProjectAtlas turns every project, skill, and qualification you've built into a single shareable profile.
-            </p>
+          <div className="mt-8 flex justify-center">
+            <UrlSubmit />
+          </div>
 
-            <div className="mt-10 flex justify-center">
-              <UrlSubmit />
-            </div>
-
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5"><Globe className="h-3.5 w-3.5 text-primary-glow" /> Your own profile page</span>
-              <span className="inline-flex items-center gap-1.5"><Brain className="h-3.5 w-3.5 text-primary-glow" /> Projects, skills & qualifications</span>
-              <span className="inline-flex items-center gap-1.5"><Radar className="h-3.5 w-3.5 text-primary-glow" /> Built-in click analytics</span>
-            </div>
-
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-gray-400">
+            <span className="inline-flex items-center gap-1.5">
+              <Globe className="h-4 w-4 text-[#ff6600]" /> Your own profile page
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Layers className="h-4 w-4 text-[#ff6600]" /> Projects, skills & qualifications
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <BarChart3 className="h-4 w-4 text-[#ff6600]" /> Built-in click analytics
+            </span>
           </div>
         </div>
       </section>
 
-      <section id="how" className="border-t border-border/40 bg-background/60">
-        <div className="mx-auto max-w-7xl px-6 py-20">
-          <div className="mx-auto mb-12 max-w-2xl text-center">
-            <h2 className="font-display text-3xl font-semibold md:text-4xl">How it works</h2>
-            <p className="mt-3 text-muted-foreground">Build your profile in minutes — no portfolio site required.</p>
-          </div>
-          <div className="grid gap-6 md:grid-cols-3">
+      {/* How it works */}
+      <section id="how" className="border-b border-gray-100 bg-gray-50">
+        <div className="mx-auto max-w-5xl px-6 py-16">
+          <h2 className="text-center font-display text-2xl font-bold text-gray-900 md:text-3xl">
+            How it works
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-500">
+            Build your profile in minutes — no portfolio site required.
+          </p>
+          <div className="mt-10 grid gap-6 md:grid-cols-3">
             {[
-              { icon: Globe, title: "1. Add your work", body: "Paste a URL for any project, case study, repo, demo, or portfolio piece." },
-              { icon: Brain, title: "2. Get your profile link", body: "Get a public page showcasing your projects, skills, and qualifications." },
-              { icon: Layers, title: "3. Share one link", body: "Drop it in your bio, resume, or proposals — track views and clicks." },
-
+              {
+                icon: Globe,
+                title: "1. Add your work",
+                body: "Paste a URL for any project, case study, repo, demo, or portfolio piece.",
+              },
+              {
+                icon: Layers,
+                title: "2. Get your profile link",
+                body: "Get a public page showcasing your projects, skills, and qualifications.",
+              },
+              {
+                icon: BarChart3,
+                title: "3. Share one link",
+                body: "Drop it in your bio, resume, or proposals — track views and clicks.",
+              },
             ].map((s) => (
-              <div key={s.title} className="rounded-2xl border border-border/60 bg-gradient-card p-6 shadow-elegant transition-smooth hover:border-primary/40">
-                <div className="mb-4 grid h-10 w-10 place-items-center rounded-lg bg-gradient-primary shadow-glow">
-                  <s.icon className="h-5 w-5 text-primary-foreground" />
+              <div
+                key={s.title}
+                className="rounded-xl border border-gray-200 bg-white p-6"
+              >
+                <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-lg bg-[#ff6600]/10">
+                  <s.icon className="h-5 w-5 text-[#ff6600]" />
                 </div>
-                <h3 className="font-display text-lg font-semibold">{s.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{s.body}</p>
+                <h3 className="font-display text-base font-semibold text-gray-900">{s.title}</h3>
+                <p className="mt-1.5 text-sm text-gray-500">{s.body}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-20">
+      {/* Discover */}
+      <section className="mx-auto max-w-7xl px-6 py-16">
         <div className="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <h2 className="font-display text-3xl font-semibold md:text-4xl">Discover work</h2>
-            <p className="mt-2 text-muted-foreground">A growing catalogue of projects, portfolios, and side-builds from freelancers and creators.</p>
+            <h2 className="font-display text-2xl font-bold text-gray-900 md:text-3xl">
+              Discover work
+            </h2>
+            <p className="mt-1.5 text-sm text-gray-500">
+              A growing catalogue of projects, portfolios, and side-builds from builders worldwide.
+            </p>
           </div>
 
-          <div className="relative w-full md:w-80">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="relative w-full md:w-72">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search projects, tags…"
-              className="w-full rounded-xl border border-border/60 bg-card/60 py-2.5 pl-9 pr-3 text-sm outline-none backdrop-blur-md transition-smooth focus:border-primary/60"
+              className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#ff6600] focus:ring-1 focus:ring-[#ff6600]/20"
             />
           </div>
         </div>
@@ -136,10 +157,10 @@ function Home() {
             <button
               key={c}
               onClick={() => setCat(c)}
-              className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-smooth ${
+              className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors ${
                 cat === c
-                  ? "border-primary bg-primary text-primary-foreground shadow-glow"
-                  : "border-border/60 bg-card/40 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                  ? "border-[#ff6600] bg-[#ff6600] text-white"
+                  : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700"
               }`}
             >
               {c}
@@ -148,28 +169,35 @@ function Home() {
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary-glow" /></div>
+          <div className="flex justify-center py-20">
+            <Loader2 className="h-6 w-6 animate-spin text-[#ff6600]" />
+          </div>
         ) : filtered.length === 0 ? (
-          <div className="rounded-2xl border border-border/60 bg-card/40 p-12 text-center text-muted-foreground">
+          <div className="rounded-xl border border-gray-200 bg-gray-50 p-12 text-center">
             {projects?.length === 0 ? (
               <>
-                <p className="text-base text-foreground">No projects yet — be the first.</p>
-                <Link to="/submit" className="mt-4 inline-flex rounded-full bg-gradient-primary px-5 py-2 text-sm font-medium text-primary-foreground shadow-glow">
+                <p className="text-base font-medium text-gray-900">No projects yet — be the first.</p>
+                <Link
+                  to="/submit"
+                  className="mt-4 inline-flex rounded-full bg-[#ff6600] px-5 py-2 text-sm font-medium text-white hover:bg-[#e55a00]"
+                >
                   Add your project
                 </Link>
               </>
             ) : (
-              <>No projects match that search.</>
+              <p className="text-gray-500">No projects match that search.</p>
             )}
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((p) => <ProjectCard key={p.id} project={p} />)}
+            {filtered.map((p) => (
+              <ProjectCard key={p.id} project={p} />
+            ))}
           </div>
         )}
       </section>
 
-      <footer className="border-t border-border/40 py-10 text-center text-xs text-muted-foreground">
+      <footer className="border-t border-gray-100 py-10 text-center text-sm text-gray-400">
         ProjectAtlas · One link for every project, skill, and qualification you've built.
       </footer>
     </div>
