@@ -660,6 +660,12 @@ function Dashboard() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setShowOnboarding(true)}
+              className="rounded-full border border-border/60 px-3 py-2 text-xs text-muted-foreground hover:border-primary/40 hover:text-foreground"
+            >
+              Change profile type
+            </button>
             <Link
               to="/submit"
               className="inline-flex items-center gap-2 rounded-full bg-gradient-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow transition-smooth hover:scale-105"
@@ -668,6 +674,7 @@ function Dashboard() {
             </Link>
           </div>
         </div>
+
 
         <ProfileLinkBanner userId={user.id} />
 
