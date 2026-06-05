@@ -399,8 +399,9 @@ function Profile() {
                 </p>
               )}
               <p className="mt-1.5 text-sm leading-relaxed line-clamp-2 text-gray-500">
-                {profile?.bio || "Building cool things with code."}
+                {profile?.headline || profile?.bio || "Building cool things."}
               </p>
+
             </div>
           </div>
 
