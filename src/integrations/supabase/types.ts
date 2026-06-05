@@ -14,6 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      profile_items: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          meta: Json
+          owner_id: string
+          position: number
+          published: boolean
+          subtitle: string | null
+          tags: string[]
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          meta?: Json
+          owner_id: string
+          position?: number
+          published?: boolean
+          subtitle?: string | null
+          tags?: string[]
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          meta?: Json
+          owner_id?: string
+          position?: number
+          published?: boolean
+          subtitle?: string | null
+          tags?: string[]
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profile_tags: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          label: string
+          owner_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          label: string
+          owner_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          label?: string
+          owner_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           about: string | null
@@ -21,9 +90,12 @@ export type Database = {
           created_at: string
           display_name: string | null
           github: string | null
+          headline: string | null
           id: string
           linkedin: string | null
           location: string | null
+          profile_type: string | null
+          tags: string[]
           twitter: string | null
           updated_at: string
           website: string | null
@@ -34,9 +106,12 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           github?: string | null
+          headline?: string | null
           id: string
           linkedin?: string | null
           location?: string | null
+          profile_type?: string | null
+          tags?: string[]
           twitter?: string | null
           updated_at?: string
           website?: string | null
@@ -47,9 +122,12 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           github?: string | null
+          headline?: string | null
           id?: string
           linkedin?: string | null
           location?: string | null
+          profile_type?: string | null
+          tags?: string[]
           twitter?: string | null
           updated_at?: string
           website?: string | null

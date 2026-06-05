@@ -3,8 +3,11 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { SiteNav } from "@/components/SiteNav";
+import { ProfileTypeOnboarding } from "@/components/ProfileTypeOnboarding";
+import { ProfileItemsManager } from "@/components/ProfileItemsManager";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, pickPalette } from "@/lib/auth";
+
 import {
   Eye,
   Plus,
@@ -67,7 +70,10 @@ type Profile = {
   twitter: string | null;
   linkedin: string | null;
   location: string | null;
+  profile_type: string | null;
+  headline: string | null;
 };
+
 
 const CATEGORIES = ["Productivity", "AI", "Developer Tools", "Finance", "Marketing", "Other"];
 
@@ -554,12 +560,19 @@ function Dashboard() {
     queryFn: async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("id, display_name, avatar_url, bio, about, website, github, twitter, linkedin, location")
+        .select("id, display_name, avatar_url, bio, about, website, github, twitter, linkedin, location, profile_type, headline")
         .eq("id", user!.id)
         .maybeSingle();
       return data as Profile | null;
     },
   });
+
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  useEffect(() => {
+    if (profileData && !profileData.profile_type) setShowOnboarding(true);
+  }, [profileData]);
+
+
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["my-projects", user?.id],
@@ -621,18 +634,38 @@ function Dashboard() {
   return (
     <div className="min-h-screen">
       <SiteNav />
+      {showOnboarding && (
+        <ProfileTypeOnboarding userId={user.id} onClose={() => setShowOnboarding(false)} />
+      )}
       <section className="mx-auto max-w-6xl px-6 py-12">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Dashboard</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Dashboard
+              {profileData?.profile_type && (
+                <span className="ml-2 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary-glow">
+                  {profileData.profile_type}
+                </span>
+              )}
+            </p>
             <h1 className="mt-1 font-display text-3xl font-semibold md:text-4xl">
               Welcome back,{" "}
               <span className="text-gradient">
                 {profileData?.display_name || user.email?.split("@")[0]}
               </span>
             </h1>
+            {profileData?.headline && (
+              <p className="mt-1 text-sm text-muted-foreground">{profileData.headline}</p>
+            )}
           </div>
+
           <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setShowOnboarding(true)}
+              className="rounded-full border border-border/60 px-3 py-2 text-xs text-muted-foreground hover:border-primary/40 hover:text-foreground"
+            >
+              Change profile type
+            </button>
             <Link
               to="/submit"
               className="inline-flex items-center gap-2 rounded-full bg-gradient-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow transition-smooth hover:scale-105"
@@ -641,6 +674,7 @@ function Dashboard() {
             </Link>
           </div>
         </div>
+
 
         <ProfileLinkBanner userId={user.id} />
 
@@ -764,7 +798,20 @@ function Dashboard() {
             </div>
           )}
         </div>
+
+        <div className="mt-12">
+          <div className="mb-4 flex items-end justify-between gap-4">
+            <div>
+              <h2 className="font-display text-xl font-semibold">Services, skills & qualifications</h2>
+              <p className="text-sm text-muted-foreground">
+                Add anything beyond project URLs — services you offer, skills you have, qualifications you've earned, and career highlights.
+              </p>
+            </div>
+          </div>
+          <ProfileItemsManager userId={user.id} profileType={profileData?.profile_type ?? null} />
+        </div>
       </section>
+
     </div>
   );
 }

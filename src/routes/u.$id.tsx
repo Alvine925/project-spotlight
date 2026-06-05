@@ -58,7 +58,20 @@ type ProfileData = {
   linkedin: string | null;
   location: string | null;
   created_at: string;
+  profile_type?: string | null;
+  headline?: string | null;
 };
+
+type PublicProfileItem = {
+  id: string;
+  type: "service" | "highlight" | "skill" | "qualification";
+  title: string;
+  subtitle: string | null;
+  body: string | null;
+  meta: Record<string, unknown>;
+  tags: string[];
+};
+
 
 function pseudoCount(seed: string, offset: number): number {
   let h = offset;
@@ -223,31 +236,45 @@ function ProjectCard({ project, index }: { project: PublicProject; index: number
   );
 }
 
+type TabKey = "projects" | "services" | "skills" | "qualifications" | "highlights" | "about";
+
 function Profile() {
   const { id } = Route.useParams();
   const [copied, setCopied] = useState(false);
-  const [tab, setTab] = useState<"projects" | "about">("projects");
+  const [tab, setTab] = useState<TabKey>("projects");
   const [showQr, setShowQr] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["profile", id],
     queryFn: async () => {
-      const [{ data: profile }, { data: projects }] = await Promise.all([
+      const [{ data: profile }, { data: projects }, { data: items }] = await Promise.all([
         supabase
           .from("profiles")
-          .select("id, display_name, avatar_url, bio, about, website, github, twitter, linkedin, location, created_at")
+          .select("id, display_name, avatar_url, bio, about, website, github, twitter, linkedin, location, created_at, profile_type, headline")
           .eq("id", id)
           .maybeSingle(),
         supabase.from("projects")
           .select("id, slug, name, tagline, url, category, tags, status, color_from, color_to, tech_stack, cover_image_url")
           .eq("owner_id", id).eq("published", true).order("created_at", { ascending: false }),
+        supabase.from("profile_items")
+          .select("id, type, title, subtitle, body, meta, tags")
+          .eq("owner_id", id).eq("published", true).order("position", { ascending: true }),
       ]);
-      return { profile: profile as ProfileData | null, projects: (projects ?? []) as PublicProject[] };
+      return {
+        profile: profile as ProfileData | null,
+        projects: (projects ?? []) as PublicProject[],
+        items: ((items ?? []) as unknown) as PublicProfileItem[],
+      };
     },
   });
 
   const name = data?.profile?.display_name || `dev-${id.slice(0, 6)}`;
   const allProjects = data?.projects ?? [];
+  const allItems = data?.items ?? [];
+  const services = allItems.filter((i) => i.type === "service");
+  const skills = allItems.filter((i) => i.type === "skill");
+  const qualifications = allItems.filter((i) => i.type === "qualification");
+  const highlights = allItems.filter((i) => i.type === "highlight");
   const initials = name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
   const [from, to] = pickPalette(id);
   const profileUrl = typeof window !== "undefined" ? window.location.href : "";
@@ -255,6 +282,16 @@ function Profile() {
   const categories = Array.from(new Set(allProjects.map((p) => p.category).filter(Boolean)));
   const profile = data?.profile;
   const hasSocials = profile?.website || profile?.github || profile?.twitter || profile?.linkedin;
+
+  const availableTabs: { key: TabKey; label: string; count?: number }[] = [
+    { key: "projects", label: "Projects", count: allProjects.length },
+    ...(services.length ? [{ key: "services" as TabKey, label: "Services", count: services.length }] : []),
+    ...(skills.length ? [{ key: "skills" as TabKey, label: "Skills", count: skills.length }] : []),
+    ...(qualifications.length ? [{ key: "qualifications" as TabKey, label: "Credentials", count: qualifications.length }] : []),
+    ...(highlights.length ? [{ key: "highlights" as TabKey, label: "Highlights", count: highlights.length }] : []),
+    { key: "about", label: "About" },
+  ];
+
 
   const copy = () => {
     navigator.clipboard.writeText(profileUrl).then(() => {
@@ -362,8 +399,9 @@ function Profile() {
                 </p>
               )}
               <p className="mt-1.5 text-sm leading-relaxed line-clamp-2 text-gray-500">
-                {profile?.bio || "Building cool things with code."}
+                {profile?.headline || profile?.bio || "Building cool things."}
               </p>
+
             </div>
           </div>
 
@@ -383,17 +421,20 @@ function Profile() {
         </section>
 
         {/* ── Tab bar ── */}
-        <div className="flex border-b border-gray-200 bg-white px-5">
-          {(["projects", "about"] as const).map((t) => (
+        <div className="flex overflow-x-auto border-b border-gray-200 bg-white px-5">
+          {availableTabs.map((t) => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`relative mr-6 pb-3 pt-3 text-sm font-semibold capitalize transition-colors ${
-                tab === t ? "text-[#ff6600]" : "text-gray-400 hover:text-gray-700"
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={`relative mr-6 shrink-0 pb-3 pt-3 text-sm font-semibold transition-colors ${
+                tab === t.key ? "text-[#ff6600]" : "text-gray-400 hover:text-gray-700"
               }`}
             >
-              {t}
-              {tab === t && (
+              {t.label}
+              {typeof t.count === "number" && (
+                <span className="ml-1 text-[10px] font-mono text-gray-300">{t.count}</span>
+              )}
+              {tab === t.key && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#ff6600]" />
               )}
             </button>
@@ -412,8 +453,97 @@ function Profile() {
                 allProjects.map((p, i) => <ProjectCard key={p.id} project={p} index={i} />)
               )}
             </div>
+          ) : tab === "services" ? (
+            <div className="space-y-3 py-2">
+              {services.map((s) => (
+                <div key={s.id} className="rounded-xl border border-gray-200 bg-white p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="font-display text-base font-bold text-gray-900">{s.title}</h3>
+                    {typeof s.meta.price === "string" && (
+                      <span className="shrink-0 rounded-full bg-[#ff6600]/10 px-2.5 py-0.5 text-xs font-semibold text-[#ff6600]">{String(s.meta.price)}</span>
+                    )}
+                  </div>
+                  {s.subtitle && <p className="mt-1 text-sm text-gray-500">{s.subtitle}</p>}
+                  {s.body && <p className="mt-2 text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">{s.body}</p>}
+                  {s.tags.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {s.tags.map((t) => (
+                        <span key={t} className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] text-gray-500">{t}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : tab === "skills" ? (
+            <div className="grid grid-cols-1 gap-2 py-2 sm:grid-cols-2">
+              {skills.map((s) => {
+                const level = Number(s.meta.level ?? 0);
+                return (
+                  <div key={s.id} className="rounded-xl border border-gray-200 bg-white p-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-sm text-gray-900">{s.title}</span>
+                      {level > 0 && (
+                        <span className="text-xs text-gray-400">
+                          {"●".repeat(level)}<span className="text-gray-200">{"●".repeat(5 - level)}</span>
+                        </span>
+                      )}
+                    </div>
+                    {s.subtitle && <p className="mt-0.5 text-xs text-gray-500">{s.subtitle}</p>}
+                    {typeof s.meta.years === "number" && (
+                      <p className="mt-0.5 text-[11px] text-gray-400">{String(s.meta.years)} yrs experience</p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : tab === "qualifications" ? (
+            <div className="space-y-2 py-2">
+              {qualifications.map((q) => (
+                <div key={q.id} className="rounded-xl border border-gray-200 bg-white p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="font-semibold text-sm text-gray-900">{q.title}</h3>
+                      {typeof q.meta.issuer === "string" && (
+                        <p className="text-xs text-gray-500">{String(q.meta.issuer)}</p>
+                      )}
+                    </div>
+                    {typeof q.meta.date === "string" && (
+                      <span className="text-xs text-gray-400">{String(q.meta.date)}</span>
+                    )}
+                  </div>
+                  {typeof q.meta.url === "string" && q.meta.url && (
+                    <a href={String(q.meta.url)} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-[#ff6600] hover:underline">
+                      Verify <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : tab === "highlights" ? (
+            <div className="space-y-3 py-2">
+              {highlights.map((h) => (
+                <div key={h.id} className="rounded-xl border border-gray-200 bg-white p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="font-semibold text-sm text-gray-900">{h.title}</h3>
+                      {(h.subtitle || typeof h.meta.org === "string") && (
+                        <p className="text-xs text-gray-500">
+                          {h.subtitle}{h.subtitle && h.meta.org ? " · " : ""}{typeof h.meta.org === "string" ? String(h.meta.org) : ""}
+                        </p>
+                      )}
+                    </div>
+                    {typeof h.meta.period === "string" && (
+                      <span className="shrink-0 text-xs text-gray-400">{String(h.meta.period)}</span>
+                    )}
+                  </div>
+                  {h.body && <p className="mt-2 text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">{h.body}</p>}
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="divide-y divide-gray-200">
+
 
               {/* About the user */}
               <div className="py-5">
