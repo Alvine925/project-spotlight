@@ -382,6 +382,42 @@ function ProjectDetail() {
                 </div>
               )}
 
+              {/* Client — only shown on freelance projects */}
+              {project.client_name && (
+                <div className="px-5 py-5">
+                  <h2 className="font-display text-base font-bold text-gray-900">Client</h2>
+                  <div className="mt-3 flex items-center gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#ff6600]/10 font-display text-sm font-black text-[#ff6600]">
+                      {project.client_name[0]?.toUpperCase()}
+                    </div>
+                    <div>
+                      {project.client_url ? (
+                        <a
+                          href={project.client_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-semibold text-gray-900 hover:text-[#ff6600] hover:underline"
+                        >
+                          {project.client_name}
+                        </a>
+                      ) : (
+                        <span className="font-semibold text-gray-900">{project.client_name}</span>
+                      )}
+                      {project.client_url && (
+                        <p className="text-xs text-gray-400">
+                          {project.client_url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {project.client_testimonial && (
+                    <blockquote className="mt-4 border-l-2 border-[#ff6600] pl-4 text-sm italic leading-relaxed text-gray-600">
+                      "{project.client_testimonial}"
+                    </blockquote>
+                  )}
+                </div>
+              )}
+
               {project.tech_stack?.length > 0 && (
                 <div className="px-5 py-5">
                   <h2 className="font-display text-base font-bold text-gray-900">Tech Stack</h2>

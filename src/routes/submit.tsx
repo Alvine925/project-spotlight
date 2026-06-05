@@ -60,6 +60,11 @@ function Submit() {
   const [err, setErr] = useState<string | null>(null);
   const [extracted, setExtracted] = useState<Extracted | null>(null);
 
+  const [isFreelance, setIsFreelance] = useState(false);
+  const [clientName, setClientName] = useState("");
+  const [clientUrl, setClientUrl] = useState("");
+  const [clientTestimonial, setClientTestimonial] = useState("");
+
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth", replace: true });
   }, [user, loading, navigate]);
@@ -123,6 +128,11 @@ function Submit() {
           cover_image_url: extracted.cover_image_url,
           status: "Live",
           published: true,
+          ...(isFreelance && clientName.trim() ? {
+            client_name: clientName.trim(),
+            client_url: clientUrl.trim() || null,
+            client_testimonial: clientTestimonial.trim() || null,
+          } : {}),
         } as never)
         .select("slug")
         .single();
@@ -302,6 +312,71 @@ function Submit() {
               />
             </div>
 
+            {/* ── Freelance toggle ── */}
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <label className="flex cursor-pointer items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-gray-800">Freelance / client work?</p>
+                  <p className="mt-0.5 text-xs text-gray-400">Optionally credit the client and add their testimonial.</p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={isFreelance}
+                  onClick={() => setIsFreelance((v) => !v)}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none ${
+                    isFreelance ? "bg-[#ff6600]" : "bg-gray-300"
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform ${
+                      isFreelance ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </label>
+
+              {isFreelance && (
+                <div className="mt-4 space-y-3">
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400">
+                      Client name <span className="text-[#ff6600]">*</span>
+                    </label>
+                    <input
+                      value={clientName}
+                      onChange={(e) => setClientName(e.target.value)}
+                      placeholder="Acme Corp"
+                      className={inputCls}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400">
+                      Client website <span className="text-gray-300">(optional)</span>
+                    </label>
+                    <input
+                      value={clientUrl}
+                      onChange={(e) => setClientUrl(e.target.value)}
+                      placeholder="https://acme.com"
+                      type="url"
+                      className={inputCls}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400">
+                      Client testimonial <span className="text-gray-300">(optional)</span>
+                    </label>
+                    <textarea
+                      value={clientTestimonial}
+                      onChange={(e) => setClientTestimonial(e.target.value)}
+                      placeholder="What the client said about working with you…"
+                      rows={3}
+                      className={`${inputCls} resize-none`}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="flex flex-col gap-2 sm:flex-row">
               <button
                 type="button"
@@ -314,7 +389,7 @@ function Submit() {
               <button
                 type="button"
                 onClick={onPublish}
-                disabled={saving}
+                disabled={saving || (isFreelance && !clientName.trim())}
                 className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#ff6600] py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#e55a00] disabled:opacity-60"
               >
                 {saving ? (
