@@ -560,12 +560,19 @@ function Dashboard() {
     queryFn: async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("id, display_name, avatar_url, bio, about, website, github, twitter, linkedin, location")
+        .select("id, display_name, avatar_url, bio, about, website, github, twitter, linkedin, location, profile_type, headline")
         .eq("id", user!.id)
         .maybeSingle();
       return data as Profile | null;
     },
   });
+
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  useEffect(() => {
+    if (profileData && !profileData.profile_type) setShowOnboarding(true);
+  }, [profileData]);
+
+
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["my-projects", user?.id],
