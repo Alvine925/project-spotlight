@@ -236,31 +236,45 @@ function ProjectCard({ project, index }: { project: PublicProject; index: number
   );
 }
 
+type TabKey = "projects" | "services" | "skills" | "qualifications" | "highlights" | "about";
+
 function Profile() {
   const { id } = Route.useParams();
   const [copied, setCopied] = useState(false);
-  const [tab, setTab] = useState<"projects" | "about">("projects");
+  const [tab, setTab] = useState<TabKey>("projects");
   const [showQr, setShowQr] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["profile", id],
     queryFn: async () => {
-      const [{ data: profile }, { data: projects }] = await Promise.all([
+      const [{ data: profile }, { data: projects }, { data: items }] = await Promise.all([
         supabase
           .from("profiles")
-          .select("id, display_name, avatar_url, bio, about, website, github, twitter, linkedin, location, created_at")
+          .select("id, display_name, avatar_url, bio, about, website, github, twitter, linkedin, location, created_at, profile_type, headline")
           .eq("id", id)
           .maybeSingle(),
         supabase.from("projects")
           .select("id, slug, name, tagline, url, category, tags, status, color_from, color_to, tech_stack, cover_image_url")
           .eq("owner_id", id).eq("published", true).order("created_at", { ascending: false }),
+        supabase.from("profile_items")
+          .select("id, type, title, subtitle, body, meta, tags")
+          .eq("owner_id", id).eq("published", true).order("position", { ascending: true }),
       ]);
-      return { profile: profile as ProfileData | null, projects: (projects ?? []) as PublicProject[] };
+      return {
+        profile: profile as ProfileData | null,
+        projects: (projects ?? []) as PublicProject[],
+        items: ((items ?? []) as unknown) as PublicProfileItem[],
+      };
     },
   });
 
   const name = data?.profile?.display_name || `dev-${id.slice(0, 6)}`;
   const allProjects = data?.projects ?? [];
+  const allItems = data?.items ?? [];
+  const services = allItems.filter((i) => i.type === "service");
+  const skills = allItems.filter((i) => i.type === "skill");
+  const qualifications = allItems.filter((i) => i.type === "qualification");
+  const highlights = allItems.filter((i) => i.type === "highlight");
   const initials = name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
   const [from, to] = pickPalette(id);
   const profileUrl = typeof window !== "undefined" ? window.location.href : "";
@@ -268,6 +282,16 @@ function Profile() {
   const categories = Array.from(new Set(allProjects.map((p) => p.category).filter(Boolean)));
   const profile = data?.profile;
   const hasSocials = profile?.website || profile?.github || profile?.twitter || profile?.linkedin;
+
+  const availableTabs: { key: TabKey; label: string; count?: number }[] = [
+    { key: "projects", label: "Projects", count: allProjects.length },
+    ...(services.length ? [{ key: "services" as TabKey, label: "Services", count: services.length }] : []),
+    ...(skills.length ? [{ key: "skills" as TabKey, label: "Skills", count: skills.length }] : []),
+    ...(qualifications.length ? [{ key: "qualifications" as TabKey, label: "Credentials", count: qualifications.length }] : []),
+    ...(highlights.length ? [{ key: "highlights" as TabKey, label: "Highlights", count: highlights.length }] : []),
+    { key: "about", label: "About" },
+  ];
+
 
   const copy = () => {
     navigator.clipboard.writeText(profileUrl).then(() => {
