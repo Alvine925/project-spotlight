@@ -17,6 +17,7 @@ import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UIdRouteImport } from './routes/u.$id'
 import { Route as ProjectSlugRouteImport } from './routes/project.$slug'
+import { Route as DemoSlugRouteImport } from './routes/demo.$slug'
 
 const SubmitRoute = SubmitRouteImport.update({
   id: '/submit',
@@ -58,6 +59,11 @@ const ProjectSlugRoute = ProjectSlugRouteImport.update({
   path: '/project/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DemoSlugRoute = DemoSlugRouteImport.update({
+  id: '/demo/$slug',
+  path: '/demo/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/settings': typeof SettingsRoute
   '/submit': typeof SubmitRoute
+  '/demo/$slug': typeof DemoSlugRoute
   '/project/$slug': typeof ProjectSlugRoute
   '/u/$id': typeof UIdRoute
 }
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/settings': typeof SettingsRoute
   '/submit': typeof SubmitRoute
+  '/demo/$slug': typeof DemoSlugRoute
   '/project/$slug': typeof ProjectSlugRoute
   '/u/$id': typeof UIdRoute
 }
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/settings': typeof SettingsRoute
   '/submit': typeof SubmitRoute
+  '/demo/$slug': typeof DemoSlugRoute
   '/project/$slug': typeof ProjectSlugRoute
   '/u/$id': typeof UIdRoute
 }
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/settings'
     | '/submit'
+    | '/demo/$slug'
     | '/project/$slug'
     | '/u/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/settings'
     | '/submit'
+    | '/demo/$slug'
     | '/project/$slug'
     | '/u/$id'
   id:
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/settings'
     | '/submit'
+    | '/demo/$slug'
     | '/project/$slug'
     | '/u/$id'
   fileRoutesById: FileRoutesById
@@ -130,6 +142,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   SettingsRoute: typeof SettingsRoute
   SubmitRoute: typeof SubmitRoute
+  DemoSlugRoute: typeof DemoSlugRoute
   ProjectSlugRoute: typeof ProjectSlugRoute
   UIdRoute: typeof UIdRoute
 }
@@ -192,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/demo/$slug': {
+      id: '/demo/$slug'
+      path: '/demo/$slug'
+      fullPath: '/demo/$slug'
+      preLoaderRoute: typeof DemoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -202,6 +222,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   SettingsRoute: SettingsRoute,
   SubmitRoute: SubmitRoute,
+  DemoSlugRoute: DemoSlugRoute,
   ProjectSlugRoute: ProjectSlugRoute,
   UIdRoute: UIdRoute,
 }

@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { SiteNav } from "@/components/SiteNav";
 import { ProfileTypeOnboarding } from "@/components/ProfileTypeOnboarding";
 import { ProfileItemsManager } from "@/components/ProfileItemsManager";
+import { AddWorkModal } from "@/components/AddWorkModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, pickPalette } from "@/lib/auth";
 
@@ -572,6 +573,7 @@ function Dashboard() {
   });
 
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showAddWork, setShowAddWork] = useState(false);
   useEffect(() => {
     if (profileData && !profileData.profile_type) setShowOnboarding(true);
   }, [profileData]);
@@ -637,7 +639,6 @@ function Dashboard() {
 
   const sidebarLinks = [
     { to: "/dashboard" as const, icon: LayoutDashboard, label: "Dashboard", active: true },
-    { to: "/submit" as const, icon: FolderOpen, label: "Add Work" },
     { to: "/settings" as const, icon: Settings, label: "Profile Settings" },
     { to: "/analytics" as const, icon: BarChart3, label: "Analytics" },
   ];
@@ -647,6 +648,9 @@ function Dashboard() {
       <SiteNav />
       {showOnboarding && (
         <ProfileTypeOnboarding userId={user.id} onClose={() => setShowOnboarding(false)} />
+      )}
+      {showAddWork && (
+        <AddWorkModal onClose={() => setShowAddWork(false)} onSuccess={() => refetch()} />
       )}
 
       <div className="flex">
@@ -667,6 +671,13 @@ function Dashboard() {
                 {link.label}
               </Link>
             ))}
+            <button
+              onClick={() => setShowAddWork(true)}
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            >
+              <FolderOpen className="h-4 w-4" />
+              Add Work
+            </button>
           </nav>
 
           <div className="border-t border-gray-100 pt-4 mt-4">
@@ -718,12 +729,12 @@ function Dashboard() {
             >
               Change profile type
             </button>
-            <Link
-              to="/submit"
+            <button
+              onClick={() => setShowAddWork(true)}
               className="inline-flex items-center gap-2 rounded-full bg-[#ff6600] px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#e55a00]"
             >
               <Plus className="h-4 w-4" /> Add Work
-            </Link>
+            </button>
           </div>
         </div>
 
@@ -746,12 +757,12 @@ function Dashboard() {
           ) : projects.length === 0 ? (
             <div className="mt-6 rounded-2xl border border-dashed border-border/60 bg-card/30 p-12 text-center">
               <p className="text-muted-foreground">You haven't added any work yet.</p>
-              <Link
-                to="/submit"
-                className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#ff6600] px-4 py-2 text-sm font-medium text-white"
+              <button
+                onClick={() => setShowAddWork(true)}
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#ff6600] px-4 py-2 text-sm font-medium text-white hover:bg-[#e55a00] transition-colors"
               >
-                <Plus className="h-4 w-4" /> Add your first project
-              </Link>
+                <Plus className="h-4 w-4" /> Add your first piece of work
+              </button>
             </div>
           ) : (
             <div className="mt-4 overflow-hidden rounded-2xl border border-border/60 bg-card/40 shadow-elegant">

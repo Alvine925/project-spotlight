@@ -119,6 +119,8 @@ function Home() {
     });
   }, [projects, query, cat]);
 
+  const [demoTab, setDemoTab] = useState<"Projects" | "Services" | "Skills" | "About">("Projects");
+
   return (
     <div className="min-h-screen bg-white">
       <SiteNav />
@@ -203,62 +205,134 @@ function Home() {
             </div>
             {/* Tabs */}
             <div className="flex gap-5 border-b border-gray-100 px-6 text-sm">
-              {["Projects", "Services", "Skills", "About"].map((t, i) => (
-                <button key={t} className={`relative pb-2.5 pt-3 font-semibold ${i === 0 ? "text-[#ff6600]" : "text-gray-400"}`}>
+              {(["Projects", "Services", "Skills", "About"] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setDemoTab(t)}
+                  className={`relative pb-2.5 pt-3 font-semibold transition-colors ${demoTab === t ? "text-[#ff6600]" : "text-gray-400 hover:text-gray-700"}`}
+                >
                   {t}
-                  {i === 0 && <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#ff6600]" />}
+                  {demoTab === t && <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#ff6600]" />}
                 </button>
               ))}
             </div>
-            {/* Project grid */}
-            <div className="space-y-2.5 p-4">
-              {[
-                {
-                  name: "RepoRadar",
-                  tag: "AI Tool",
-                  status: "Live",
-                  desc: "AI-powered GitHub analytics — commit trends, PR heatmaps & contributor insights.",
-                  img: "/demo-reporadar.png",
-                  views: "2.4k views",
-                },
-                {
-                  name: "ShipFast CLI",
-                  tag: "App",
-                  status: "Live",
-                  desc: "Zero-config deployment CLI. One command from local to production in under 60s.",
-                  img: "/demo-shipfast.png",
-                  views: "1.1k views",
-                },
-                {
-                  name: "AnalyticsPro",
-                  tag: "App",
-                  status: "WIP",
-                  desc: "Product analytics for indie SaaS — funnels, retention cohorts & revenue dashboards.",
-                  img: "/demo-analyticspro.png",
-                  views: "874 views",
-                },
-              ].map((p) => (
-                <div key={p.name} className="flex items-center gap-4 rounded-xl border border-gray-100 p-3 transition-colors hover:border-gray-200 hover:bg-gray-50/50">
-                  <div className="h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-gray-100">
-                    <img src={p.img} alt={p.name} className="h-full w-full object-cover" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-display text-sm font-bold text-gray-900">{p.name}</p>
-                    <p className="mt-0.5 text-[11px] text-gray-400 leading-snug line-clamp-1">{p.desc}</p>
-                    <div className="mt-1.5 flex items-center gap-2">
-                      <span className="rounded-full bg-[#ff6600]/10 px-2 py-0.5 text-[10px] font-semibold text-[#ff6600]">{p.tag}</span>
-                      <span className={`flex items-center gap-1 text-[10px] font-semibold ${p.status === "Live" ? "text-green-600" : "text-amber-600"}`}>
-                        <span className={`h-1.5 w-1.5 rounded-full ${p.status === "Live" ? "bg-green-500" : "bg-amber-500"}`} />
-                        {p.status}
-                      </span>
-                      <span className="text-[10px] text-gray-300">·</span>
-                      <span className="text-[10px] text-gray-400">{p.views}</span>
+
+            {/* ── Projects tab ── */}
+            {demoTab === "Projects" && (
+              <div className="space-y-2.5 p-4">
+                {[
+                  { name: "RepoRadar", slug: "reporadar", tag: "AI Tool", status: "Live", desc: "AI-powered GitHub analytics — commit trends, PR heatmaps & contributor insights.", img: "/demo-reporadar.png", views: "2.4k views" },
+                  { name: "ShipFast CLI", slug: "shipfast-cli", tag: "App", status: "Live", desc: "Zero-config deployment CLI. One command from local to production in under 60s.", img: "/demo-shipfast.png", views: "1.1k views" },
+                  { name: "AnalyticsPro", slug: "analyticspro", tag: "App", status: "WIP", desc: "Product analytics for indie SaaS — funnels, retention cohorts & revenue dashboards.", img: "/demo-analyticspro.png", views: "874 views" },
+                ].map((p) => (
+                  <Link key={p.name} to="/demo/$slug" params={{ slug: p.slug }} className="flex items-center gap-4 rounded-xl border border-gray-100 p-3 transition-colors hover:border-[#ff6600]/30 hover:bg-orange-50/30 cursor-pointer">
+                    <div className="h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                      <img src={p.img} alt={p.name} className="h-full w-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-display text-sm font-bold text-gray-900">{p.name}</p>
+                      <p className="mt-0.5 text-[11px] text-gray-400 leading-snug line-clamp-1">{p.desc}</p>
+                      <div className="mt-1.5 flex items-center gap-2">
+                        <span className="rounded-full bg-[#ff6600]/10 px-2 py-0.5 text-[10px] font-semibold text-[#ff6600]">{p.tag}</span>
+                        <span className={`flex items-center gap-1 text-[10px] font-semibold ${p.status === "Live" ? "text-green-600" : "text-amber-600"}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${p.status === "Live" ? "bg-green-500" : "bg-amber-500"}`} />
+                          {p.status}
+                        </span>
+                        <span className="text-[10px] text-gray-300">·</span>
+                        <span className="text-[10px] text-gray-400">{p.views}</span>
+                      </div>
+                    </div>
+                    <ArrowRight className="h-4 w-4 shrink-0 text-gray-300" />
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            {/* ── Services tab ── */}
+            {demoTab === "Services" && (
+              <div className="space-y-2.5 p-4">
+                {[
+                  { name: "Full-Stack Web Development", rate: "$150 / hr", desc: "End-to-end web apps using React, Node.js, and PostgreSQL. From MVP to production.", tags: ["React", "TypeScript", "Node.js"], avail: "Open" },
+                  { name: "API Design & Integration", rate: "$120 / hr", desc: "REST and GraphQL API design, third-party integrations, and webhook systems.", tags: ["REST", "GraphQL", "OpenAI"], avail: "Open" },
+                  { name: "Technical Code Review", rate: "$100 / hr", desc: "Architecture review, performance audits, and security checks for existing codebases.", tags: ["Consulting", "Security"], avail: "Limited" },
+                ].map((s) => (
+                  <div key={s.name} className="rounded-xl border border-gray-100 p-4 transition-colors hover:border-gray-200">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="font-display text-sm font-bold text-gray-900">{s.name}</p>
+                          <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${s.avail === "Open" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>{s.avail}</span>
+                        </div>
+                        <p className="mt-0.5 text-[11px] text-gray-400 leading-snug">{s.desc}</p>
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {s.tags.map((t) => <span key={t} className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-500">{t}</span>)}
+                        </div>
+                      </div>
+                      <span className="shrink-0 rounded-lg bg-[#ff6600]/10 px-2.5 py-1 text-xs font-bold text-[#ff6600]">{s.rate}</span>
                     </div>
                   </div>
-                  <ArrowRight className="h-4 w-4 shrink-0 text-gray-300" />
+                ))}
+              </div>
+            )}
+
+            {/* ── Skills tab ── */}
+            {demoTab === "Skills" && (
+              <div className="p-4 space-y-4">
+                {[
+                  { category: "Languages", items: [{ name: "TypeScript", level: 95 }, { name: "Python", level: 85 }, { name: "Go", level: 70 }] },
+                  { category: "Frontend", items: [{ name: "React", level: 98 }, { name: "Tailwind CSS", level: 92 }, { name: "Next.js", level: 88 }] },
+                  { category: "Backend & Infra", items: [{ name: "Node.js", level: 90 }, { name: "PostgreSQL", level: 87 }, { name: "Docker", level: 80 }, { name: "AWS", level: 75 }] },
+                ].map((group) => (
+                  <div key={group.category}>
+                    <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400">{group.category}</p>
+                    <div className="space-y-2">
+                      {group.items.map((skill) => (
+                        <div key={skill.name} className="flex items-center gap-3">
+                          <span className="w-24 shrink-0 text-xs font-medium text-gray-700">{skill.name}</span>
+                          <div className="flex-1 h-1.5 rounded-full bg-gray-100">
+                            <div className="h-1.5 rounded-full bg-[#ff6600]" style={{ width: `${skill.level}%` }} />
+                          </div>
+                          <span className="w-8 text-right text-[10px] text-gray-400">{skill.level}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* ── About tab ── */}
+            {demoTab === "About" && (
+              <div className="p-4 space-y-4">
+                <div className="rounded-xl bg-gray-50 p-4">
+                  <p className="text-sm leading-relaxed text-gray-600">
+                    Hey — I'm Jordan. I'm a full-stack developer based in San Francisco, building AI-powered tools for developers. I started coding at 16, spent 3 years at a fintech startup, then went indie in 2022. I currently run three SaaS products generating $8k MRR.
+                  </p>
+                  <p className="mt-3 text-sm leading-relaxed text-gray-600">
+                    I'm obsessed with developer experience, fast iteration loops, and shipping things that actually get used. When I'm not building, I'm writing about indie hacking and AI tooling.
+                  </p>
                 </div>
-              ))}
-            </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { label: "Years exp.", value: "5+" },
+                    { label: "Products live", value: "3" },
+                    { label: "MRR", value: "$8k" },
+                  ].map((m) => (
+                    <div key={m.label} className="rounded-lg border border-gray-100 bg-white p-3 text-center">
+                      <p className="font-display text-xl font-black text-gray-900">{m.value}</p>
+                      <p className="mt-0.5 text-[10px] font-medium uppercase tracking-wider text-gray-400">{m.label}</p>
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Education</p>
+                  <div className="rounded-lg border border-gray-100 bg-white px-4 py-3">
+                    <p className="text-sm font-semibold text-gray-800">B.Sc. Computer Science — UC Berkeley</p>
+                    <p className="text-xs text-gray-400">Graduated 2020 · GPA 3.8</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
