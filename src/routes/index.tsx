@@ -170,7 +170,7 @@ function Home() {
       </section>
 
       <footer className="border-t border-border/40 py-10 text-center text-xs text-muted-foreground">
-        ProjectAtlas · An AI-powered home for the projects developers actually build.
+        ProjectAtlas · One link for every project, skill, and qualification you've built.
       </footer>
     </div>
   );
