@@ -213,22 +213,46 @@ function Home() {
             {/* Project grid */}
             <div className="space-y-2.5 p-4">
               {[
-                { name: "RepoRadar", tag: "AI Tool", status: "Live", cover: "#3b82f6" },
-                { name: "ShipFast CLI", tag: "Developer Tool", status: "Live", cover: "#8b5cf6" },
-                { name: "AnalyticsPro", tag: "SaaS", status: "WIP", cover: "#10b981" },
+                {
+                  name: "RepoRadar",
+                  tag: "AI Tool",
+                  status: "Live",
+                  desc: "AI-powered GitHub analytics — commit trends, PR heatmaps & contributor insights.",
+                  img: "/demo-reporadar.png",
+                  views: "2.4k views",
+                },
+                {
+                  name: "ShipFast CLI",
+                  tag: "App",
+                  status: "Live",
+                  desc: "Zero-config deployment CLI. One command from local to production in under 60s.",
+                  img: "/demo-shipfast.png",
+                  views: "1.1k views",
+                },
+                {
+                  name: "AnalyticsPro",
+                  tag: "App",
+                  status: "WIP",
+                  desc: "Product analytics for indie SaaS — funnels, retention cohorts & revenue dashboards.",
+                  img: "/demo-analyticspro.png",
+                  views: "874 views",
+                },
               ].map((p) => (
-                <div key={p.name} className="flex items-center gap-4 rounded-xl border border-gray-100 p-3">
-                  <div className="h-14 w-20 shrink-0 rounded-lg" style={{ background: p.cover + "22" }}>
-                    <div className="h-full w-full rounded-lg" style={{ background: `linear-gradient(135deg, ${p.cover}33, ${p.cover}11)` }} />
+                <div key={p.name} className="flex items-center gap-4 rounded-xl border border-gray-100 p-3 transition-colors hover:border-gray-200 hover:bg-gray-50/50">
+                  <div className="h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                    <img src={p.img} alt={p.name} className="h-full w-full object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-display text-sm font-bold text-gray-900">{p.name}</p>
-                    <div className="mt-1 flex items-center gap-2">
+                    <p className="mt-0.5 text-[11px] text-gray-400 leading-snug line-clamp-1">{p.desc}</p>
+                    <div className="mt-1.5 flex items-center gap-2">
                       <span className="rounded-full bg-[#ff6600]/10 px-2 py-0.5 text-[10px] font-semibold text-[#ff6600]">{p.tag}</span>
                       <span className={`flex items-center gap-1 text-[10px] font-semibold ${p.status === "Live" ? "text-green-600" : "text-amber-600"}`}>
                         <span className={`h-1.5 w-1.5 rounded-full ${p.status === "Live" ? "bg-green-500" : "bg-amber-500"}`} />
                         {p.status}
                       </span>
+                      <span className="text-[10px] text-gray-300">·</span>
+                      <span className="text-[10px] text-gray-400">{p.views}</span>
                     </div>
                   </div>
                   <ArrowRight className="h-4 w-4 shrink-0 text-gray-300" />

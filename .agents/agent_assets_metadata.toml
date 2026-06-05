@@ -1,0 +1,20 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "-Qry54dMd4NriZf7z6h_8"
+uri = "file://attached_assets/generated_images/clean_modern_analytics_saas_4f2f.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "iOR3VZxnJAZ9kRs9ru1Pn"
+uri = "file://attached_assets/generated_images/clean_terminal_cli_tool_d106.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "7sdmZMok9T2P7Nm79ubX8"
+uri = "file://attached_assets/generated_images/clean_minimal_dark_dashboard_5b0a.png"
+type = "image"
+title = "generated_image"
