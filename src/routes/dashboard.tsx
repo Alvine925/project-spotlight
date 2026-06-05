@@ -28,6 +28,10 @@ import {
   Linkedin,
   MapPin,
   ChevronUp,
+  LayoutDashboard,
+  FolderOpen,
+  Settings,
+  LogOut,
 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
@@ -75,7 +79,7 @@ type Profile = {
 };
 
 
-const CATEGORIES = ["Productivity", "AI", "Developer Tools", "Finance", "Marketing", "Other"];
+const CATEGORIES = ["App", "Website", "AI Tool", "Design", "Photography", "Branding", "Writing", "Architecture", "Video", "Marketing", "Other"];
 
 const inputCls =
   "w-full rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#ff6600]/50 focus:ring-1 focus:ring-[#ff6600]/15";
@@ -631,13 +635,61 @@ function Dashboard() {
   const viewMap = data?.viewMap ?? {};
   const totalViews = Object.values(viewMap).reduce((a, b) => a + b, 0);
 
+  const sidebarLinks = [
+    { to: "/dashboard" as const, icon: LayoutDashboard, label: "Dashboard", active: true },
+    { to: "/submit" as const, icon: FolderOpen, label: "Add Work" },
+    { to: "/settings" as const, icon: Settings, label: "Profile Settings" },
+    { to: "/analytics" as const, icon: BarChart3, label: "Analytics" },
+  ];
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       <SiteNav />
       {showOnboarding && (
         <ProfileTypeOnboarding userId={user.id} onClose={() => setShowOnboarding(false)} />
       )}
-      <section className="mx-auto max-w-6xl px-6 py-12">
+
+      <div className="flex">
+        {/* ── Sidebar ── */}
+        <aside className="hidden w-56 shrink-0 flex-col border-r border-gray-200 bg-white px-4 py-8 md:flex" style={{ minHeight: "calc(100vh - 64px)" }}>
+          <nav className="flex flex-1 flex-col gap-1">
+            {sidebarLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                  link.active
+                    ? "bg-[#ff6600]/10 text-[#ff6600]"
+                    : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+                }`}
+              >
+                <link.icon className="h-4 w-4" />
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="border-t border-gray-100 pt-4 mt-4">
+            <Link
+              to="/u/$id"
+              params={{ id: user.id }}
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-xs text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+            >
+              <Eye className="h-4 w-4" />
+              View public profile
+            </Link>
+            <button
+              onClick={() => supabase.auth.signOut()}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            >
+              <LogOut className="h-4 w-4" />
+              Sign out
+            </button>
+          </div>
+        </aside>
+
+        {/* ── Main content ── */}
+        <section className="flex-1 min-w-0 px-6 py-10 md:px-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -668,9 +720,9 @@ function Dashboard() {
             </button>
             <Link
               to="/submit"
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow transition-smooth hover:scale-105"
+              className="inline-flex items-center gap-2 rounded-full bg-[#ff6600] px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#e55a00]"
             >
-              <Plus className="h-4 w-4" /> New project
+              <Plus className="h-4 w-4" /> Add Work
             </Link>
           </div>
         </div>
@@ -680,23 +732,23 @@ function Dashboard() {
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <EditProfileCard profile={profileData ?? null} userId={user.id} />
-          <Stat label="Projects" value={projects.length} icon={Eye} />
+          <Stat label="Total work" value={projects.length} icon={Eye} />
           <Stat label="Total views" value={totalViews} icon={BarChart3} />
           <Stat label="Published" value={projects.filter((p) => p.published).length} icon={ExternalLink} />
         </div>
 
         <div className="mt-10">
-          <h2 className="font-display text-xl font-semibold">Your projects</h2>
+          <h2 className="font-display text-xl font-semibold">Your work</h2>
           {isLoading ? (
             <div className="flex justify-center py-12">
               <Loader2 className="h-5 w-5 animate-spin text-primary-glow" />
             </div>
           ) : projects.length === 0 ? (
             <div className="mt-6 rounded-2xl border border-dashed border-border/60 bg-card/30 p-12 text-center">
-              <p className="text-muted-foreground">You haven't added any projects yet.</p>
+              <p className="text-muted-foreground">You haven't added any work yet.</p>
               <Link
                 to="/submit"
-                className="mt-4 inline-flex items-center gap-2 rounded-full bg-gradient-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow"
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#ff6600] px-4 py-2 text-sm font-medium text-white"
               >
                 <Plus className="h-4 w-4" /> Add your first project
               </Link>
@@ -810,7 +862,9 @@ function Dashboard() {
           </div>
           <ProfileItemsManager userId={user.id} profileType={profileData?.profile_type ?? null} />
         </div>
-      </section>
+        </section>
+        {/* end flex */}
+      </div>
 
     </div>
   );

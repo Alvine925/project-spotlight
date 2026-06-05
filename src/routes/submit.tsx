@@ -58,7 +58,8 @@ const EMPTY_MANUAL: Manual = {
   status: "Live",
 };
 
-const STATUS_OPTIONS = ["Live", "In Progress", "Beta", "Archived"];
+const CATEGORIES = ["App", "Website", "AI Tool", "Design", "Photography", "Branding", "Writing", "Architecture", "Video", "Marketing", "Other"];
+const STATUS_OPTIONS = ["Live", "WIP", "Beta", "Archived"];
 
 const inputCls =
   "w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#ff6600] focus:ring-1 focus:ring-[#ff6600]/20";
@@ -270,7 +271,7 @@ function Submit() {
         {/* ── Header ── */}
         <div className="mb-8 text-center">
           <h1 className="font-display text-3xl font-bold text-gray-900 md:text-4xl">
-            Add your project
+            Add your work
           </h1>
           <p className="mx-auto mt-3 max-w-md text-sm text-gray-500">
             Paste a URL for instant AI analysis, or fill in all the details yourself.
@@ -367,7 +368,10 @@ function Submit() {
                 </Field>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <Field label="Category">
-                    <input value={extracted.category} onChange={(e) => setExtracted({ ...extracted, category: e.target.value })} className={inputCls} />
+                    <select value={extracted.category} onChange={(e) => setExtracted({ ...extracted, category: e.target.value })} className={inputCls}>
+                      <option value="">— Select —</option>
+                      {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                    </select>
                   </Field>
                   <Field label="Tags" hint="comma-separated">
                     <input value={extracted.tags.join(", ")} onChange={(e) => setExtracted({ ...extracted, tags: e.target.value.split(",").map((t) => t.trim()).filter(Boolean) })} className={inputCls} />
@@ -438,7 +442,10 @@ function Submit() {
 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <Field label="Category">
-                      <input value={manual.category} onChange={setM("category")} placeholder="Developer Tool" className={inputCls} />
+                      <select value={manual.category} onChange={setM("category")} className={inputCls}>
+                        <option value="">— Select —</option>
+                        {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                      </select>
                     </Field>
                     <Field label="Status">
                       <select value={manual.status} onChange={setM("status")} className={inputCls}>

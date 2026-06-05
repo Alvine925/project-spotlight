@@ -1,0 +1,250 @@
+1. Landing Page (Marketing Page)
+Purpose
+
+Explain the product and convert users to sign up.
+
+Layout
+
+Top Nav
+
+Logo (left)
+Features
+Examples
+Sign in
+CTA button: “Create your page”
+Hero Section
+Headline: “Show your projects, not just your links”
+Subtext: short explanation of project-first portfolios
+CTA buttons:
+Create free page
+View examples
+Demo Preview Section
+Mock profile page preview (important)
+Shows:
+profile header
+project grid
+Features Section
+
+3–5 cards:
+
+Project-based profiles
+Clean portfolio pages
+Shareable links
+Image + proof support
+Example Profiles
+3 sample profiles (developers, founders, freelancers)
+Final CTA
+“Build your portfolio in minutes”
+2. Sign Up / Login Page
+Simple layout
+Left: short pitch
+Right: login box
+Options:
+Continue with Google
+Email + password
+
+After signup → onboarding
+
+3. Onboarding Screen (Critical)
+Step 1: Basic Profile
+
+Fields:
+
+Full name
+Username (creates URL: /u/username)
+Role (dropdown: Developer, Founder, Designer, Freelancer)
+Short bio
+Profile image upload
+
+Button: “Continue”
+
+Step 2: Optional Social Links
+GitHub
+Twitter
+LinkedIn
+(can skip)
+
+Button: “Finish setup”
+
+After this → dashboard
+
+4. Dashboard (Main Control Panel)
+Layout
+
+Left Sidebar
+
+Dashboard
+Projects
+Profile Settings
+Analytics (later)
+Logout
+Main Area (Dashboard Home)
+
+Top section:
+
+Profile preview card
+Public link button: “View my page”
+Projects Overview
+Total projects count
+Recent project list
+
+Button:
+
+“+ Add New Project”
+5. Add Project Screen
+
+This is the core action screen.
+
+Form layout (clean single column)
+
+Fields:
+
+Project Title
+Short Description (max 2 lines)
+Long Description (optional but expandable)
+Cover Image Upload (very important)
+Live Link (URL)
+Category dropdown:
+App
+Website
+AI Tool
+Design
+Other
+Tags (chips input)
+Status:
+Live
+WIP
+Archived
+
+Button:
+
+“Publish Project”
+
+Secondary:
+
+Save draft
+
+After submit → redirect to project page
+
+6. Projects List Page
+Grid layout
+
+Each project card:
+
+Image thumbnail
+Title
+Short description
+Status badge (Live/WIP)
+Buttons:
+Edit
+View
+
+Top bar:
+
+Search projects
+Filter by category
+
+Button:
+
+Add project
+7. Project Detail Page (VERY IMPORTANT DIFFERENTIATOR)
+
+This is what Linktree does NOT have.
+
+Layout
+Header Section
+Project title
+Status badge
+Live link button
+Hero Media
+Large image or gallery
+Description Section
+Full description
+Project Info Sidebar
+Category
+Tags
+Date created
+Tech stack (optional later)
+Proof Section (your advantage)
+
+Optional fields:
+
+Users
+Revenue
+Downloads
+GitHub stars
+CTA Section
+“View live project”
+“Share project”
+8. Public Profile Page (CORE PRODUCT PAGE)
+
+This is what people share.
+
+Layout
+Top Profile Section
+Profile image
+Name
+Role
+Bio
+
+Buttons:
+
+Social links (GitHub, Twitter, LinkedIn)
+Featured Projects Section
+
+Grid layout:
+
+Each project card:
+
+Image
+Title
+Short description
+Click → project detail page OR external link
+Optional Section
+“About” expanded
+Skills/tags
+Footer
+“Powered by your product name”
+9. Settings Page
+Profile Settings
+Name
+Bio
+Role
+Image
+Account Settings
+Email
+Password
+Page Settings
+Theme (light/dark)
+Custom username
+Custom domain (later stage)
+10. Analytics Page (Later but important)
+
+Per profile:
+
+Page views
+Project clicks
+Most viewed project
+
+Simple charts:
+
+Views over time
+Click-through rate per project
+11. Empty States (important for UX)
+No projects yet
+
+Message:
+
+“You haven’t added any projects yet”
+Button:
+“Add your first project”
+12. Public Share Preview Card (for social media)
+
+When someone shares a profile:
+
+Auto-generated card:
+
+Name
+Title (e.g. “Developer Portfolio”)
+Number of projects
+Branding
