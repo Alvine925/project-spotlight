@@ -58,7 +58,20 @@ type ProfileData = {
   linkedin: string | null;
   location: string | null;
   created_at: string;
+  profile_type?: string | null;
+  headline?: string | null;
 };
+
+type PublicProfileItem = {
+  id: string;
+  type: "service" | "highlight" | "skill" | "qualification";
+  title: string;
+  subtitle: string | null;
+  body: string | null;
+  meta: Record<string, unknown>;
+  tags: string[];
+};
+
 
 function pseudoCount(seed: string, offset: number): number {
   let h = offset;
