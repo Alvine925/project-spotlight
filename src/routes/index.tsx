@@ -58,11 +58,11 @@ function Home() {
 
       {/* ─── Hero ─── */}
       <section className="border-b border-gray-100">
-        <div className="mx-auto max-w-4xl px-6 pb-24 pt-24 md:pt-32">
+        <div className="mx-auto max-w-4xl px-4 pb-16 pt-16 sm:px-6 sm:pb-24 sm:pt-24 md:pt-32">
           <p className="mb-5 text-sm font-medium text-[#ff6600]">
             For developers, designers, freelancers &amp; creatives
           </p>
-          <h1 className="font-display text-5xl font-bold leading-[1.08] tracking-tight text-gray-900 md:text-7xl">
+          <h1 className="font-display text-4xl font-bold leading-[1.08] tracking-tight text-gray-900 sm:text-5xl md:text-7xl">
             Show your projects,<br />
             <span className="text-[#ff6600]">not just your links.</span>
           </h1>
@@ -72,17 +72,17 @@ function Home() {
             All from one link.
           </p>
 
-          <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+          <div className="mt-8 flex flex-col items-stretch gap-3 sm:mt-10 sm:flex-row sm:items-center sm:gap-4">
             <Link
               to="/auth"
-              className="inline-flex items-center gap-2 rounded-full bg-[#ff6600] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#e55a00]"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#ff6600] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#e55a00]"
             >
               Create free page <ArrowRight className="h-4 w-4" />
             </Link>
             <UrlSubmit />
           </div>
 
-          <div className="mt-8 flex flex-wrap gap-x-8 gap-y-2 text-sm text-gray-400">
+          <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-400">
             <span>Your own profile page</span>
             <span>Projects, skills &amp; qualifications</span>
             <span>Built-in click analytics</span>
