@@ -58,11 +58,11 @@ function Home() {
 
       {/* ─── Hero ─── */}
       <section className="border-b border-gray-100">
-        <div className="mx-auto max-w-4xl px-6 pb-24 pt-24 md:pt-32">
+        <div className="mx-auto max-w-4xl px-4 pb-16 pt-16 sm:px-6 sm:pb-24 sm:pt-24 md:pt-32">
           <p className="mb-5 text-sm font-medium text-[#ff6600]">
             For developers, designers, freelancers &amp; creatives
           </p>
-          <h1 className="font-display text-5xl font-bold leading-[1.08] tracking-tight text-gray-900 md:text-7xl">
+          <h1 className="font-display text-4xl font-bold leading-[1.08] tracking-tight text-gray-900 sm:text-5xl md:text-7xl">
             Show your projects,<br />
             <span className="text-[#ff6600]">not just your links.</span>
           </h1>
@@ -72,17 +72,17 @@ function Home() {
             All from one link.
           </p>
 
-          <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+          <div className="mt-8 flex flex-col items-stretch gap-3 sm:mt-10 sm:flex-row sm:items-center sm:gap-4">
             <Link
               to="/auth"
-              className="inline-flex items-center gap-2 rounded-full bg-[#ff6600] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#e55a00]"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#ff6600] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#e55a00]"
             >
               Create free page <ArrowRight className="h-4 w-4" />
             </Link>
             <UrlSubmit />
           </div>
 
-          <div className="mt-8 flex flex-wrap gap-x-8 gap-y-2 text-sm text-gray-400">
+          <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-400">
             <span>Your own profile page</span>
             <span>Projects, skills &amp; qualifications</span>
             <span>Built-in click analytics</span>
@@ -91,10 +91,10 @@ function Home() {
       </section>
 
       {/* ─── Demo Preview ─── */}
-      <section className="border-b border-gray-100 py-20">
-        <div className="mx-auto max-w-5xl px-6">
-          <div className="mb-12">
-            <h2 className="font-display text-3xl font-bold text-gray-900 md:text-4xl">
+      <section className="border-b border-gray-100 py-14 sm:py-20">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <div className="mb-10 sm:mb-12">
+            <h2 className="font-display text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl">
               A portfolio that actually shows your work
             </h2>
             <p className="mt-3 max-w-xl text-gray-500">
@@ -104,26 +104,26 @@ function Home() {
 
           <div className="mx-auto max-w-3xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
             {/* Profile header */}
-            <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-              <div className="flex items-center gap-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#ff6600] to-[#ff9500] font-display text-base font-black text-white">
+            <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-4 py-4 sm:px-6">
+              <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#ff6600] to-[#ff9500] font-display text-base font-black text-white">
                   J
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="font-display text-sm font-bold text-gray-900">Jordan Kim</p>
-                  <p className="text-xs text-gray-400">Full-Stack Developer · San Francisco</p>
+                  <p className="truncate text-xs text-gray-400">Full-Stack Developer · San Francisco</p>
                 </div>
               </div>
-              <span className="rounded-full bg-[#ff6600]/10 px-2.5 py-0.5 text-[10px] font-semibold text-[#ff6600]">Developer</span>
+              <span className="shrink-0 rounded-full bg-[#ff6600]/10 px-2.5 py-0.5 text-[10px] font-semibold text-[#ff6600]">Developer</span>
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-5 border-b border-gray-100 px-6 text-sm">
+            <div className="flex gap-5 overflow-x-auto border-b border-gray-100 px-4 text-sm sm:px-6">
               {(["Projects", "Services", "Skills", "About"] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => setDemoTab(t)}
-                  className={`relative pb-2.5 pt-3 font-semibold transition-colors ${demoTab === t ? "text-[#ff6600]" : "text-gray-400 hover:text-gray-700"}`}
+                  className={`relative shrink-0 pb-2.5 pt-3 font-semibold transition-colors ${demoTab === t ? "text-[#ff6600]" : "text-gray-400 hover:text-gray-700"}`}
                 >
                   {t}
                   {demoTab === t && <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#ff6600]" />}
@@ -140,8 +140,8 @@ function Home() {
                   { name: "AnalyticsPro", slug: "analyticspro", tag: "App", status: "WIP", desc: "Product analytics for indie SaaS — funnels, retention cohorts & revenue dashboards.", img: "/demo-analyticspro.png", views: "874 views" },
                 ].map((p) => (
                   <Link key={p.name} to="/demo/$slug" params={{ slug: p.slug }}
-                    className="flex items-center gap-4 rounded-xl p-3 transition-colors hover:bg-gray-50">
-                    <div className="h-12 w-18 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                    className="flex items-center gap-3 rounded-xl p-3 transition-colors hover:bg-gray-50 sm:gap-4">
+                    <div className="h-12 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-100 sm:w-20">
                       <img src={p.img} alt={p.name} className="h-full w-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -371,10 +371,10 @@ function Home() {
       </section>
 
       {/* ─── Discover ─── */}
-      <section className="mx-auto max-w-7xl px-6 py-20">
-        <div className="mb-10 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
+        <div className="mb-8 flex flex-col items-start justify-between gap-4 md:mb-10 md:flex-row md:items-end">
           <div>
-            <h2 className="font-display text-3xl font-bold text-gray-900 md:text-4xl">Discover work</h2>
+            <h2 className="font-display text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl">Discover work</h2>
             <p className="mt-2 text-gray-500">
               A growing catalogue of projects, portfolios, and side-builds from creators worldwide.
             </p>
@@ -390,12 +390,12 @@ function Home() {
           </div>
         </div>
 
-        <div className="mb-8 flex flex-wrap gap-2">
+        <div className="mb-6 flex flex-nowrap gap-2 overflow-x-auto pb-1 sm:mb-8 sm:flex-wrap sm:overflow-visible">
           {CATEGORIES.map((c) => (
             <button
               key={c}
               onClick={() => setCat(c)}
-              className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors ${
+              className={`shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors ${
                 cat === c
                   ? "border-[#ff6600] bg-[#ff6600] text-white"
                   : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700"
@@ -436,25 +436,25 @@ function Home() {
       </section>
 
       {/* ─── Final CTA ─── */}
-      <section className="border-t border-gray-100 py-24">
-        <div className="mx-auto max-w-3xl px-6">
+      <section className="border-t border-gray-100 py-20 sm:py-24">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <p className="mb-4 text-sm font-medium text-[#ff6600]">Free to get started</p>
-          <h2 className="font-display text-4xl font-bold text-gray-900 md:text-6xl leading-[1.08]">
+          <h2 className="font-display text-3xl font-bold text-gray-900 sm:text-4xl md:text-6xl leading-[1.08]">
             Build your portfolio<br />in minutes.
           </h2>
           <p className="mt-5 max-w-md text-gray-500 leading-relaxed">
             Join developers, designers, freelancers, and creatives who use ProjectAtlas to showcase their work.
           </p>
-          <div className="mt-8 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+          <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <Link
               to="/auth"
-              className="inline-flex items-center gap-2 rounded-full bg-[#ff6600] px-7 py-3 text-sm font-bold text-white transition-colors hover:bg-[#e55a00]"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#ff6600] px-7 py-3 text-sm font-bold text-white transition-colors hover:bg-[#e55a00]"
             >
               Create your free page <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               to="/submit"
-              className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-7 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 px-7 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50"
             >
               Add your first project
             </Link>

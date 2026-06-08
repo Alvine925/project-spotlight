@@ -700,7 +700,7 @@ function Dashboard() {
         </aside>
 
         {/* ── Main content ── */}
-        <section className="flex-1 min-w-0 px-6 py-10 md:px-10">
+        <section className="flex-1 min-w-0 px-4 py-8 sm:px-6 sm:py-10 md:px-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -711,7 +711,7 @@ function Dashboard() {
                 </span>
               )}
             </p>
-            <h1 className="mt-1 font-display text-3xl font-semibold md:text-4xl">
+            <h1 className="mt-1 font-display text-2xl font-semibold sm:text-3xl md:text-4xl">
               Welcome back,{" "}
               <span className="text-gradient">
                 {profileData?.display_name || user.email?.split("@")[0]}
@@ -765,8 +765,8 @@ function Dashboard() {
               </button>
             </div>
           ) : (
-            <div className="mt-4 overflow-hidden rounded-2xl border border-border/60 bg-card/40 shadow-elegant">
-              <table className="w-full text-sm">
+            <div className="mt-4 overflow-x-auto rounded-2xl border border-border/60 bg-card/40 shadow-elegant">
+              <table className="w-full min-w-[640px] text-sm">
                 <thead className="bg-muted/40 text-xs uppercase tracking-wider text-muted-foreground">
                   <tr>
                     <th className="px-4 py-3 text-left">Project</th>
