@@ -224,6 +224,9 @@ export type Database = {
       projects: {
         Row: {
           category: string | null
+          client_name: string | null
+          client_testimonial: string | null
+          client_url: string | null
           color_from: string
           color_to: string
           cover_image_url: string | null
@@ -250,6 +253,9 @@ export type Database = {
         }
         Insert: {
           category?: string | null
+          client_name?: string | null
+          client_testimonial?: string | null
+          client_url?: string | null
           color_from?: string
           color_to?: string
           cover_image_url?: string | null
@@ -276,6 +282,9 @@ export type Database = {
         }
         Update: {
           category?: string | null
+          client_name?: string | null
+          client_testimonial?: string | null
+          client_url?: string | null
           color_from?: string
           color_to?: string
           cover_image_url?: string | null
