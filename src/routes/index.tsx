@@ -423,11 +423,13 @@ function Home() {
               <>
                 <p className="text-base font-medium text-gray-900">No work showcased yet — be the first.</p>
                 <Link
-                  to="/submit"
+                  to="/dashboard"
+                  search={{ add: "1" }}
                   className="mt-4 inline-flex rounded-full bg-[#ff6600] px-5 py-2 text-sm font-medium text-white hover:bg-[#e55a00]"
                 >
                   Add your work
                 </Link>
+
               </>
             ) : (
               <p className="text-gray-500">No work matches that search.</p>
