@@ -178,11 +178,13 @@ function AnalyticsPage() {
                 <p className="text-sm font-medium text-gray-900">No published work yet</p>
                 <p className="mt-1 text-xs text-gray-400">Add and publish your first project to start tracking analytics.</p>
                 <Link
-                  to="/submit"
+                  to="/dashboard"
+                  search={{ add: "1" }}
                   className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#ff6600] px-4 py-2 text-sm font-semibold text-white hover:bg-[#e55a00]"
                 >
                   Add your first project
                 </Link>
+
               </div>
             ) : (
               <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
