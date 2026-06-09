@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { SiteNav } from "@/components/SiteNav";
 import { ProjectCard, type ProjectRow } from "@/components/ProjectCard";
-import { UrlSubmit } from "@/components/UrlSubmit";
+
 import { supabase } from "@/integrations/supabase/client";
 import { Search, Loader2, ArrowRight, CheckCircle2 } from "lucide-react";
 
