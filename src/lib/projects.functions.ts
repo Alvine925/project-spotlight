@@ -115,50 +115,51 @@ export const analyzeProjectUrl = createServerFn({ method: "POST" })
 
     // 3) Generate a cover image and upload to the `covers` storage bucket
     let cover_image_url: string | null = null;
+    let cover_error: string | null = null;
     try {
+      const prompt = `Modern abstract cover image for a product named "${parsed.name}". Theme: ${parsed.tagline}. Style: minimal, vibrant gradient, soft geometric shapes, no text, 16:9 wide.`;
       const imgRes = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
         method: "POST",
         headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash-image",
-          messages: [
-            {
-              role: "user",
-              content: `Modern abstract cover image for a product named "${parsed.name}". Theme: ${parsed.tagline}. Style: minimal, vibrant gradient, soft geometric shapes, no text, 16:9 wide.`,
-            },
-          ],
-          modalities: ["image", "text"],
+          model: "openai/gpt-image-2",
+          prompt,
+          quality: "low",
+          size: "1536x1024",
+          n: 1,
         }),
       });
-      if (imgRes.ok) {
-        const imgJson = (await imgRes.json()) as {
-          choices?: Array<{ message?: { images?: Array<{ image_url?: { url?: string } }> } }>;
-          data?: Array<{ b64_json?: string }>;
-        };
-        let b64 = imgJson.data?.[0]?.b64_json ?? null;
+      if (!imgRes.ok) {
+        cover_error = `image gen ${imgRes.status}: ${(await imgRes.text().catch(() => "")).slice(0, 300)}`;
+        console.error(cover_error);
+      } else {
+        const imgJson = (await imgRes.json()) as { data?: Array<{ b64_json?: string }> };
+        const b64 = imgJson.data?.[0]?.b64_json;
         if (!b64) {
-          const dataUrl = imgJson.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-          if (dataUrl && dataUrl.startsWith("data:")) b64 = dataUrl.split(",")[1] ?? null;
-        }
-        if (b64) {
+          cover_error = "image gen returned no b64_json";
+          console.error(cover_error, JSON.stringify(imgJson).slice(0, 300));
+        } else {
           const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const filePath = `${userId}/${Date.now()}.png`;
           const { error: upErr } = await supabaseAdmin.storage
             .from("covers")
             .upload(filePath, bytes, { contentType: "image/png", upsert: true });
-          if (!upErr) {
+          if (upErr) {
+            cover_error = `cover upload failed: ${upErr.message}`;
+            console.error(cover_error);
+          } else {
             const { data: pub } = supabaseAdmin.storage.from("covers").getPublicUrl(filePath);
             cover_image_url = pub.publicUrl;
-          } else {
-            console.error("cover upload failed", upErr);
           }
         }
-      } else {
-        console.error("image gen failed", imgRes.status, await imgRes.text().catch(() => ""));
       }
     } catch (e) {
+      cover_error = e instanceof Error ? e.message : "cover image generation failed";
       console.error("cover image generation failed", e);
+    }
+    if (cover_error && !cover_image_url) {
+      console.error("[analyzeProjectUrl] cover_error:", cover_error);
     }
 
     return { ...parsed, cover_image_url, url: data.url };
