@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { SiteNav } from "@/components/SiteNav";
 import { ProjectCard, type ProjectRow } from "@/components/ProjectCard";
-import { UrlSubmit } from "@/components/UrlSubmit";
+
 import { supabase } from "@/integrations/supabase/client";
 import { Search, Loader2, ArrowRight, CheckCircle2 } from "lucide-react";
 
@@ -79,7 +79,14 @@ function Home() {
             >
               Create free page <ArrowRight className="h-4 w-4" />
             </Link>
-            <UrlSubmit />
+            <Link
+              to="/dashboard"
+              search={{ add: "1" }}
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-6 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50"
+            >
+              Add a project
+            </Link>
+
           </div>
 
           <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-400">
@@ -416,11 +423,13 @@ function Home() {
               <>
                 <p className="text-base font-medium text-gray-900">No work showcased yet — be the first.</p>
                 <Link
-                  to="/submit"
+                  to="/dashboard"
+                  search={{ add: "1" }}
                   className="mt-4 inline-flex rounded-full bg-[#ff6600] px-5 py-2 text-sm font-medium text-white hover:bg-[#e55a00]"
                 >
                   Add your work
                 </Link>
+
               </>
             ) : (
               <p className="text-gray-500">No work matches that search.</p>
@@ -453,11 +462,13 @@ function Home() {
               Create your free page <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              to="/submit"
+              to="/dashboard"
+              search={{ add: "1" }}
               className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 px-7 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50"
             >
               Add your first project
             </Link>
+
           </div>
         </div>
       </section>

@@ -143,10 +143,11 @@ function SettingsPage() {
 
   const sidebarLinks = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { to: "/submit", icon: FolderOpen, label: "Add Work" },
+    { to: "/dashboard", search: { add: "1" }, icon: FolderOpen, label: "Add Work" },
     { to: "/settings", icon: Settings, label: "Settings", active: true },
     { to: "/analytics", icon: BarChart3, label: "Analytics" },
   ];
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -165,8 +166,9 @@ function SettingsPage() {
           <nav className="flex flex-1 flex-col gap-1">
             {sidebarLinks.map((link) => (
               <Link
-                key={link.to}
+                key={link.label}
                 to={link.to}
+                search={(link as { search?: Record<string, string> }).search ?? {}}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                   link.active
                     ? "bg-[#ff6600]/10 text-[#ff6600]"
@@ -177,6 +179,7 @@ function SettingsPage() {
                 {link.label}
               </Link>
             ))}
+
           </nav>
 
           <button

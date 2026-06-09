@@ -36,6 +36,9 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    add: search.add === "1" || search.add === 1 ? "1" : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Dashboard — ProjectAtlas" },
@@ -44,6 +47,7 @@ export const Route = createFileRoute("/dashboard")({
   }),
   component: Dashboard,
 });
+
 
 type MyProject = {
   id: string;
@@ -574,9 +578,18 @@ function Dashboard() {
 
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAddWork, setShowAddWork] = useState(false);
+  const { add: addParam } = Route.useSearch();
+  const dashNavigate = useNavigate();
   useEffect(() => {
     if (profileData && !profileData.profile_type) setShowOnboarding(true);
   }, [profileData]);
+  useEffect(() => {
+    if (addParam === "1") {
+      setShowAddWork(true);
+      dashNavigate({ to: "/dashboard", search: {}, replace: true });
+    }
+  }, [addParam, dashNavigate]);
+
 
 
 

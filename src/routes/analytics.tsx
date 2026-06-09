@@ -74,10 +74,11 @@ function AnalyticsPage() {
 
   const sidebarLinks = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { to: "/submit", icon: FolderOpen, label: "Add Work" },
+    { to: "/dashboard", search: { add: "1" }, icon: FolderOpen, label: "Add Work" },
     { to: "/settings", icon: Settings, label: "Settings" },
     { to: "/analytics", icon: BarChart3, label: "Analytics", active: true },
   ];
+
 
   if (loading || !user) {
     return (
@@ -104,8 +105,9 @@ function AnalyticsPage() {
           <nav className="flex flex-1 flex-col gap-1">
             {sidebarLinks.map((link) => (
               <Link
-                key={link.to}
+                key={link.label}
                 to={link.to}
+                search={(link as { search?: Record<string, string> }).search ?? {}}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                   link.active
                     ? "bg-[#ff6600]/10 text-[#ff6600]"
@@ -116,6 +118,7 @@ function AnalyticsPage() {
                 {link.label}
               </Link>
             ))}
+
           </nav>
 
           <button
@@ -175,11 +178,13 @@ function AnalyticsPage() {
                 <p className="text-sm font-medium text-gray-900">No published work yet</p>
                 <p className="mt-1 text-xs text-gray-400">Add and publish your first project to start tracking analytics.</p>
                 <Link
-                  to="/submit"
+                  to="/dashboard"
+                  search={{ add: "1" }}
                   className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#ff6600] px-4 py-2 text-sm font-semibold text-white hover:bg-[#e55a00]"
                 >
                   Add your first project
                 </Link>
+
               </div>
             ) : (
               <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
