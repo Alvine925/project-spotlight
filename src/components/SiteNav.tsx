@@ -30,9 +30,10 @@ export function SiteNav() {
           </Link>
           <a href="/#features" className="transition-colors hover:text-gray-900">Features</a>
           <a href="/#examples" className="transition-colors hover:text-gray-900">Examples</a>
-          <Link to="/submit" className={`transition-colors hover:text-gray-900 ${path === "/submit" ? "text-gray-900 font-medium" : ""}`}>
+          <Link to="/dashboard" search={{ add: "1" }} className="transition-colors hover:text-gray-900">
             Add Work
           </Link>
+
           {user && (
             <Link to="/dashboard" className={`transition-colors hover:text-gray-900 ${path.startsWith("/dashboard") ? "text-gray-900 font-medium" : ""}`}>
               Dashboard
