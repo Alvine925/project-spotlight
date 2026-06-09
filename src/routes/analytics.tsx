@@ -74,10 +74,11 @@ function AnalyticsPage() {
 
   const sidebarLinks = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { to: "/submit", icon: FolderOpen, label: "Add Work" },
+    { to: "/dashboard", search: { add: "1" }, icon: FolderOpen, label: "Add Work" },
     { to: "/settings", icon: Settings, label: "Settings" },
     { to: "/analytics", icon: BarChart3, label: "Analytics", active: true },
   ];
+
 
   if (loading || !user) {
     return (
