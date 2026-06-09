@@ -143,10 +143,11 @@ function SettingsPage() {
 
   const sidebarLinks = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { to: "/submit", icon: FolderOpen, label: "Add Work" },
+    { to: "/dashboard", search: { add: "1" }, icon: FolderOpen, label: "Add Work" },
     { to: "/settings", icon: Settings, label: "Settings", active: true },
     { to: "/analytics", icon: BarChart3, label: "Analytics" },
   ];
+
 
   return (
     <div className="min-h-screen bg-gray-50">
