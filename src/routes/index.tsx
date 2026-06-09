@@ -462,11 +462,13 @@ function Home() {
               Create your free page <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              to="/submit"
+              to="/dashboard"
+              search={{ add: "1" }}
               className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 px-7 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50"
             >
               Add your first project
             </Link>
+
           </div>
         </div>
       </section>
