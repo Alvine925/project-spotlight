@@ -578,9 +578,18 @@ function Dashboard() {
 
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAddWork, setShowAddWork] = useState(false);
+  const { add: addParam } = Route.useSearch();
+  const dashNavigate = useNavigate();
   useEffect(() => {
     if (profileData && !profileData.profile_type) setShowOnboarding(true);
   }, [profileData]);
+  useEffect(() => {
+    if (addParam === "1") {
+      setShowAddWork(true);
+      dashNavigate({ to: "/dashboard", search: {}, replace: true });
+    }
+  }, [addParam, dashNavigate]);
+
 
 
 
