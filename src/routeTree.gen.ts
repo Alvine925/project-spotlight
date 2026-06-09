@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SubmitRouteImport } from './routes/submit'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -19,11 +18,6 @@ import { Route as UIdRouteImport } from './routes/u.$id'
 import { Route as ProjectSlugRouteImport } from './routes/project.$slug'
 import { Route as DemoSlugRouteImport } from './routes/demo.$slug'
 
-const SubmitRoute = SubmitRouteImport.update({
-  id: '/submit',
-  path: '/submit',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -71,7 +65,6 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
   '/settings': typeof SettingsRoute
-  '/submit': typeof SubmitRoute
   '/demo/$slug': typeof DemoSlugRoute
   '/project/$slug': typeof ProjectSlugRoute
   '/u/$id': typeof UIdRoute
@@ -82,7 +75,6 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
   '/settings': typeof SettingsRoute
-  '/submit': typeof SubmitRoute
   '/demo/$slug': typeof DemoSlugRoute
   '/project/$slug': typeof ProjectSlugRoute
   '/u/$id': typeof UIdRoute
@@ -94,7 +86,6 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
   '/settings': typeof SettingsRoute
-  '/submit': typeof SubmitRoute
   '/demo/$slug': typeof DemoSlugRoute
   '/project/$slug': typeof ProjectSlugRoute
   '/u/$id': typeof UIdRoute
@@ -107,7 +98,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/settings'
-    | '/submit'
     | '/demo/$slug'
     | '/project/$slug'
     | '/u/$id'
@@ -118,7 +108,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/settings'
-    | '/submit'
     | '/demo/$slug'
     | '/project/$slug'
     | '/u/$id'
@@ -129,7 +118,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/settings'
-    | '/submit'
     | '/demo/$slug'
     | '/project/$slug'
     | '/u/$id'
@@ -141,7 +129,6 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DashboardRoute: typeof DashboardRoute
   SettingsRoute: typeof SettingsRoute
-  SubmitRoute: typeof SubmitRoute
   DemoSlugRoute: typeof DemoSlugRoute
   ProjectSlugRoute: typeof ProjectSlugRoute
   UIdRoute: typeof UIdRoute
@@ -149,13 +136,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/submit': {
-      id: '/submit'
-      path: '/submit'
-      fullPath: '/submit'
-      preLoaderRoute: typeof SubmitRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -221,7 +201,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DashboardRoute: DashboardRoute,
   SettingsRoute: SettingsRoute,
-  SubmitRoute: SubmitRoute,
   DemoSlugRoute: DemoSlugRoute,
   ProjectSlugRoute: ProjectSlugRoute,
   UIdRoute: UIdRoute,
@@ -229,3 +208,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
