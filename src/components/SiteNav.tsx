@@ -94,7 +94,7 @@ export function SiteNav() {
             <Link to="/" className="rounded-md px-3 py-2.5 text-gray-700 hover:bg-gray-50">Discover</Link>
             <a href="/#features" className="rounded-md px-3 py-2.5 text-gray-700 hover:bg-gray-50">Features</a>
             <a href="/#examples" className="rounded-md px-3 py-2.5 text-gray-700 hover:bg-gray-50">Examples</a>
-            <Link to="/submit" className="rounded-md px-3 py-2.5 text-gray-700 hover:bg-gray-50">Add Work</Link>
+            <Link to="/dashboard" search={{ add: "1" }} className="rounded-md px-3 py-2.5 text-gray-700 hover:bg-gray-50">Add Work</Link>
             {user ? (
               <>
                 <Link to="/dashboard" className="rounded-md px-3 py-2.5 text-gray-700 hover:bg-gray-50">Dashboard</Link>
