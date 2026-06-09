@@ -79,7 +79,14 @@ function Home() {
             >
               Create free page <ArrowRight className="h-4 w-4" />
             </Link>
-            <UrlSubmit />
+            <Link
+              to="/dashboard"
+              search={{ add: "1" }}
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-6 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50"
+            >
+              Add a project
+            </Link>
+
           </div>
 
           <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-400">
