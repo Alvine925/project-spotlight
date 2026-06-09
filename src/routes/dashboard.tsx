@@ -36,6 +36,9 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    add: search.add === "1" || search.add === 1 ? "1" : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Dashboard — ProjectAtlas" },
@@ -44,6 +47,7 @@ export const Route = createFileRoute("/dashboard")({
   }),
   component: Dashboard,
 });
+
 
 type MyProject = {
   id: string;
